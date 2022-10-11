@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  <title>VR player</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      overflow: hidden;
+    }
+
+    footer {
+      display: flex;
+      justify-content: center;
+      padding: 5px;
+      font-size: 12px;
+      background-color: #d4d4d4;
+      color: rgb(0, 0, 0);
+    }
+  </style>
+
+  <script defer="defer" type="module" src="dist/index.js"></script>
+</head>
+
+<body>
+  <video id="video" crossOrigin="anonymous" playsinline style="display:none">
+    <source id="video_src" src="" type="video/mp4">
+  </video>
+  <footer>
+    <p>
+      Icons made by
+      &nbsp;<a target="_blank" href="https://www.flaticon.com/authors/nawicon">nawicon</a>,
+      &nbsp;<a target="_blank" href="https://www.flaticon.com/authors/alfanz">alfanz</a>,
+      &nbsp;<a target="_blank" href="https://www.flaticon.com/authors/ayub-irawan">ayub-irawan</a>,
+      &nbsp;<a target="_blank" href="https://www.flaticon.com/authors/us-and-up">us-and-up</a>,
+      &nbsp;<a target="_blank" href="https://www.flaticon.com/authors/freepik">freepik</a>,
+      &nbsp;from&nbsp;<a target="_blank" href="http://www.flaticon.com/">www.flaticon.com</a>
+    </p>
+  </footer>
+</body>
+
+</html>
