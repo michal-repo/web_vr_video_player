@@ -158,6 +158,7 @@ export class PlayerPanel {
 		fontSize: 0.07,
 		padding: 0.02,
 		borderRadius: 0,
+		backgroundOpacity: 1,
 		width: this.SETTINGSPANELMAXWIDTH
 	};
 
@@ -274,7 +275,11 @@ export class PlayerPanel {
 		this.playMenuContainer.position.set(0, 1.2, -1.6);
 		this.playMenuContainer.add(playMenuContainerButtons);
 
+		this.playMenuContainer.setupState({ state: 'selected' });
+		this.playMenuContainer.setupState({ state: 'hovered' });
+		this.playMenuContainer.setupState({ state: 'idle' });
 
+		////////////////////////////////////////
 
 		// Time elapsed and duration info label
 		const playbackContainer = new Block(this.playbackContainerAttributes);
@@ -582,7 +587,7 @@ export class PlayerPanel {
 		this.playMenuContainer.add(this.progressBarContainer);
 
 		playMenuContainerButtons.add(buttonExitToMainContainer, buttonMuteContainer, buttonRew, this.buttonPlay, buttonFF, recenterButton, settingsButton, hideButtonContainer);
-		this.playMenuObjsToTest.push(hideButton, buttonExitToMain, buttonRew, this.buttonPlay, buttonFF, buttonMute, recenterButton, settingsButton, this.progressBarContainer, MAIN.hiddenSphere);
+		this.playMenuObjsToTest.push(hideButton, buttonExitToMain, buttonRew, this.buttonPlay, buttonFF, buttonMute, recenterButton, settingsButton, this.progressBarContainer, this.playMenuContainer, MAIN.hiddenSphere);
 
 		// Settings container
 
@@ -591,6 +596,9 @@ export class PlayerPanel {
 		MAIN.scene.add(this.settingsMenuContainer);
 		this.settingsMenuContainer.settingsVisible = false;
 		this.settingsMenuContainer.position.set(0.5, 1.8, -1.55);
+		this.settingsMenuContainer.setupState({ state: 'selected' });
+		this.settingsMenuContainer.setupState({ state: 'hovered' });
+		this.settingsMenuContainer.setupState({ state: 'idle' });
 
 		const settingsMenuTopBar = new Block(this.settingsRowBlockAttributes);
 		settingsMenuTopBar.set({ justifyContent: 'end', width: (this.SETTINGSPANELMAXWIDTH - this.SETTINGSPANELMAXWIDTH / 16) });
@@ -776,7 +784,7 @@ export class PlayerPanel {
 		settingsMenuTilt.add(tiltLabel, tiltDownButton, tiltUpButton, tiltResetButton);
 		settingsMenuModes.add(modeLabel, ScreenModeButton, VRModeButton);
 		this.settingsMenuContainer.add(settingsMenuTopBar, settingsMenuModes, settingsMenuZoom, settingsMenuTilt);
-		this.settingsMenuObjsToTest.push(closeSettingsButton, zoomInButton, zoomOutButton, zoomResetButton, tiltUpButton, tiltDownButton, tiltResetButton, ScreenModeButton, VRModeButton, settingsButton, MAIN.hiddenSphere);
+		this.settingsMenuObjsToTest.push(closeSettingsButton, zoomInButton, zoomOutButton, zoomResetButton, tiltUpButton, tiltDownButton, tiltResetButton, ScreenModeButton, VRModeButton, settingsButton, this.settingsMenuContainer, this.playMenuContainer, MAIN.hiddenSphere);
 
 	}
 
