@@ -17,7 +17,7 @@ generate(){
 	filepattern=(${INI__videos__thumbnails_folder}/"$file".jpg)
 	if [ ! -f "$filepattern" ]; then
 		sleep 2
-		ffmpeg -loglevel panic -ss 20 -i "$file" -filter:v "crop=in_w/2:in_h:0:0, scale=512:-1" -vframes 1 -q:v 2 "$filepattern" -y
+		ffmpeg -loglevel panic -nostdin -ss 20 -i "$file" -filter:v "crop=in_w/2:in_h:0:0, scale=512:-1" -vframes 1 -q:v 2 "$filepattern" -y
 	fi
 }
 
