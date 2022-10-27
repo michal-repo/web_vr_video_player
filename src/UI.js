@@ -18,7 +18,7 @@ export function hideMenu(menuContainer, passedObjsToTest = [], shouldSwitch2d3d 
         objsToTest = passedObjsToTest.slice();
     } else {
         objsToTest.push(MAIN.hiddenSphere);
-        MAIN.vrControl.controllers[0].point.visible = false;
+        MAIN.vrControl.controllers[MAIN.vrControlCurrentlyUsedController].point.visible = false;
     }
 }
 
@@ -29,7 +29,7 @@ export function showMenu(menuContainer, passedObjsToTest, shouldSwitch2d3d = fal
     menuContainer.visible = true;
     objsToTest = [];
     objsToTest = passedObjsToTest.slice();
-    MAIN.vrControl.controllers[0].point.visible = true;
+    MAIN.vrControl.controllers[MAIN.vrControlCurrentlyUsedController].point.visible = true;
 }
 
 export function registerNewObjectsToTest(passedObjsToTest) {

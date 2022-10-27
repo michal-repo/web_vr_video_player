@@ -64,6 +64,8 @@ export class PlayerPanel {
 
 	SETTINGSPANELMAXWIDTH = (this.PLAYERPANELMAXWIDTH / 2);
 
+	videoElement;
+
 	commonBlockAttributes = {
 		justifyContent: 'center',
 		contentDirection: 'row',
@@ -142,6 +144,7 @@ export class PlayerPanel {
 	progressBarContainerAttributes = {
 		height: this.PROGRESSPANELHEIGHT,
 		width: this.PROGRESSPANELMAXWIDTH,
+		margin: 0.04,
 		offset: 0.045,
 		borderRadius: 0,
 		justifyContent: 'start',
@@ -185,7 +188,6 @@ export class PlayerPanel {
 		borderRadius: 0.08
 	};
 
-	consoleOut;
 	playbackLabelContainer;
 	////////////////////////////////////////////////////////////////////////////////////////
 	// BUTTONS OPTIONS
@@ -256,6 +258,8 @@ export class PlayerPanel {
 	//////////////////////////////////////////////////////////////////////////////
 
 	constructor(video) {
+
+		this.videoElement = video;
 
 		this.playMenuContainer = new Block({
 			justifyContent: 'center',
@@ -428,10 +432,7 @@ export class PlayerPanel {
 			state: 'selected',
 			attributes: this.selectedAttributes,
 			onSet: () => {
-				if (Helpers.videoSrcExists()) {
-					video.currentTime += 10;
-				}
-
+				this.videoPlaybackFFRew("FF");
 			}
 		});
 		buttonFF.setupState(this.hoveredStateAttributes);
@@ -443,9 +444,7 @@ export class PlayerPanel {
 			state: 'selected',
 			attributes: this.selectedAttributes,
 			onSet: () => {
-				if (Helpers.videoSrcExists()) {
-					video.currentTime -= 10;
-				}
+				this.videoPlaybackFFRew("Rew");
 			}
 		});
 		buttonRew.setupState(this.hoveredStateAttributes);
@@ -818,6 +817,7 @@ export class PlayerPanel {
 
 	ExitToMain() {
 		this.hidePlayMenuPanel();
+		ScreenManager.zoom("reset");
 		MAIN.fileBrowserPanel.showFileMenuPanel();
 	}
 
@@ -829,25 +829,25 @@ export class PlayerPanel {
 
 		if (Helpers.videoSrcExists()) {
 			if (MAIN.hiddenSphere.buttonsVisible) {
-				let progressBarLength = (((this.PROGRESSPANELMAXWIDTH - (this.PROGRESSPANELMINWIDTH * 2 - 0.001)) * ((video.currentTime * 100) / video.duration)) / 100)
+				let progressBarLength = (((this.PROGRESSPANELMAXWIDTH - (this.PROGRESSPANELMINWIDTH * 2 - 0.001)) * ((MAIN.video.currentTime * 100) / MAIN.video.duration)) / 100)
 				this.progressBar.set({ width: ((progressBarLength < this.PROGRESSPANELMINWIDTH) ? this.PROGRESSPANELMINWIDTH : progressBarLength) });
 				let playbackHelper = new Date(null);
-				playbackHelper.setSeconds(video.currentTime);
+				playbackHelper.setSeconds(MAIN.video.currentTime);
 				let result = playbackHelper.toISOString().substr(11, 8);
 				result += " / ";
 				playbackHelper = new Date(null);
-				playbackHelper.setSeconds(video.duration);
+				playbackHelper.setSeconds(MAIN.video.duration);
 				result += playbackHelper.toISOString().substr(11, 8);
 				this.playbackLabelContainer.set({ content: result });
 			}
 
-			if (video.ended == false) {
+			if (MAIN.video.ended == false) {
 				// Some videos can't stop playing, meaning they almost reach the end eg. video.duration: 51.985691 but when video reaches end video.currentTime is 51.98569
 				// almost the end but playback can't end by itself which causes screen to flip between few last frames
-				if (((video.currentTime * 100) / video.duration) > 99.9999) {
+				if (((MAIN.video.currentTime * 100) / MAIN.video.duration) > 99.9999) {
 					if (this.videoCantEndBug) {
-						video.pause();
-						video.currentTime += 10;
+						MAIN.video.pause();
+						MAIN.video.currentTime += 10;
 						this.buttonPlay.remove(this.pauseIconElement);
 						this.buttonPlay.add(this.playIconElement);
 						this.videoCantEndBug = false;
@@ -859,6 +859,21 @@ export class PlayerPanel {
 				this.videoCantEndBug = false;
 				this.buttonPlay.remove(this.pauseIconElement);
 				this.buttonPlay.add(this.playIconElement);
+			}
+		}
+	}
+
+	videoPlaybackFFRew(direction, seconds = 10) {
+		if (Helpers.videoSrcExists()) {
+			switch (direction) {
+				case "FF":
+					this.videoElement.currentTime += seconds;
+					break;
+				case "Rew":
+					this.videoElement.currentTime -= seconds;
+					break;
+				default:
+					break;
 			}
 		}
 	}

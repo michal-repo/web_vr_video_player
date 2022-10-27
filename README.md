@@ -25,3 +25,8 @@
 ## Troubleshooting
 
 If videos or player can't be loaded make sure that this app files are owned by web server user (eg. www-data) and that web server user can read video and thumbnail files (eg. www-data is owner or permissions for others include read).
+
+## Gamepad controls 
+
+Thumbstick up/down for zoom, left/right for rewind and fast forward.
+If there are two connected controllers pressing trigger switches active controller.

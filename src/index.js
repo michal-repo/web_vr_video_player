@@ -12,7 +12,7 @@ import { FileBrowserPanel } from './FileBrowserPanelUI.js';
 import * as ScreenManager from './ScreenManager.js';
 import * as UI from './UI.js';
 
-export let scene, camera, renderer, controls, vrControl, video, video_src, videoTexture, mesh1, mesh2, mesh1Clone, meshForScreenMode;
+export let scene, camera, renderer, controls, vrControl, vrControlCurrentlyUsedController, gamepad, video, video_src, videoTexture, mesh1, mesh2, mesh1Clone, meshForScreenMode;
 export let playMenuPanel;
 export let fileBrowserPanel;
 export let camToSave = {};
@@ -169,19 +169,46 @@ function init() {
 	////////////////
 
 	vrControl = VRControl(renderer);
-
+	vrControlCurrentlyUsedController = 0;
 	scene.add(vrControl.controllerGrips[0], vrControl.controllers[0]);
+	scene.add(vrControl.controllerGrips[1], vrControl.controllers[1]);
 
 	vrControl.controllers[0].addEventListener('selectstart', () => {
 
-		selectState = true;
+		vrControlSelected(0);
 
 	});
 	vrControl.controllers[0].addEventListener('selectend', () => {
 
-		selectState = false;
+		vrControlUnselected(0);
 
 	});
+
+	vrControl.controllers[1].addEventListener('selectstart', () => {
+
+		vrControlSelected(1);
+
+	});
+	vrControl.controllers[1].addEventListener('selectend', () => {
+
+		vrControlUnselected(1);
+
+	});
+
+	function vrControlSelected(id) {
+		if (vrControlCurrentlyUsedController == id) {
+			selectState = true;
+		} else {
+			vrControl.controllers[vrControlCurrentlyUsedController].point.visible = false;
+			vrControlCurrentlyUsedController = id;
+		}
+	}
+
+	function vrControlUnselected(id) {
+		if (vrControlCurrentlyUsedController == id) {
+			selectState = false;
+		}
+	}
 
 	//////////
 	// Panel
@@ -234,6 +261,29 @@ function onWindowResize() {
 //
 
 let everyXframesUpdateProgBar = 0;
+let gamepadControlsUpdateInit = 0;
+let gamepadFFRewActive = false;
+
+function gamepadControlsUpdate() {
+	if (renderer.xr.isPresenting && renderer.xr.getSession() !== null && typeof renderer.xr.getSession().inputSources !== 'undefined' && renderer.xr.getSession().inputSources.length >= 1) {
+		gamepad = renderer.xr.getSession().inputSources[vrControlCurrentlyUsedController].gamepad;
+		if (typeof gamepad !== 'undefined') {
+			if (gamepad.axes[2] > 0.35 && gamepadFFRewActive == false) {
+				playMenuPanel.videoPlaybackFFRew("FF", 10);
+				gamepadFFRewActive = true;
+			} else if (gamepad.axes[2] < -0.35 && gamepadFFRewActive == false) {
+				playMenuPanel.videoPlaybackFFRew("Rew", 10);
+				gamepadFFRewActive = true;
+			} else if (gamepad.axes[3] > 0.35) {
+				ScreenManager.zoom("out", 0.2);
+			} else if (gamepad.axes[3] < -0.35) {
+				ScreenManager.zoom("in", 0.2);
+			} else if (gamepad.axes[2] < 0.15 && gamepad.axes[2] > -0.15) {
+				gamepadFFRewActive = false;
+			}
+		}
+	}
+}
 
 function loop() {
 
@@ -243,6 +293,13 @@ function loop() {
 	ThreeMeshUI.update();
 
 	controls.update();
+
+	// Check gamepad after 120 frames
+	if (gamepadControlsUpdateInit >= 120) {
+		gamepadControlsUpdate();
+	} else {
+		gamepadControlsUpdateInit++;
+	}
 
 	renderer.render(scene, camera);
 
@@ -268,14 +325,14 @@ function updateButtons() {
 
 	if (renderer.xr.isPresenting) {
 
-		vrControl.setFromController(0, raycaster.ray);
+		vrControl.setFromController(vrControlCurrentlyUsedController, raycaster.ray);
 
 		intersect = raycast();
 
 		// Position the little white dot at the end of the controller pointing ray
 		// need to skip this if intersecting hiddenSphere because in VR it spreads points apart 
 		if (intersect && intersect.object.name != hiddenSphere.name) {
-			vrControl.setPointerAt(0, intersect.point);
+			vrControl.setPointerAt(vrControlCurrentlyUsedController, intersect.point);
 		};
 
 	} else if (mouse.x !== null && mouse.y !== null) {

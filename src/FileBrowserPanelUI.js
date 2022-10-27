@@ -29,7 +29,7 @@ export class FileBrowserPanel {
 
     FILES = [];
 
-    FILES_PER_ROW = 5;
+    FILES_PER_ROW = 4;
     FILES_ROWS = 3;
 
     CURRENT_PAGE = 0;
@@ -37,8 +37,11 @@ export class FileBrowserPanel {
 
     loader = new TextureLoader();
 
-    PANELMAXWIDTH = 4;
-    PANELMAXHEIGHT = 3;
+    PANELMAXWIDTH = 4.5;
+    PANELMAXHEIGHT = 3.2;
+
+    THUMBTEXTUREHEIGHT = ((this.PANELMAXHEIGHT / this.FILES_ROWS) - ((this.PANELMAXHEIGHT / this.FILES_ROWS) * 0.25));
+    THUMBTEXTUREWIDTH = ((this.PANELMAXWIDTH - this.PANELMAXWIDTH / 16) / this.FILES_PER_ROW - 0.05);
 
     DoubleClickPreventFlag = { prevent: false };
 
@@ -60,7 +63,7 @@ export class FileBrowserPanel {
         fontFamily: FontJSON,
         fontTexture: FontImage,
         fontSize: 0.07,
-        padding: 0.02,
+        padding: 0,
         borderRadius: 0,
         backgroundOpacity: 0,
         hiddenOverflow: true,
@@ -73,28 +76,32 @@ export class FileBrowserPanel {
         width: ((this.PANELMAXWIDTH - this.PANELMAXWIDTH / 16) / this.FILES_PER_ROW),
         justifyContent: 'start',
         contentDirection: 'column',
-        padding: 0.02,
+        padding: 0,
         hiddenOverflow: true,
         borderRadius: 0,
     };
 
     textureAttributes(texture) {
         return {
-            // height: ((this.PANELMAXHEIGHT / this.FILES_ROWS) - ((this.PANELMAXHEIGHT / this.FILES_ROWS) / 16)),
-            height: ((this.PANELMAXWIDTH - this.PANELMAXWIDTH / 16) / this.FILES_PER_ROW - 0.05),
-            width: ((this.PANELMAXWIDTH - this.PANELMAXWIDTH / 16) / this.FILES_PER_ROW - 0.05),
+            height: this.THUMBTEXTUREHEIGHT,
+            width: this.THUMBTEXTUREWIDTH,
             backgroundTexture: texture,
             borderRadius: 0
         }
     };
 
+    thumbTextContainerAttributes = {
+            height: (this.PANELMAXHEIGHT / this.FILES_ROWS) - this.THUMBTEXTUREHEIGHT - 0.025,
+            width: this.THUMBTEXTUREWIDTH,
+            backgroundOpacity: 0,
+            bestFit: 'shrink'
+    };
+
     thumbTextAttributes(name) {
         return {
-            height: ((this.PANELMAXHEIGHT / this.FILES_ROWS) / 16),
-            width: ((this.PANELMAXWIDTH - this.PANELMAXWIDTH / 16) / this.FILES_PER_ROW - 0.05),
             fontFamily: FontJSON,
             fontTexture: FontImage,
-            fontSize: 0.059,
+            fontSize: this.PANELMAXHEIGHT * 0.029,
             content: name
         }
     };
@@ -253,6 +260,7 @@ export class FileBrowserPanel {
 
 
         this.fileBrowserContainer.position.set(0, 1, -2);
+        this.fileBrowserContainer.rotation.x = -0.3;
 
         // objectsToRecenter.move.push(this.playMenuContainer);
 
@@ -275,7 +283,9 @@ export class FileBrowserPanel {
                 this.loader.load((this.FILES[iterate].thumbnail == "" ? VideoIcon : this.FILES[iterate].thumbnail), (image) => {
                     thumb.add(
                         new InlineBlock(this.textureAttributes(image)),
-                        new Text(this.thumbTextAttributes(name))
+                        new Block(this.thumbTextContainerAttributes).add(
+                            new Text(this.thumbTextAttributes(name))
+                        )
                     );
                 });
 

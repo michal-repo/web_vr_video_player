@@ -8,7 +8,7 @@ export function preventDoubleClick(variable, seconds = 2) {
 }
 
 export function videoSrcExists() {
-	if (video_src && video_src.src != window.location.href) {
+	if (typeof video_src !== 'undefined' && video_src.src != window.location.href) {
 		return true;
 	}
 	return false;
@@ -23,7 +23,7 @@ export function setVideoSrc(src) {
 }
 
 export function removeVideoSrc() {
-	if (video_src && video_src.src != window.location.href) {
+	if (typeof video_src !== 'undefined' && video_src.src != window.location.href) {
         video.pause();
 		video_src.setAttribute('src', "");
 	}

@@ -4,6 +4,7 @@ let isVRModeUsed = true;
 let currently_3d = true;
 let positionsToSaveForVRExit = {};
 let positionsToResetZoomTilt = {};
+let currentZoom = 0;
 
 export function saveMeshPositionAndRotation() {
 	positionsToResetZoomTilt = {
@@ -40,7 +41,7 @@ export function vrsessionstart() {
 	MAIN.playMenuPanel.settingsMenuContainer.position.set(0, 1, -2.95);
 	MAIN.playMenuPanel.settingsMenuContainer.rotation.x = -0.45;
 	MAIN.fileBrowserPanel.fileBrowserContainer.position.set(0, 1.4, -3.5);
-	MAIN.fileBrowserPanel.fileBrowserContainer.rotation.x = -0.15;
+	MAIN.fileBrowserPanel.fileBrowserContainer.rotation.x = 0;
 }
 
 export function vrsessionend() {
@@ -53,19 +54,24 @@ export function vrsessionend() {
 	MAIN.fileBrowserPanel.fileBrowserContainer.rotation.set(positionsToSaveForVRExit.fileBrowserContainer_rotation.x, positionsToSaveForVRExit.fileBrowserContainer_rotation.y, positionsToSaveForVRExit.fileBrowserContainer_rotation.z, positionsToSaveForVRExit.fileBrowserContainer_rotation.order);
 }
 
-export function zoom(in_or_out) {
+export function zoom(in_or_out, step = 10) {
+	currentZoom = MAIN.mesh1.position.z;
 	switch (in_or_out) {
 		case "in":
-			MAIN.mesh1.position.z += 10;
-			MAIN.mesh1Clone.position.z += 10;
-			MAIN.mesh2.position.z += 10;
-			MAIN.meshForScreenMode.position.z += 10;
+			if (currentZoom < 60) {
+				MAIN.mesh1.position.z += step;
+				MAIN.mesh1Clone.position.z += step;
+				MAIN.mesh2.position.z += step;
+				MAIN.meshForScreenMode.position.z += step;
+			}
 			break;
 		case "out":
-			MAIN.mesh1.position.z -= 10;
-			MAIN.mesh1Clone.position.z -= 10;
-			MAIN.mesh2.position.z -= 10;
-			MAIN.meshForScreenMode.position.z -= 10;
+			if (currentZoom > -120) {
+				MAIN.mesh1.position.z -= step;
+				MAIN.mesh1Clone.position.z -= step;
+				MAIN.mesh2.position.z -= step;
+				MAIN.meshForScreenMode.position.z -= step;
+			}
 			break;
 		case "reset":
 			MAIN.mesh1.position.z = positionsToResetZoomTilt.mesh1.position.z;
