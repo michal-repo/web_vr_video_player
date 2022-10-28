@@ -818,6 +818,7 @@ export class PlayerPanel {
 	ExitToMain() {
 		this.hidePlayMenuPanel();
 		ScreenManager.zoom("reset");
+		ScreenManager.tilt("reset");
 		MAIN.fileBrowserPanel.showFileMenuPanel();
 	}
 
