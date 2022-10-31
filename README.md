@@ -33,6 +33,6 @@ If videos or player can't be loaded make sure that this app files are owned by w
 
 ## Screenshots
 
-![Print-screen-1](https://github.com/michal-repo/web_vr_video_player/examples/blob/main/Screenshot_VR_player_1.png?raw=true)
-![Print-screen-2](https://github.com/michal-repo/web_vr_video_player/examples/blob/main/Screenshot_VR_player_2.png?raw=true)
-![Print-screen-3](https://github.com/michal-repo/web_vr_video_player/examples/blob/main/Screenshot_VR_player_3.png?raw=true)
+![Print-screen-1](https://github.com/michal-repo/web_vr_video_player/blob/main/examples/Screenshot_VR_player_1.png?raw=true)
+![Print-screen-2](https://github.com/michal-repo/web_vr_video_player/blob/main/examples/Screenshot_VR_player_2.png?raw=true)
+![Print-screen-3](https://github.com/michal-repo/web_vr_video_player/blob/main/examples/Screenshot_VR_player_3.png?raw=true)
