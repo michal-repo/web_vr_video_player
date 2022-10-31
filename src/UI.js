@@ -12,7 +12,13 @@ export function hideMenu(menuContainer, passedObjsToTest = [], shouldSwitch2d3d 
     if (shouldSwitch2d3d) {
         ScreenManager.switch2d3d("3d");
     }
-    menuContainer.visible = false;
+    if (menuContainer.constructor === Array) {
+        menuContainer.forEach(element => {
+            element.visible = false;
+        });
+    } else {
+        menuContainer.visible = false;
+    }
     objsToTest = [];
     if (passedObjsToTest.length > 0) {
         objsToTest = passedObjsToTest.slice();
@@ -26,7 +32,13 @@ export function showMenu(menuContainer, passedObjsToTest, shouldSwitch2d3d = fal
     if (shouldSwitch2d3d) {
         ScreenManager.switch2d3d("2d");
     }
-    menuContainer.visible = true;
+    if (menuContainer.constructor === Array) {
+        menuContainer.forEach(element => {
+            element.visible = true;
+        });
+    } else {
+        menuContainer.visible = true;
+    }
     objsToTest = [];
     objsToTest = passedObjsToTest.slice();
     MAIN.vrControl.controllers[MAIN.vrControlCurrentlyUsedController].point.visible = true;

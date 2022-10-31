@@ -53,6 +53,7 @@ export class PlayerPanel {
 	buttonPlay;
 	playIconElement;
 	pauseIconElement;
+	VR2DModeButtonText;
 
 
 	loader = new TextureLoader();
@@ -615,6 +616,12 @@ export class PlayerPanel {
 		const tiltResetButton = new Block(this.buttonOptions);
 		const VRModeButton = new Block(this.buttonOptions);
 		const ScreenModeButton = new Block(this.buttonOptions);
+		const VR2DModeButton = new Block(this.buttonOptions);
+		
+		this.VR2DModeButtonText = new Text({
+			content: '3D', fontSize: 0.07
+		});
+		VR2DModeButton.add(this.VR2DModeButtonText);
 
 		this.loader.load(CloseIcon, (texture) => {
 			closeSettingsButton.add(
@@ -680,6 +687,7 @@ export class PlayerPanel {
 			attributes: this.selectedAttributes,
 			onSet: () => {
 				this.hideSettingsMenuContainer();
+				Helpers.preventDoubleClick(this.showPlayMenuPanelDoubleClickPreventFlag, 1);
 			}
 		});
 		closeSettingsButton.setupState(this.hoveredStateAttributes);
@@ -765,6 +773,22 @@ export class PlayerPanel {
 		ScreenModeButton.setupState(this.hoveredStateAttributes);
 		ScreenModeButton.setupState(this.idleStateAttributes);
 
+		VR2DModeButton.setupState({
+			state: 'selected',
+			attributes: this.selectedAttributes,
+			onSet: () => {
+				if (ScreenManager.force_2d_mode){
+					ScreenManager.force2DMode(false);
+					this.VR2DModeButtonText.set({ content: "3D" });
+				} else {
+					ScreenManager.force2DMode(true);
+					this.VR2DModeButtonText.set({ content: "2D" });
+				}
+			}
+		});
+		VR2DModeButton.setupState(this.hoveredStateAttributes);
+		VR2DModeButton.setupState(this.idleStateAttributes);
+
 		// Labels
 		const zoomLabel = new Block(this.bigButtonOptions).add(new Text({
 			content: 'Zoom video', fontSize: 0.05
@@ -781,9 +805,9 @@ export class PlayerPanel {
 		settingsMenuTopBar.add(closeSettingsButton);
 		settingsMenuZoom.add(zoomLabel, zoomOutButton, zoomInButton, zoomResetButton);
 		settingsMenuTilt.add(tiltLabel, tiltDownButton, tiltUpButton, tiltResetButton);
-		settingsMenuModes.add(modeLabel, ScreenModeButton, VRModeButton);
+		settingsMenuModes.add(modeLabel, ScreenModeButton, VRModeButton, VR2DModeButton);
 		this.settingsMenuContainer.add(settingsMenuTopBar, settingsMenuModes, settingsMenuZoom, settingsMenuTilt);
-		this.settingsMenuObjsToTest.push(closeSettingsButton, zoomInButton, zoomOutButton, zoomResetButton, tiltUpButton, tiltDownButton, tiltResetButton, ScreenModeButton, VRModeButton, settingsButton, this.settingsMenuContainer, this.playMenuContainer, MAIN.hiddenSphere);
+		this.settingsMenuObjsToTest.push(closeSettingsButton, zoomInButton, zoomOutButton, zoomResetButton, tiltUpButton, tiltDownButton, tiltResetButton, ScreenModeButton, VRModeButton, VR2DModeButton, settingsButton, this.settingsMenuContainer, this.playMenuContainer, MAIN.hiddenSphere);
 
 	}
 
@@ -817,6 +841,8 @@ export class PlayerPanel {
 
 	ExitToMain() {
 		this.hidePlayMenuPanel();
+		ScreenManager.force2DMode(false);
+		this.VR2DModeButtonText.set({ content: "3D" });
 		ScreenManager.zoom("reset");
 		ScreenManager.tilt("reset");
 		MAIN.fileBrowserPanel.showFileMenuPanel();

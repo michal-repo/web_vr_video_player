@@ -222,7 +222,7 @@ function init() {
 
 	fetch("files.json")
 		.then(response => response.json())
-		.then(json => fileBrowserPanel = new FileBrowserPanel(json)).then(a => fileBrowserPanel.showFileMenuPanel())
+		.then(json => fileBrowserPanel = new FileBrowserPanel(json)).then(a => fileBrowserPanel.showFileMenuPanel(true))
 		.catch((error) => {
 			console.error('Error:', error);
 			alert('Failed parsing json file, check console for details.');

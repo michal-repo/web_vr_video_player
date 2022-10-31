@@ -16,17 +16,21 @@ import * as Helpers from './Helpers.js';
 import LeftIcon from '../assets/icons/left-arrow.png';
 import RightIcon from '../assets/icons/right-arrow.png';
 import VideoIcon from '../assets/icons/video.png';
+import FolderIcon from '../assets/icons/folder.png';
 
 export class FileBrowserPanel {
 
     fileBrowserContainer;
+    foldersContainer;
     thumbsContainer;
 
     buttonLeft;
     buttonRight;
 
     fileThumbsToTest = [];
+    foldersButtonsToTest = [];
 
+    VIDEOS = [];
     FILES = [];
 
     FILES_PER_ROW = 4;
@@ -91,10 +95,10 @@ export class FileBrowserPanel {
     };
 
     thumbTextContainerAttributes = {
-            height: (this.PANELMAXHEIGHT / this.FILES_ROWS) - this.THUMBTEXTUREHEIGHT - 0.025,
-            width: this.THUMBTEXTUREWIDTH,
-            backgroundOpacity: 0,
-            bestFit: 'shrink'
+        height: (this.PANELMAXHEIGHT / this.FILES_ROWS) - this.THUMBTEXTUREHEIGHT - 0.025,
+        width: this.THUMBTEXTUREWIDTH,
+        backgroundOpacity: 0,
+        bestFit: 'shrink'
     };
 
     thumbTextAttributes(name) {
@@ -174,9 +178,11 @@ export class FileBrowserPanel {
 
     constructor(files) {
         if (files.videos) {
-            this.FILES = files.videos;
+            this.VIDEOS = files.videos;
+            this.FILES = this.VIDEOS[0].list;
             this.TOTAL_PAGES = (Math.ceil(this.FILES.length / (this.FILES_PER_ROW * this.FILES_ROWS))) - 1;
         }
+
 
         // Buttons
 
@@ -243,6 +249,53 @@ export class FileBrowserPanel {
 
         this.thumbsContainer = new Block(this.thumbsContainerAttributes);
 
+        if (this.VIDEOS.length > 0) {
+            this.foldersContainer = new Block({
+                justifyContent: 'start',
+                contentDirection: 'column',
+                fontFamily: FontJSON,
+                fontTexture: FontImage,
+                fontSize: 0.07,
+                padding: 0.02,
+                borderRadius: 0,
+                backgroundOpacity: 1,
+                width: this.PANELMAXWIDTH / 3,
+                height: this.PANELMAXHEIGHT
+            });
+
+            for (let index = 0; index < this.VIDEOS.length; index++) {
+                const folderButton = new Block({
+                    justifyContent: 'center',
+                    contentDirection: 'row',
+                    height: 0.2,
+                    offset: 0.05,
+                    margin: 0.02,
+                    width: (this.PANELMAXWIDTH / 3) - 0.1,
+                    backgroundOpacity: 1
+                }).add(new Text({ content: this.VIDEOS[index].name }));
+                folderButton.setupState({
+                    state: 'selected',
+                    attributes: this.selectedAttributes,
+                    onSet: () => {
+                        this.CURRENT_PAGE = 0;
+                        this.FILES = this.VIDEOS[index].list;
+                        this.TOTAL_PAGES = (Math.ceil(this.FILES.length / (this.FILES_PER_ROW * this.FILES_ROWS))) - 1;
+                        this.regenerateFileBrowser();
+                    }
+                });
+                folderButton.setupState(this.hoveredStateAttributes);
+                folderButton.setupState(this.idleStateAttributes);
+                this.foldersContainer.add(folderButton);
+                this.foldersButtonsToTest.push(folderButton);
+            }
+
+            MAIN.scene.add(this.foldersContainer);
+
+            this.foldersContainer.position.set(-(this.PANELMAXWIDTH - 0.5), 1.5, -3);
+            this.foldersContainer.rotation.y = 0.5;
+        }
+
+
         ///////////////////////////
         // Add to main container
 
@@ -252,6 +305,7 @@ export class FileBrowserPanel {
 
         this.fileBrowserContainer.add(this.buttonRight);
 
+        this.fileThumbsToTest = this.foldersButtonsToTest.slice();
         this.fileThumbsToTest.push(this.buttonLeft, this.buttonRight);
 
         if (this.FILES.length > 0) {
@@ -272,6 +326,7 @@ export class FileBrowserPanel {
         let iterate = (this.CURRENT_PAGE > 0 ? ((this.FILES_PER_ROW * this.FILES_ROWS) * this.CURRENT_PAGE) : 0);
         for (let index = 0; index < this.FILES_ROWS; index++) {
             const thumbsContainerButtonsRow = new Block(this.thumbRowContainerAttributes);
+            let addedThumbs = 0;
             for (let index = 0; index < this.FILES_PER_ROW; index++) {
                 if (!this.FILES[iterate]) {
                     endOfFiles = true;
@@ -307,8 +362,11 @@ export class FileBrowserPanel {
                 thumbsContainerButtonsRow.add(thumb);
                 this.fileThumbsToTest.push(thumb);
                 iterate++;
+                addedThumbs++;
             }
-            this.thumbsContainer.add(thumbsContainerButtonsRow);
+            if (addedThumbs > 0) {
+                this.thumbsContainer.add(thumbsContainerButtonsRow);
+            }
             if (endOfFiles) {
                 break;
             }
@@ -319,6 +377,7 @@ export class FileBrowserPanel {
         deepDelete(this.thumbsContainer);
         this.thumbsContainer.set(this.thumbsContainerAttributes);
         this.fileThumbsToTest = [];
+        this.fileThumbsToTest = this.foldersButtonsToTest.slice();
         this.fileThumbsToTest.push(this.buttonLeft, this.buttonRight);
 
         this.generateView();
@@ -329,16 +388,18 @@ export class FileBrowserPanel {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Hide / Show Menu
 
-    showFileMenuPanel() {
-        Helpers.preventDoubleClick(this.DoubleClickPreventFlag, 2);
-        UI.showMenu(this.fileBrowserContainer, this.fileThumbsToTest, true);
+    showFileMenuPanel(init = false) {
+        if (!init) {
+            Helpers.preventDoubleClick(this.DoubleClickPreventFlag, 2);
+        }
+        UI.showMenu([this.fileBrowserContainer, this.foldersContainer], this.fileThumbsToTest, true);
         MAIN.hiddenSphere.buttonsVisible = true;
         Helpers.removeVideoSrc();
     }
 
     hideFileMenuPanel() {
-        Helpers.preventDoubleClick(MAIN.playMenuPanel.showPlayMenuPanelDoubleClickPreventFlag, 2);
-        UI.hideMenu(this.fileBrowserContainer, [], true);
+        Helpers.preventDoubleClick(MAIN.playMenuPanel.showPlayMenuPanelDoubleClickPreventFlag, 1);
+        UI.hideMenu([this.fileBrowserContainer, this.foldersContainer], [], true);
         MAIN.hiddenSphere.buttonsVisible = false;
     }
 

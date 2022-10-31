@@ -2,6 +2,7 @@ import * as MAIN from './index.js';
 
 let isVRModeUsed = true;
 let currently_3d = true;
+export let force_2d_mode = false;
 let positionsToSaveForVRExit = {};
 let positionsToResetZoomTilt = {};
 let currentZoom = 0;
@@ -114,7 +115,7 @@ export function tilt(up_or_down) {
 
 export function switchModeVRScreen(vr_or_screen) {
 	if (!currently_3d) {
-		switch2d3d("3d");
+		switch2d3d("3d", true);
 	}
 	switch (vr_or_screen) {
 		case "vr":
@@ -135,8 +136,8 @@ export function switchModeVRScreen(vr_or_screen) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Switch between 2D and 3D mode
 
-export function switch2d3d(switch_2d_or_3d) {
-	if (isVRModeUsed) {
+export function switch2d3d(switch_2d_or_3d, forced = false) {
+	if (isVRModeUsed && (!force_2d_mode || forced)) {
 		switch (switch_2d_or_3d) {
 			case "2d":
 				MAIN.mesh2.visible = false;
@@ -151,6 +152,14 @@ export function switch2d3d(switch_2d_or_3d) {
 		}
 	}
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Force 2D mode
+
+export function force2DMode(bool) {
+	force_2d_mode = bool;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Recenter
 
