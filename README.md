@@ -16,10 +16,10 @@
 
 ## Setup
 
-- Edit config.ini providing correct paths
+- Edit `config.ini` providing correct paths
 - Make `init.sh` file executable `chmod u+x init.sh` and run it
 - If you don't have Thumbnails generated for your videos and want to use them run `generate_thumbnails.sh` script
-- Finally run `generate_files_json.sh` script to generate files.json containing list of VR files for player
+- Finally run `generate_files_json.sh` script to generate `files.json` containing list of VR files for player
 
 
 ## Troubleshooting
