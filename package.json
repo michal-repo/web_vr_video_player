@@ -9,8 +9,8 @@
   "author": "michal-repo",
   "license": "ISC",
   "dependencies": {
-    "three": "^0.144.0",
-    "three-mesh-ui": "^6.4.5"
+    "three": "^0.146.0",
+    "three-mesh-ui": "^6.5.2"
   },
   "devDependencies": {
     "file-loader": "^6.2.0",

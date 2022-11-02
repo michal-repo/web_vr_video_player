@@ -13,6 +13,7 @@ import * as ScreenManager from './ScreenManager.js';
 import * as UI from './UI.js';
 
 export let scene, camera, renderer, controls, vrControl, vrControlCurrentlyUsedController, gamepad, video, video_src, videoTexture, mesh1, mesh2, mesh1Clone, meshForScreenMode;
+export let clickedButton = undefined;
 export let playMenuPanel;
 export let fileBrowserPanel;
 export let camToSave = {};
@@ -43,6 +44,7 @@ window.addEventListener('pointerdown', () => {
 
 window.addEventListener('pointerup', () => {
 	selectState = false;
+	clickedButton = undefined;
 });
 
 window.addEventListener('touchstart', (event) => {
@@ -53,6 +55,7 @@ window.addEventListener('touchstart', (event) => {
 
 window.addEventListener('touchend', () => {
 	selectState = false;
+	clickedButton = undefined;
 	mouse.x = null;
 	mouse.y = null;
 });
@@ -207,6 +210,7 @@ function init() {
 	function vrControlUnselected(id) {
 		if (vrControlCurrentlyUsedController == id) {
 			selectState = false;
+			clickedButton = undefined;
 		}
 	}
 
@@ -350,8 +354,11 @@ function updateButtons() {
 		intersect.object.uv = { x: intersect.uv.x, y: intersect.uv.y };
 
 		if (selectState) {
-			// Component.setState internally call component.set with the options you defined in component.setupState
-			intersect.object.setState('selected');
+			if (clickedButton === undefined || clickedButton == intersect.object.uuid) {
+				// Component.setState internally call component.set with the options you defined in component.setupState
+				clickedButton = intersect.object.uuid;
+				intersect.object.setState('selected');
+			}
 		} else {
 			// Component.setState internally call component.set with the options you defined in component.setupState
 			intersect.object.setState('hovered');

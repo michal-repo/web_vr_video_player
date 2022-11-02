@@ -47,8 +47,6 @@ export class FileBrowserPanel {
     THUMBTEXTUREHEIGHT = ((this.PANELMAXHEIGHT / this.FILES_ROWS) - ((this.PANELMAXHEIGHT / this.FILES_ROWS) * 0.25));
     THUMBTEXTUREWIDTH = ((this.PANELMAXWIDTH - this.PANELMAXWIDTH / 16) / this.FILES_PER_ROW - 0.05);
 
-    DoubleClickPreventFlag = { prevent: false };
-
     thumbRowContainerAttributes = {
         width: this.PANELMAXWIDTH,
         height: ((this.PANELMAXHEIGHT) / this.FILES_ROWS),
@@ -350,10 +348,8 @@ export class FileBrowserPanel {
                     state: 'selected',
                     attributes: this.selectedAttributes,
                     onSet: () => {
-                        if (!this.DoubleClickPreventFlag.prevent) {
-                            Helpers.setVideoSrc(thumb.fileSRC);
-                            this.hideFileMenuPanel();
-                        }
+                        Helpers.setVideoSrc(thumb.fileSRC);
+                        this.hideFileMenuPanel();
                     }
                 });
                 thumb.setupState(this.hoveredStateAttributes);
@@ -388,17 +384,13 @@ export class FileBrowserPanel {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Hide / Show Menu
 
-    showFileMenuPanel(init = false) {
-        if (!init) {
-            Helpers.preventDoubleClick(this.DoubleClickPreventFlag, 2);
-        }
+    showFileMenuPanel() {
         UI.showMenu([this.fileBrowserContainer, this.foldersContainer], this.fileThumbsToTest, true);
         MAIN.hiddenSphere.buttonsVisible = true;
         Helpers.removeVideoSrc();
     }
 
     hideFileMenuPanel() {
-        Helpers.preventDoubleClick(MAIN.playMenuPanel.showPlayMenuPanelDoubleClickPreventFlag, 1);
         UI.hideMenu([this.fileBrowserContainer, this.foldersContainer], [], true);
         MAIN.hiddenSphere.buttonsVisible = false;
     }

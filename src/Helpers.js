@@ -1,12 +1,5 @@
 let video_src = document.getElementById('video_src');
 
-export function preventDoubleClick(variable, seconds = 2) {
-	variable.prevent = true;
-	setTimeout(function () {
-		variable.prevent = false;
-	}, seconds * 1000);
-}
-
 export function videoSrcExists() {
 	if (typeof video_src !== 'undefined' && video_src.src != window.location.href) {
 		return true;

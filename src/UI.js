@@ -90,9 +90,9 @@ export class HiddenSphere {
         this.hiddenSphere.setupState({
             state: 'selected',
             onSet: () => {
-                if (Helpers.videoSrcExists() && !this.hiddenSphere.buttonsVisible && !MAIN.playMenuPanel.showPlayMenuPanelDoubleClickPreventFlag.prevent) {
+                if (Helpers.videoSrcExists() && !this.hiddenSphere.buttonsVisible) {
                     MAIN.playMenuPanel.showPlayMenuPanel();
-                } else if (Helpers.videoSrcExists() && !MAIN.playMenuPanel.showPlayMenuPanelDoubleClickPreventFlag.prevent) {
+                } else if (Helpers.videoSrcExists()) {
                     MAIN.playMenuPanel.hidePlayMenuPanel();
                 }
             }

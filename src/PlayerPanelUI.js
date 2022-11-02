@@ -49,7 +49,6 @@ export class PlayerPanel {
 	progressBar;
 	progressBarContainer;
 	settingsMenuContainer;
-	showPlayMenuPanelDoubleClickPreventFlag = { prevent: false };
 	buttonPlay;
 	playIconElement;
 	pauseIconElement;
@@ -536,7 +535,7 @@ export class PlayerPanel {
 			state: 'selected',
 			attributes: this.selectedAttributes,
 			onSet: () => {
-				if (MAIN.hiddenSphere.buttonsVisible && !this.showPlayMenuPanelDoubleClickPreventFlag.prevent) {
+				if (MAIN.hiddenSphere.buttonsVisible) {
 					this.hidePlayMenuPanel();
 				}
 			}
@@ -687,7 +686,6 @@ export class PlayerPanel {
 			attributes: this.selectedAttributes,
 			onSet: () => {
 				this.hideSettingsMenuContainer();
-				Helpers.preventDoubleClick(this.showPlayMenuPanelDoubleClickPreventFlag, 1);
 			}
 		});
 		closeSettingsButton.setupState(this.hoveredStateAttributes);
@@ -815,13 +813,11 @@ export class PlayerPanel {
 	// Hide / Show Menu
 
 	showPlayMenuPanel() {
-		Helpers.preventDoubleClick(this.showPlayMenuPanelDoubleClickPreventFlag, 1);
 		UI.showMenu(this.playMenuContainer, this.playMenuObjsToTest, true);
 		MAIN.hiddenSphere.buttonsVisible = true;
 	}
 
 	hidePlayMenuPanel() {
-		Helpers.preventDoubleClick(this.showPlayMenuPanelDoubleClickPreventFlag, 1);
 		if (this.settingsMenuContainer.settingsVisible) {
 			this.hideSettingsMenuContainer();
 		}
