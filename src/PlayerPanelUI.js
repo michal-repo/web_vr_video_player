@@ -276,7 +276,7 @@ export class PlayerPanel {
 		MAIN.scene.add(this.playMenuContainer);
 		const playMenuContainerButtons = new Block(this.commonBlockAttributes);
 
-		this.playMenuContainer.position.set(0, 1.2, -1.6);
+		this.playMenuContainer.position.set(0, 0.6, -3);
 		this.playMenuContainer.add(playMenuContainerButtons);
 
 		this.playMenuContainer.setupState({ state: 'selected' });
@@ -419,7 +419,9 @@ export class PlayerPanel {
 						case true:
 							this.buttonPlay.remove(this.playIconElement);
 							this.buttonPlay.add(this.pauseIconElement);
-							video.play();
+							video.play().catch((e)=>{
+								console.warn(e);
+							 });
 							break;
 					}
 				}
@@ -427,6 +429,11 @@ export class PlayerPanel {
 		});
 		this.buttonPlay.setupState(this.hoveredStateAttributes);
 		this.buttonPlay.setupState(this.idleStateAttributes);
+
+		this.buttonPlay.playbackStarted = () => {
+			this.buttonPlay.remove(this.playIconElement);
+			this.buttonPlay.add(this.pauseIconElement);
+		};
 
 		buttonFF.setupState({
 			state: 'selected',
@@ -594,7 +601,7 @@ export class PlayerPanel {
 		this.settingsMenuContainer.visible = false;
 		MAIN.scene.add(this.settingsMenuContainer);
 		this.settingsMenuContainer.settingsVisible = false;
-		this.settingsMenuContainer.position.set(0.5, 1.8, -1.55);
+		this.settingsMenuContainer.position.set(0, 1, -2.95);
 		this.settingsMenuContainer.setupState({ state: 'selected' });
 		this.settingsMenuContainer.setupState({ state: 'hovered' });
 		this.settingsMenuContainer.setupState({ state: 'idle' });
@@ -616,7 +623,7 @@ export class PlayerPanel {
 		const VRModeButton = new Block(this.buttonOptions);
 		const ScreenModeButton = new Block(this.buttonOptions);
 		const VR2DModeButton = new Block(this.buttonOptions);
-		
+
 		this.VR2DModeButtonText = new Text({
 			content: '3D', fontSize: 0.07
 		});
@@ -775,7 +782,7 @@ export class PlayerPanel {
 			state: 'selected',
 			attributes: this.selectedAttributes,
 			onSet: () => {
-				if (ScreenManager.force_2d_mode){
+				if (ScreenManager.force_2d_mode) {
 					ScreenManager.force2DMode(false);
 					this.VR2DModeButtonText.set({ content: "3D" });
 				} else {
@@ -859,9 +866,13 @@ export class PlayerPanel {
 				let result = playbackHelper.toISOString().substr(11, 8);
 				result += " / ";
 				playbackHelper = new Date(null);
-				playbackHelper.setSeconds(MAIN.video.duration);
-				result += playbackHelper.toISOString().substr(11, 8);
-				this.playbackLabelContainer.set({ content: result });
+				if (MAIN.video.duration) {
+					playbackHelper.setSeconds(MAIN.video.duration);
+					result += playbackHelper.toISOString().substr(11, 8);
+					this.playbackLabelContainer.set({ content: result });
+				} else {
+					this.playbackLabelContainer.set({ content: "N/A" });
+				}
 			}
 
 			if (MAIN.video.ended == false) {

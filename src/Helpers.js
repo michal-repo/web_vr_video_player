@@ -12,12 +12,14 @@ export function setVideoSrc(src) {
 	video_src.setAttribute('type', 'video/mp4');
     let video = document.getElementById('video');
     video.load();
-    video.play();
+	video.play().catch((e)=>{
+		console.warn(e);
+	 });
 }
 
 export function removeVideoSrc() {
 	if (typeof video_src !== 'undefined' && video_src.src != window.location.href) {
-        video.pause();
+		video.pause();
 		video_src.setAttribute('src', "");
 	}
 }

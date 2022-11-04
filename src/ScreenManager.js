@@ -36,13 +36,8 @@ export function vrsessionstart() {
 	positionsToSaveForVRExit.settingsMenuContainer_rotation = MAIN.playMenuPanel.settingsMenuContainer.rotation.clone();
 	positionsToSaveForVRExit.fileBrowserContainer_position = MAIN.fileBrowserPanel.fileBrowserContainer.position.clone();
 	positionsToSaveForVRExit.fileBrowserContainer_rotation = MAIN.fileBrowserPanel.fileBrowserContainer.rotation.clone();
-	MAIN.camera.position.y = 0;
-	MAIN.playMenuPanel.playMenuContainer.position.set(0, 0.6, -3);
-	MAIN.playMenuPanel.playMenuContainer.rotation.x = -0.45;
-	MAIN.playMenuPanel.settingsMenuContainer.position.set(0, 1, -2.95);
-	MAIN.playMenuPanel.settingsMenuContainer.rotation.x = -0.45;
-	MAIN.fileBrowserPanel.fileBrowserContainer.position.set(0, 1.4, -3.5);
-	MAIN.fileBrowserPanel.fileBrowserContainer.rotation.x = 0;
+	positionsToSaveForVRExit.foldersContainer_position = MAIN.fileBrowserPanel.foldersContainer.position.clone();
+	positionsToSaveForVRExit.foldersContainer_rotation = MAIN.fileBrowserPanel.foldersContainer.rotation.clone();
 }
 
 export function vrsessionend() {
@@ -53,6 +48,8 @@ export function vrsessionend() {
 	MAIN.playMenuPanel.settingsMenuContainer.rotation.set(positionsToSaveForVRExit.settingsMenuContainer_rotation.x, positionsToSaveForVRExit.settingsMenuContainer_rotation.y, positionsToSaveForVRExit.settingsMenuContainer_rotation.z, positionsToSaveForVRExit.settingsMenuContainer_rotation.order);
 	MAIN.fileBrowserPanel.fileBrowserContainer.position.set(positionsToSaveForVRExit.fileBrowserContainer_position.x, positionsToSaveForVRExit.fileBrowserContainer_position.y, positionsToSaveForVRExit.fileBrowserContainer_position.z);
 	MAIN.fileBrowserPanel.fileBrowserContainer.rotation.set(positionsToSaveForVRExit.fileBrowserContainer_rotation.x, positionsToSaveForVRExit.fileBrowserContainer_rotation.y, positionsToSaveForVRExit.fileBrowserContainer_rotation.z, positionsToSaveForVRExit.fileBrowserContainer_rotation.order);
+	MAIN.fileBrowserPanel.foldersContainer.position.set(positionsToSaveForVRExit.foldersContainer_position.x, positionsToSaveForVRExit.foldersContainer_position.y, positionsToSaveForVRExit.foldersContainer_position.z);
+	MAIN.fileBrowserPanel.foldersContainer.rotation.set(positionsToSaveForVRExit.foldersContainer_rotation.x, positionsToSaveForVRExit.foldersContainer_rotation.y, positionsToSaveForVRExit.foldersContainer_rotation.z, positionsToSaveForVRExit.foldersContainer_rotation.order);
 }
 
 export function zoom(in_or_out, step = 10) {

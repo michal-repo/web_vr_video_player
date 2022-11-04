@@ -197,10 +197,7 @@ export class FileBrowserPanel {
             state: 'selected',
             attributes: this.selectedAttributes,
             onSet: () => {
-                if (this.CURRENT_PAGE > 0) {
-                    this.CURRENT_PAGE--;
-                    this.regenerateFileBrowser();
-                }
+                this.PreviousPage();
             }
         });
         this.buttonLeft.setupState(this.hoveredStateAttributes);
@@ -219,10 +216,7 @@ export class FileBrowserPanel {
             state: 'selected',
             attributes: this.selectedAttributes,
             onSet: () => {
-                if (this.CURRENT_PAGE < this.TOTAL_PAGES) {
-                    this.CURRENT_PAGE++;
-                    this.regenerateFileBrowser();
-                }
+                this.NextPage();
             }
         });
         this.buttonRight.setupState(this.hoveredStateAttributes);
@@ -253,7 +247,7 @@ export class FileBrowserPanel {
                 contentDirection: 'column',
                 fontFamily: FontJSON,
                 fontTexture: FontImage,
-                fontSize: 0.07,
+                fontSize: 0.12,
                 padding: 0.02,
                 borderRadius: 0,
                 backgroundOpacity: 1,
@@ -268,6 +262,7 @@ export class FileBrowserPanel {
                     height: 0.2,
                     offset: 0.05,
                     margin: 0.02,
+                    bestFit: 'shrink',
                     width: (this.PANELMAXWIDTH / 3) - 0.1,
                     backgroundOpacity: 1
                 }).add(new Text({ content: this.VIDEOS[index].name }));
@@ -289,7 +284,7 @@ export class FileBrowserPanel {
 
             MAIN.scene.add(this.foldersContainer);
 
-            this.foldersContainer.position.set(-(this.PANELMAXWIDTH - 0.5), 1.5, -3);
+            this.foldersContainer.position.set(-3.8, 1.5, -3);
             this.foldersContainer.rotation.y = 0.5;
         }
 
@@ -310,9 +305,7 @@ export class FileBrowserPanel {
             this.generateView();
         }
 
-
-        this.fileBrowserContainer.position.set(0, 1, -2);
-        this.fileBrowserContainer.rotation.x = -0.3;
+        this.fileBrowserContainer.position.set(0, 1.4, -3.5);
 
         // objectsToRecenter.move.push(this.playMenuContainer);
 
@@ -381,18 +374,32 @@ export class FileBrowserPanel {
         UI.registerNewObjectsToTest(this.fileThumbsToTest);
     }
 
+    PreviousPage() {
+        if (this.CURRENT_PAGE > 0) {
+            this.CURRENT_PAGE--;
+            this.regenerateFileBrowser();
+        }
+    }
+
+    NextPage() {
+        if (this.CURRENT_PAGE < this.TOTAL_PAGES) {
+            this.CURRENT_PAGE++;
+            this.regenerateFileBrowser();
+        }
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Hide / Show Menu
 
     showFileMenuPanel() {
         UI.showMenu([this.fileBrowserContainer, this.foldersContainer], this.fileThumbsToTest, true);
-        MAIN.hiddenSphere.buttonsVisible = true;
         Helpers.removeVideoSrc();
+        MAIN.playbackChange(false);
     }
 
     hideFileMenuPanel() {
         UI.hideMenu([this.fileBrowserContainer, this.foldersContainer], [], true);
-        MAIN.hiddenSphere.buttonsVisible = false;
+        MAIN.playbackChange(true);
     }
 
 

@@ -102,15 +102,13 @@ function init() {
 	// invert the geometry on the x-axis so that all of the faces point inward
 	geometryScreen.scale(- 1, 1, 1);
 
-
-
 	const materialScreen = new THREE.MeshBasicMaterial({ map: videoTexture });
 
 	meshForScreenMode = new THREE.Mesh(geometryScreen, materialScreen);
 	meshForScreenMode.visible = false;
 	scene.add(meshForScreenMode);
 
-	// left
+	// left eye
 
 	const geometry1 = new THREE.SphereGeometry(120, 60, 40, Math.PI, Math.PI);
 	// invert the geometry on the x-axis so that all of the faces point inward
@@ -128,16 +126,17 @@ function init() {
 
 	mesh1 = new THREE.Mesh(geometry1, material1);
 	mesh1.layers.set(1); // display in left eye only
+	mesh1.visible = false;
 	scene.add(mesh1);
 
-	// mesh for 2d
+	// mesh for 2d mode
 
 	mesh1Clone = mesh1.clone();
 	mesh1Clone.layers.set(2);
 	mesh1Clone.visible = false;
 	scene.add(mesh1Clone);
 
-	// right
+	// right eye
 
 	const geometry2 = new THREE.SphereGeometry(120, 60, 40, Math.PI, Math.PI);
 	geometry2.scale(- 1, 1, 1);
@@ -155,6 +154,7 @@ function init() {
 
 	mesh2 = new THREE.Mesh(geometry2, material2);
 	mesh2.layers.set(2); // display in right eye only
+	mesh2.visible = false;
 	scene.add(mesh2);
 
 	//////////
@@ -226,7 +226,8 @@ function init() {
 
 	fetch("files.json")
 		.then(response => response.json())
-		.then(json => fileBrowserPanel = new FileBrowserPanel(json)).then(a => fileBrowserPanel.showFileMenuPanel(true))
+		.then(json => fileBrowserPanel = new FileBrowserPanel(json))
+		.then(a => fileBrowserPanel.showFileMenuPanel())
 		.catch((error) => {
 			console.error('Error:', error);
 			alert('Failed parsing json file, check console for details.');
@@ -252,6 +253,18 @@ function init() {
 
 }
 
+function showMeshes3D() {
+	mesh1.visible = true;
+	mesh2.visible = true;
+}
+
+function hideMeshes() {
+	mesh1.visible = false;
+	mesh2.visible = false;
+	meshForScreenMode.visible = false;
+	mesh1Clone.visible = false;
+}
+
 // Handle resizing the viewport
 
 function onWindowResize() {
@@ -264,26 +277,65 @@ function onWindowResize() {
 
 //
 
-let everyXframesUpdateProgBar = 0;
-let gamepadControlsUpdateInit = 0;
-let gamepadFFRewActive = false;
+const everyXframesUpdateProgBar = 15;
+let everyXframesUpdateProgBarInt = 0;
+let gamepadAxisActive = false;
+export let playbackIsActive = false;
+
+export function playbackChange(is_active = false) {
+	switch (is_active) {
+		case true:
+			playbackIsActive = true;
+			showMeshes3D();
+			playMenuPanel.buttonPlay.playbackStarted();
+			if (everyXframesUpdateProgBarInt < everyXframesUpdateProgBar) {
+				playMenuPanel.progressBarAndDuration();
+			}
+			break;
+		default:
+		case false:
+			playbackIsActive = false;
+			hideMeshes();
+			break;
+	}
+}
 
 function gamepadControlsUpdate() {
-	if (renderer.xr.isPresenting && renderer.xr.getSession() !== null && typeof renderer.xr.getSession().inputSources !== 'undefined' && renderer.xr.getSession().inputSources.length >= 1) {
-		gamepad = renderer.xr.getSession().inputSources[vrControlCurrentlyUsedController].gamepad;
-		if (typeof gamepad !== 'undefined') {
-			if (gamepad.axes[2] > 0.35 && gamepadFFRewActive == false) {
-				playMenuPanel.videoPlaybackFFRew("FF", 10);
-				gamepadFFRewActive = true;
-			} else if (gamepad.axes[2] < -0.35 && gamepadFFRewActive == false) {
-				playMenuPanel.videoPlaybackFFRew("Rew", 10);
-				gamepadFFRewActive = true;
-			} else if (gamepad.axes[3] > 0.35) {
-				ScreenManager.zoom("out", 0.2);
-			} else if (gamepad.axes[3] < -0.35) {
-				ScreenManager.zoom("in", 0.2);
-			} else if (gamepad.axes[2] < 0.15 && gamepad.axes[2] > -0.15) {
-				gamepadFFRewActive = false;
+	if (renderer.xr.isPresenting) {
+		if (renderer.xr.getSession() !== null) {
+			if (typeof renderer.xr.getSession().inputSources !== 'undefined' && renderer.xr.getSession().inputSources.length >= 1) {
+				if (renderer.xr.getSession().inputSources.length >= 1) {
+					gamepad = renderer.xr.getSession().inputSources[vrControlCurrentlyUsedController].gamepad;
+					if (typeof gamepad !== 'undefined') {
+						if (gamepad.axes[2] > 0.35 && gamepadAxisActive === false) {
+							if (playbackIsActive) {
+								playMenuPanel.videoPlaybackFFRew("FF", 10);
+							} else {
+								fileBrowserPanel.NextPage();
+							}
+							gamepadAxisActive = true;
+						} else if (gamepad.axes[2] < -0.35 && gamepadAxisActive === false) {
+							if (playbackIsActive) {
+								playMenuPanel.videoPlaybackFFRew("Rew", 10);
+							} else {
+								fileBrowserPanel.PreviousPage();
+							}
+							gamepadAxisActive = true;
+						} else if (gamepad.axes[3] > 0.35 && (gamepadAxisActive === false || gamepadAxisActive === "down")) {
+							if (playbackIsActive) {
+								ScreenManager.zoom("out", 0.2);
+							}
+							gamepadAxisActive = "down";
+						} else if (gamepad.axes[3] < -0.35 && (gamepadAxisActive === false || gamepadAxisActive === "up")) {
+							if (playbackIsActive) {
+								ScreenManager.zoom("in", 0.2);
+							}
+							gamepadAxisActive = "up";
+						} else if (gamepad.axes[2] < 0.15 && gamepad.axes[2] > -0.15) {
+							gamepadAxisActive = false;
+						}
+					}
+				}
 			}
 		}
 	}
@@ -298,22 +350,16 @@ function loop() {
 
 	controls.update();
 
-	// Check gamepad after 120 frames
-	if (gamepadControlsUpdateInit >= 120) {
-		gamepadControlsUpdate();
-	} else {
-		gamepadControlsUpdateInit++;
-	}
+	gamepadControlsUpdate();
 
 	renderer.render(scene, camera);
 
 	updateButtons();
 
 	// progressbar and duration time
-
-	if (everyXframesUpdateProgBar++ >= 15) {
+	if (everyXframesUpdateProgBarInt++ >= everyXframesUpdateProgBar) {
 		playMenuPanel.progressBarAndDuration();
-		everyXframesUpdateProgBar = 0;
+		everyXframesUpdateProgBarInt = 0;
 	}
 
 }
