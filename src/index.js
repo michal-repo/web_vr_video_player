@@ -12,11 +12,16 @@ import { FileBrowserPanel } from './FileBrowserPanelUI.js';
 import * as ScreenManager from './ScreenManager.js';
 import * as UI from './UI.js';
 
-export let scene, camera, renderer, controls, vrControl, vrControlCurrentlyUsedController, gamepad, video, video_src, videoTexture, mesh1, mesh2, mesh1Clone, meshForScreenMode;
+export let scene, camera, renderer, orbitControls, vrControl, vrControlCurrentlyUsedController, gamepad, video, video_src, videoTexture, mesh1, mesh2, mesh1Clone, meshForScreenMode;
 export let clickedButton = undefined;
 export let playMenuPanel;
 export let fileBrowserPanel;
 export let camToSave = {};
+export const objectsToRecenter = {};
+
+let popupMessage, popupContainer;
+import FontJSON from '../assets/fonts/Roboto-Regular-msdf.json';
+import FontImage from '../assets/fonts/Roboto-Regular.png';
 
 export let hiddenSphere;
 const CAMERAPOSITIONY = 1.6;
@@ -74,6 +79,7 @@ function init() {
 	camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 1, 1000);
 	camera.layers.enable(1);
 	camera.position.y = CAMERAPOSITIONY;
+	scene.add(camera);
 
 	renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
 	renderer.localClippingEnabled = true;
@@ -85,8 +91,8 @@ function init() {
 
 	// Orbit controls for no-vr
 
-	controls = new OrbitControls(camera, renderer.domElement);
-	controls.target = new THREE.Vector3(0, 1, -1.8);
+	orbitControls = new OrbitControls(camera, renderer.domElement);
+	orbitControls.target = new THREE.Vector3(0, 1, -1.8);
 
 	/////////
 	// Room
@@ -157,6 +163,12 @@ function init() {
 	mesh2.visible = false;
 	scene.add(mesh2);
 
+
+	registerObjectToRecenter(mesh1, "player");
+	registerObjectToRecenter(mesh2, "player");
+	registerObjectToRecenter(mesh1Clone, "player");
+	registerObjectToRecenter(meshForScreenMode, "player");
+	
 	//////////
 	// Light
 	//////////
@@ -218,7 +230,6 @@ function init() {
 	// Panel
 	//////////
 
-
 	hiddenSphere = new UI.HiddenSphere();
 	scene.add(hiddenSphere);
 	UI.objsToTest.push(hiddenSphere);
@@ -234,12 +245,41 @@ function init() {
 		});
 
 
+
+	////////////////////////////////////////
+	popupContainer = new ThreeMeshUI.Block({
+		justifyContent: 'center',
+		contentDirection: 'row',
+		fontFamily: FontJSON,
+		fontTexture: FontImage,
+		fontSize: 0.07,
+		padding: 0.02,
+		borderRadius: 0,
+		backgroundOpacity: 1,
+		backgroundColor: new THREE.Color(0x0099ff),
+		height: 0.20,
+		width: 2
+	});
+	popupMessage = new ThreeMeshUI.Text({
+		content: '',
+		fontFamily: FontJSON,
+		fontTexture: FontImage,
+		fontSize: 0.07,
+		offset: 0.035,
+		fontColor: new THREE.Color(0xffffff)
+	});
+	popupContainer.add(popupMessage);
+	popupContainer.position.set(0, 1, -2);
+	popupContainer.visible = false;
+	scene.add(popupContainer);
+	////////////////////////////////////////
+
 	/////////////////////////////////////////////////////////////
 
 	// save current camera position
 	camToSave.position = camera.position.clone();
 	camToSave.rotation = camera.rotation.clone();
-	camToSave.controlCenter = controls.target.clone();
+	camToSave.controlCenter = orbitControls.target.clone();
 
 	ScreenManager.saveMeshPositionAndRotation();
 
@@ -251,6 +291,21 @@ function init() {
 
 	renderer.setAnimationLoop(loop);
 
+}
+
+let showPopupTimeoutID;
+
+export function showPopupMessage(message) {
+	if (typeof message === "string") {
+		popupMessage.set({ content: message });
+		popupContainer.visible = true;
+		clearTimeout(showPopupTimeoutID);
+		showPopupTimeoutID = setTimeout(() => {
+			popupContainer.visible = false;
+		}, 4000);
+	} else {
+		console.warn("Error in showPopupMessage, message must be string");
+	}
 }
 
 function showMeshes3D() {
@@ -348,7 +403,7 @@ function loop() {
 	// to improve performance
 	ThreeMeshUI.update();
 
-	controls.update();
+	orbitControls.update();
 
 	gamepadControlsUpdate();
 
@@ -452,6 +507,13 @@ function raycast() {
 
 	}, null);
 
+}
+
+export function registerObjectToRecenter(obj, view) {
+	if (!(view in objectsToRecenter)){
+		objectsToRecenter[view] = [];
+	}
+	objectsToRecenter[view].push(obj);
 }
 
 if (WebGL.isWebGLAvailable()) {

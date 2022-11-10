@@ -12,6 +12,8 @@ import * as UI from './UI.js';
 
 import * as Helpers from './Helpers.js';
 
+import * as ScreenManager from './ScreenManager.js';
+
 // Import Icons
 import LeftIcon from '../assets/icons/left-arrow.png';
 import RightIcon from '../assets/icons/right-arrow.png';
@@ -23,6 +25,7 @@ export class FileBrowserPanel {
     fileBrowserContainer;
     foldersContainer;
     thumbsContainer;
+    draggingBox;
 
     buttonLeft;
     buttonRight;
@@ -43,6 +46,8 @@ export class FileBrowserPanel {
 
     PANELMAXWIDTH = 4.5;
     PANELMAXHEIGHT = 3.2;
+
+    BUTTONWIDTHHEIGHT = (this.PANELMAXHEIGHT / this.FILES_ROWS - 0.5);
 
     THUMBTEXTUREHEIGHT = ((this.PANELMAXHEIGHT / this.FILES_ROWS) - ((this.PANELMAXHEIGHT / this.FILES_ROWS) * 0.25));
     THUMBTEXTUREWIDTH = ((this.PANELMAXWIDTH - this.PANELMAXWIDTH / 16) / this.FILES_PER_ROW - 0.05);
@@ -109,8 +114,8 @@ export class FileBrowserPanel {
     };
 
     bigButtonAttributes = {
-        height: (this.PANELMAXHEIGHT / this.FILES_ROWS - 0.5),
-        width: (this.PANELMAXHEIGHT / this.FILES_ROWS - 0.5),
+        height: this.BUTTONWIDTHHEIGHT,
+        width: this.BUTTONWIDTHHEIGHT,
         justifyContent: 'center',
         offset: 0.05,
         margin: 0.02,
@@ -121,8 +126,8 @@ export class FileBrowserPanel {
 
     bigButtonAttributesTextureAttributes(texture) {
         return {
-            height: (this.PANELMAXHEIGHT / this.FILES_ROWS - 0.5),
-            width: (this.PANELMAXHEIGHT / this.FILES_ROWS - 0.5),
+            height: this.BUTTONWIDTHHEIGHT,
+            width: this.BUTTONWIDTHHEIGHT,
             backgroundTexture: texture,
             borderRadius: 0
         }
@@ -232,8 +237,9 @@ export class FileBrowserPanel {
             fontSize: 0.07,
             padding: 0.02,
             borderRadius: 0,
-            backgroundOpacity: 0,
-            width: this.PANELMAXWIDTH + 0.3,
+            backgroundOpacity: 1,
+            backgroundColor: new Color(0x292929),
+            width: this.PANELMAXWIDTH + 0.3 + (this.BUTTONWIDTHHEIGHT * 2),
             height: this.PANELMAXHEIGHT
         });
 
@@ -251,6 +257,7 @@ export class FileBrowserPanel {
                 padding: 0.02,
                 borderRadius: 0,
                 backgroundOpacity: 1,
+                backgroundColor: new Color(0x292929),
                 width: this.PANELMAXWIDTH / 3,
                 height: this.PANELMAXHEIGHT
             });
@@ -283,8 +290,7 @@ export class FileBrowserPanel {
             }
 
             MAIN.scene.add(this.foldersContainer);
-
-            this.foldersContainer.position.set(-3.8, 1.5, -3);
+            this.foldersContainer.position.set(-3.8, 1.4, -3);
             this.foldersContainer.rotation.y = 0.5;
         }
 
@@ -307,7 +313,51 @@ export class FileBrowserPanel {
 
         this.fileBrowserContainer.position.set(0, 1.4, -3.5);
 
-        // objectsToRecenter.move.push(this.playMenuContainer);
+        this.draggingBox = new Block({
+            justifyContent: 'center',
+            contentDirection: 'row',
+            padding: 0.02,
+            borderRadius: 0.06,
+            backgroundOpacity: 1,
+            backgroundColor: new Color(0x5c5c5c),
+            width: this.PANELMAXWIDTH / 3,
+            height: 0.1
+        });
+
+        MAIN.scene.add(this.draggingBox);
+        this.draggingBox.position.set(0, -0.3, -3.5);
+        this.draggingBox.setupState({
+            state: 'selected',
+            onSet: () => {
+                ScreenManager.startDrag("files");
+            }
+        });
+
+        this.draggingBox.setupState({
+            state: 'hovered',
+            attributes: {
+                backgroundColor: new Color(0xffff00),
+                backgroundOpacity: 1
+            },
+            onSet: () => {
+                ScreenManager.stopDrag("files");
+            }
+        });
+        this.draggingBox.setupState({
+            state: 'idle',
+            attributes: {
+                backgroundColor: new Color(0x5c5c5c),
+                backgroundOpacity: 1
+            },
+            onSet: () => {
+                ScreenManager.stopDrag("files");
+            }
+        });
+        this.fileThumbsToTest.push(this.draggingBox);
+
+        MAIN.registerObjectToRecenter(this.draggingBox, "files");
+        MAIN.registerObjectToRecenter(this.foldersContainer, "files");
+        MAIN.registerObjectToRecenter(this.fileBrowserContainer, "files");
 
     }
 
@@ -341,8 +391,13 @@ export class FileBrowserPanel {
                     state: 'selected',
                     attributes: this.selectedAttributes,
                     onSet: () => {
-                        Helpers.setVideoSrc(thumb.fileSRC);
-                        this.hideFileMenuPanel();
+                        const response = Helpers.testIfFileExist(thumb.fileSRC);
+                        if (response) {
+                            Helpers.setVideoSrc(thumb.fileSRC);
+                            this.hideFileMenuPanel();
+                        } else {
+                            MAIN.showPopupMessage("Video file not found.");
+                        }
                     }
                 });
                 thumb.setupState(this.hoveredStateAttributes);
@@ -367,7 +422,7 @@ export class FileBrowserPanel {
         this.thumbsContainer.set(this.thumbsContainerAttributes);
         this.fileThumbsToTest = [];
         this.fileThumbsToTest = this.foldersButtonsToTest.slice();
-        this.fileThumbsToTest.push(this.buttonLeft, this.buttonRight);
+        this.fileThumbsToTest.push(this.buttonLeft, this.buttonRight, this.draggingBox);
 
         this.generateView();
 
@@ -392,13 +447,13 @@ export class FileBrowserPanel {
     // Hide / Show Menu
 
     showFileMenuPanel() {
-        UI.showMenu([this.fileBrowserContainer, this.foldersContainer], this.fileThumbsToTest, true);
+        UI.showMenu([this.fileBrowserContainer, this.foldersContainer, this.draggingBox], this.fileThumbsToTest, true);
         Helpers.removeVideoSrc();
         MAIN.playbackChange(false);
     }
 
     hideFileMenuPanel() {
-        UI.hideMenu([this.fileBrowserContainer, this.foldersContainer], [], true);
+        UI.hideMenu([this.fileBrowserContainer, this.foldersContainer, this.draggingBox], [], true);
         MAIN.playbackChange(true);
     }
 

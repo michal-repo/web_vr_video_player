@@ -98,6 +98,8 @@ export class HiddenSphere {
             }
         });
 
+        MAIN.registerObjectToRecenter(this.hiddenSphere, "player");
+
         return this.hiddenSphere;
     }
 }

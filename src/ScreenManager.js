@@ -160,23 +160,42 @@ export function force2DMode(bool) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Recenter
 
-export async function recenter() {
+export function recenter() {
 	if (MAIN.renderer.xr.isPresenting) {
-		// Exit and enter VR session
-		let session = MAIN.renderer.xr.getSession();
-		let buttonVR = document.getElementById("VRButton");
-		await session.end();
-		buttonVR.click();
+		startDrag();
 	} else {
-		restoreCamera(MAIN.camToSave.position, MAIN.camToSave.rotation, MAIN.camToSave.controlCenter);
+		setTimeout(restoreCameraNotInVR, 2000);
 	}
 }
 
+export let dragging = false;
+
+export function startDrag(view) {
+	if (MAIN.renderer.xr.isPresenting && !dragging && view in MAIN.objectsToRecenter) {
+		MAIN.objectsToRecenter[view].forEach((obj) => {
+			MAIN.vrControl.controllers[MAIN.vrControlCurrentlyUsedController].attach(obj);
+		});
+		dragging = true;
+	}
+}
+
+export function stopDrag(view) {
+	if (MAIN.renderer.xr.isPresenting && dragging && view in MAIN.objectsToRecenter) {
+		MAIN.objectsToRecenter[view].forEach((obj) => {
+			MAIN.scene.attach(obj);
+		});
+		dragging = false;
+	}
+}
+
+function restoreCameraNotInVR() {
+	restoreCamera(MAIN.camToSave.position, MAIN.camToSave.rotation, MAIN.camToSave.controlCenter);
+}
 
 function restoreCamera(position, rotation, controlCenter) {
 	MAIN.camera.position.set(position.x, position.y, position.z);
 	MAIN.camera.rotation.set(rotation.x, rotation.y, rotation.z);
 
-	MAIN.controls.target.set(controlCenter.x, controlCenter.y, controlCenter.z);
-	MAIN.controls.update();
+	MAIN.orbitControls.target.set(controlCenter.x, controlCenter.y, controlCenter.z);
+	MAIN.orbitControls.update();
 }

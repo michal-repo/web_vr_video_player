@@ -10,16 +10,32 @@ export function videoSrcExists() {
 export function setVideoSrc(src) {
 	video_src.setAttribute('src', src);
 	video_src.setAttribute('type', 'video/mp4');
-    let video = document.getElementById('video');
-    video.load();
-	video.play().catch((e)=>{
+	let video = document.getElementById('video');
+	video.load();
+	video.play().catch((e) => {
 		console.warn(e);
-	 });
+	});
 }
 
 export function removeVideoSrc() {
 	if (typeof video_src !== 'undefined' && video_src.src != window.location.href) {
 		video.pause();
 		video_src.setAttribute('src', "");
+	}
+}
+
+export function testIfFileExist(url) {
+	try {
+		var xhr = new XMLHttpRequest();
+		xhr.open('HEAD', url, false);
+		xhr.send();
+		if (xhr.status !== 200) {
+			return false;
+		} else {
+			return true;
+		}
+	} catch (e) {
+		console.warn(e);
+		return false;
 	}
 }

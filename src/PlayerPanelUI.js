@@ -53,6 +53,7 @@ export class PlayerPanel {
 	playIconElement;
 	pauseIconElement;
 	VR2DModeButtonText;
+	draggingBox;
 
 
 	loader = new TextureLoader();
@@ -90,8 +91,18 @@ export class PlayerPanel {
 		width: this.PLAYERPANELMAXWIDTH
 	};
 
-	paddingOnRightContainerAttributes = {
-		width: this.PLAYERPANELMAXWIDTH / 6,
+	centerContainerAttributes = {
+		width: 1.33,
+		height: 0.15,
+		justifyContent: 'center',
+		contentDirection: 'row',
+		offset: 0,
+		margin: 0,
+		backgroundOpacity: 0
+	};
+
+	exitButtonContainerAttributes = {
+		width: 0.60,
 		height: 0.15,
 		justifyContent: 'start',
 		contentDirection: 'row',
@@ -100,8 +111,18 @@ export class PlayerPanel {
 		backgroundOpacity: 0
 	};
 
+	muteButtonContainerAttributes = {
+		width: 0.66,
+		height: 0.15,
+		justifyContent: 'end',
+		contentDirection: 'row',
+		offset: 0,
+		margin: 0,
+		backgroundOpacity: 0
+	};
+
 	hideButtonContainerAttributes = {
-		width: this.PLAYERPANELMAXWIDTH / 6,
+		width: 1.27,
 		height: 0.15,
 		justifyContent: 'end',
 		contentDirection: 'row',
@@ -309,12 +330,13 @@ export class PlayerPanel {
 		const buttonMute = new Block(this.buttonOptions);
 		const dummyButtonMute = new Block(this.buttonOptions);
 		dummyButtonMute.visible = false;
-		const buttonMuteContainer = new Block(this.paddingOnRightContainerAttributes).add(buttonMute, dummyButtonMute);
+		const buttonMuteContainer = new Block(this.muteButtonContainerAttributes).add(buttonMute, dummyButtonMute);
 		const buttonExitToMain = new Block(this.buttonOptions);
-		const buttonExitToMainContainer = new Block(this.paddingOnRightContainerAttributes).add(buttonExitToMain);
-		const recenterButton = new Block(this.buttonOptions);
+		const buttonExitToMainContainer = new Block(this.exitButtonContainerAttributes).add(buttonExitToMain);
 
 		const settingsButton = new Block(this.buttonOptions);
+		const buttonsPlaybackContainer = new Block(this.centerContainerAttributes).add(buttonPause, buttonRew, this.buttonPlay, buttonFF, settingsButton);
+
 		const hideButton = new Block(this.buttonOptions);
 		const hideButtonContainer = new Block(this.hideButtonContainerAttributes).add(hideButton);
 
@@ -383,12 +405,6 @@ export class PlayerPanel {
 
 		///////////////////////////////////////////////
 
-		this.loader.load(TargetIcon, (texture) => {
-			recenterButton.add(
-				new InlineBlock(this.textureAttributes(texture))
-			);
-		});
-
 		this.loader.load(SettingsIcon, (texture) => {
 			settingsButton.add(
 				new InlineBlock(this.textureAttributes(texture))
@@ -419,9 +435,9 @@ export class PlayerPanel {
 						case true:
 							this.buttonPlay.remove(this.playIconElement);
 							this.buttonPlay.add(this.pauseIconElement);
-							video.play().catch((e)=>{
+							video.play().catch((e) => {
 								console.warn(e);
-							 });
+							});
 							break;
 					}
 				}
@@ -505,20 +521,6 @@ export class PlayerPanel {
 
 		//
 
-		recenterButton.setupState({
-			state: 'selected',
-			attributes: this.selectedAttributes,
-			onSet: () => {
-
-				setTimeout(ScreenManager.recenter, 2000);
-
-			}
-		});
-		recenterButton.setupState(this.hoveredStateAttributes);
-		recenterButton.setupState(this.idleStateAttributes);
-
-		//
-
 		settingsButton.setupState({
 			state: 'selected',
 			attributes: this.selectedAttributes,
@@ -592,8 +594,8 @@ export class PlayerPanel {
 
 		this.playMenuContainer.add(this.progressBarContainer);
 
-		playMenuContainerButtons.add(buttonExitToMainContainer, buttonMuteContainer, buttonRew, this.buttonPlay, buttonFF, recenterButton, settingsButton, hideButtonContainer);
-		this.playMenuObjsToTest.push(hideButton, buttonExitToMain, buttonRew, this.buttonPlay, buttonFF, buttonMute, recenterButton, settingsButton, this.progressBarContainer, this.playMenuContainer, MAIN.hiddenSphere);
+		playMenuContainerButtons.add(buttonExitToMainContainer, buttonMuteContainer, buttonsPlaybackContainer, hideButtonContainer);
+		this.playMenuObjsToTest.push(hideButton, buttonExitToMain, buttonRew, this.buttonPlay, buttonFF, buttonMute, settingsButton, this.progressBarContainer, this.playMenuContainer, MAIN.hiddenSphere);
 
 		// Settings container
 
@@ -814,13 +816,58 @@ export class PlayerPanel {
 		this.settingsMenuContainer.add(settingsMenuTopBar, settingsMenuModes, settingsMenuZoom, settingsMenuTilt);
 		this.settingsMenuObjsToTest.push(closeSettingsButton, zoomInButton, zoomOutButton, zoomResetButton, tiltUpButton, tiltDownButton, tiltResetButton, ScreenModeButton, VRModeButton, VR2DModeButton, settingsButton, this.settingsMenuContainer, this.playMenuContainer, MAIN.hiddenSphere);
 
+		this.draggingBox = new Block({
+			justifyContent: 'center',
+			contentDirection: 'row',
+			padding: 0.02,
+			borderRadius: 0.06,
+			backgroundOpacity: 1,
+			backgroundColor: new Color(0x5c5c5c),
+			width: this.PLAYERPANELMAXWIDTH / 3,
+			height: 0.1
+		});
+		this.draggingBox.visible = false;
+		MAIN.scene.add(this.draggingBox);
+		this.draggingBox.position.set(0, 0.25, -3);
+		this.draggingBox.setupState({
+			state: 'selected',
+			onSet: () => {
+				ScreenManager.startDrag("player");
+			}
+		});
+
+		this.draggingBox.setupState({
+			state: 'hovered',
+			attributes: {
+				backgroundColor: new Color(0xffff00),
+				backgroundOpacity: 1
+			},
+			onSet: () => {
+				ScreenManager.stopDrag("player");
+			}
+		});
+		this.draggingBox.setupState({
+			state: 'idle',
+			attributes: {
+				backgroundColor: new Color(0x5c5c5c),
+				backgroundOpacity: 1
+			},
+			onSet: () => {
+				ScreenManager.stopDrag("player");
+			}
+		});
+		this.playMenuObjsToTest.push(this.draggingBox);
+
+		MAIN.registerObjectToRecenter(this.draggingBox, "player");
+		MAIN.registerObjectToRecenter(this.playMenuContainer, "player");
+		MAIN.registerObjectToRecenter(this.settingsMenuContainer, "player");
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Hide / Show Menu
 
 	showPlayMenuPanel() {
-		UI.showMenu(this.playMenuContainer, this.playMenuObjsToTest, true);
+		UI.showMenu([this.playMenuContainer, this.draggingBox], this.playMenuObjsToTest, true);
 		MAIN.hiddenSphere.buttonsVisible = true;
 	}
 
@@ -828,7 +875,7 @@ export class PlayerPanel {
 		if (this.settingsMenuContainer.settingsVisible) {
 			this.hideSettingsMenuContainer();
 		}
-		UI.hideMenu(this.playMenuContainer, [], true);
+		UI.hideMenu([this.playMenuContainer, this.draggingBox], [], true);
 		MAIN.hiddenSphere.buttonsVisible = false;
 	}
 
