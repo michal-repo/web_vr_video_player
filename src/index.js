@@ -306,7 +306,7 @@ function gamepadControlsUpdate() {
 			if (typeof renderer.xr.getSession().inputSources !== 'undefined' && renderer.xr.getSession().inputSources.length >= 1) {
 				if (renderer.xr.getSession().inputSources.length >= 1) {
 					gamepad = renderer.xr.getSession().inputSources[vrControlCurrentlyUsedController].gamepad;
-					if (typeof gamepad !== 'undefined') {
+					if (typeof gamepad !== 'undefined' && gamepad !== null) {
 						if (gamepad.axes[2] > 0.35 && gamepadAxisActive === false) {
 							if (playbackIsActive) {
 								playMenuPanel.videoPlaybackFFRew("FF", 10);
