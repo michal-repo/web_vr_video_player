@@ -893,8 +893,8 @@ export class PlayerPanel {
 		this.hidePlayMenuPanel();
 		ScreenManager.force2DMode(false);
 		this.VR2DModeButtonText.set({ content: "3D" });
-		ScreenManager.zoom("reset");
-		ScreenManager.tilt("reset");
+		ScreenManager.resetPosition("playMenuPanel");
+		ScreenManager.resetPosition("meshes");
 		MAIN.fileBrowserPanel.showFileMenuPanel();
 	}
 

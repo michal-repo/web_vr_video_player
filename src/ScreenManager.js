@@ -4,52 +4,105 @@ let isVRModeUsed = true;
 let currently_3d = true;
 export let force_2d_mode = false;
 let positionsToSaveForVRExit = {};
-let positionsToResetZoomTilt = {};
 let currentZoom = 0;
 
-export function saveMeshPositionAndRotation() {
-	positionsToResetZoomTilt = {
-		mesh1: {
-			position: { z: MAIN.mesh1.position.z },
-			rotation: { x: MAIN.mesh1.rotation.x }
-		},
-		mesh1Clone: {
-			position: { z: MAIN.mesh1Clone.position.z },
-			rotation: { x: MAIN.mesh1Clone.rotation.x }
-		},
-		mesh2: {
-			position: { z: MAIN.mesh2.position.z },
-			rotation: { x: MAIN.mesh2.rotation.x }
-		},
-		meshForScreenMode: {
-			position: { z: MAIN.meshForScreenMode.position.z },
-			rotation: { x: MAIN.meshForScreenMode.rotation.x }
-		}
-	};
-}
-
-export function vrsessionstart() {
-	positionsToSaveForVRExit.camera_position = MAIN.camera.position.clone();
-	positionsToSaveForVRExit.playMenuContainer_position = MAIN.playMenuPanel.playMenuContainer.position.clone();
-	positionsToSaveForVRExit.playMenuContainer_rotation = MAIN.playMenuPanel.playMenuContainer.rotation.clone();
-	positionsToSaveForVRExit.settingsMenuContainer_position = MAIN.playMenuPanel.settingsMenuContainer.position.clone();
-	positionsToSaveForVRExit.settingsMenuContainer_rotation = MAIN.playMenuPanel.settingsMenuContainer.rotation.clone();
-	positionsToSaveForVRExit.fileBrowserContainer_position = MAIN.fileBrowserPanel.fileBrowserContainer.position.clone();
-	positionsToSaveForVRExit.fileBrowserContainer_rotation = MAIN.fileBrowserPanel.fileBrowserContainer.rotation.clone();
-	positionsToSaveForVRExit.foldersContainer_position = MAIN.fileBrowserPanel.foldersContainer.position.clone();
-	positionsToSaveForVRExit.foldersContainer_rotation = MAIN.fileBrowserPanel.foldersContainer.rotation.clone();
-}
+const panels = [
+	{
+		name: "cameras",
+		panels: [
+			{
+				ui_name: "camera",
+				save_as_name: "camera"
+			}
+		]
+	},
+	{
+		name: "playMenuPanel",
+		panels: [
+			{
+				ui_name: "playMenuContainer",
+				save_as_name: "playMenuContainer"
+			},
+			{
+				ui_name: "settingsMenuContainer",
+				save_as_name: "settingsMenuContainer"
+			},
+			{
+				ui_name: "draggingBox",
+				save_as_name: "playerDraggingBox"
+			},
+		]
+	},
+	{
+		name: "meshes",
+		panels: [
+			{
+				ui_name: "mesh1",
+				save_as_name: "mesh1"
+			},
+			{
+				ui_name: "mesh1Clone",
+				save_as_name: "mesh1Clone"
+			},
+			{
+				ui_name: "mesh2",
+				save_as_name: "mesh2"
+			},
+			{
+				ui_name: "meshForScreenMode",
+				save_as_name: "meshForScreenMode"
+			},
+		]
+	},
+	{
+		name: "fileBrowserPanel",
+		panels: [
+			{
+				ui_name: "fileBrowserContainer",
+				save_as_name: "fileBrowserContainer"
+			},
+			{
+				ui_name: "foldersContainer",
+				save_as_name: "foldersContainer"
+			},
+			{
+				ui_name: "draggingBox",
+				save_as_name: "fileBrowserDraggingBox"
+			},
+		]
+	},
+];
 
 export function vrsessionend() {
-	MAIN.camera.position.set(positionsToSaveForVRExit.camera_position.x, positionsToSaveForVRExit.camera_position.y, positionsToSaveForVRExit.camera_position.z);
-	MAIN.playMenuPanel.playMenuContainer.position.set(positionsToSaveForVRExit.playMenuContainer_position.x, positionsToSaveForVRExit.playMenuContainer_position.y, positionsToSaveForVRExit.playMenuContainer_position.z);
-	MAIN.playMenuPanel.playMenuContainer.rotation.set(positionsToSaveForVRExit.playMenuContainer_rotation.x, positionsToSaveForVRExit.playMenuContainer_rotation.y, positionsToSaveForVRExit.playMenuContainer_rotation.z, positionsToSaveForVRExit.playMenuContainer_rotation.order);
-	MAIN.playMenuPanel.settingsMenuContainer.position.set(positionsToSaveForVRExit.settingsMenuContainer_position.x, positionsToSaveForVRExit.settingsMenuContainer_position.y, positionsToSaveForVRExit.settingsMenuContainer_position.z);
-	MAIN.playMenuPanel.settingsMenuContainer.rotation.set(positionsToSaveForVRExit.settingsMenuContainer_rotation.x, positionsToSaveForVRExit.settingsMenuContainer_rotation.y, positionsToSaveForVRExit.settingsMenuContainer_rotation.z, positionsToSaveForVRExit.settingsMenuContainer_rotation.order);
-	MAIN.fileBrowserPanel.fileBrowserContainer.position.set(positionsToSaveForVRExit.fileBrowserContainer_position.x, positionsToSaveForVRExit.fileBrowserContainer_position.y, positionsToSaveForVRExit.fileBrowserContainer_position.z);
-	MAIN.fileBrowserPanel.fileBrowserContainer.rotation.set(positionsToSaveForVRExit.fileBrowserContainer_rotation.x, positionsToSaveForVRExit.fileBrowserContainer_rotation.y, positionsToSaveForVRExit.fileBrowserContainer_rotation.z, positionsToSaveForVRExit.fileBrowserContainer_rotation.order);
-	MAIN.fileBrowserPanel.foldersContainer.position.set(positionsToSaveForVRExit.foldersContainer_position.x, positionsToSaveForVRExit.foldersContainer_position.y, positionsToSaveForVRExit.foldersContainer_position.z);
-	MAIN.fileBrowserPanel.foldersContainer.rotation.set(positionsToSaveForVRExit.foldersContainer_rotation.x, positionsToSaveForVRExit.foldersContainer_rotation.y, positionsToSaveForVRExit.foldersContainer_rotation.z, positionsToSaveForVRExit.foldersContainer_rotation.order);
+	resetPosition("cameras");
+	resetPosition("playMenuPanel");
+	resetPosition("fileBrowserPanel");
+}
+
+export function savePositions(ui) {
+	positionsToSaveForVRExit[ui] = {};
+	panels.forEach((element) => {
+		if (element.name === ui) {
+			positionsToSaveForVRExit[element.name] = {};
+			element.panels.forEach((panel) => {
+				positionsToSaveForVRExit[element.name][panel.save_as_name] = {};
+				positionsToSaveForVRExit[element.name][panel.save_as_name]["position"] = MAIN[element.name][panel.ui_name].position.clone();
+				positionsToSaveForVRExit[element.name][panel.save_as_name]["rotation"] = MAIN[element.name][panel.ui_name].rotation.clone();
+			});
+		}
+	});
+}
+
+export function resetPosition(ui) {
+	panels.forEach((element) => {
+		if (element.name === ui) {
+			element.panels.forEach((panel) => {
+				MAIN[element.name][panel.ui_name].position.set(positionsToSaveForVRExit[element.name][panel.save_as_name]["position"].x, positionsToSaveForVRExit[element.name][panel.save_as_name]["position"].y, positionsToSaveForVRExit[element.name][panel.save_as_name]["position"].z);
+				MAIN[element.name][panel.ui_name].rotation.set(positionsToSaveForVRExit[element.name][panel.save_as_name]["rotation"].x, positionsToSaveForVRExit[element.name][panel.save_as_name]["rotation"].y, positionsToSaveForVRExit[element.name][panel.save_as_name]["rotation"].z, positionsToSaveForVRExit[element.name][panel.save_as_name]["rotation"].order);
+				positionsToSaveForVRExit[element.name][panel.save_as_name]["rotation"] = MAIN[element.name][panel.ui_name].rotation.clone();
+			});
+		}
+	});
 }
 
 export function zoom(in_or_out, step = 10) {
@@ -72,10 +125,10 @@ export function zoom(in_or_out, step = 10) {
 			}
 			break;
 		case "reset":
-			MAIN.mesh1.position.z = positionsToResetZoomTilt.mesh1.position.z;
-			MAIN.mesh1Clone.position.z = positionsToResetZoomTilt.mesh1Clone.position.z;
-			MAIN.mesh2.position.z = positionsToResetZoomTilt.mesh2.position.z;
-			MAIN.meshForScreenMode.position.z = positionsToResetZoomTilt.meshForScreenMode.position.z;
+			MAIN.mesh1.position.z = positionsToSaveForVRExit.meshes.mesh1.position.z;
+			MAIN.mesh1Clone.position.z = positionsToSaveForVRExit.meshes.mesh1Clone.position.z;
+			MAIN.mesh2.position.z = positionsToSaveForVRExit.meshes.mesh2.position.z;
+			MAIN.meshForScreenMode.position.z = positionsToSaveForVRExit.meshes.meshForScreenMode.position.z;
 			break;
 		default:
 			break;
@@ -97,10 +150,10 @@ export function tilt(up_or_down) {
 			MAIN.meshForScreenMode.rotation.x += 0.01;
 			break;
 		case "reset":
-			MAIN.mesh1.rotation.x = positionsToResetZoomTilt.mesh1.rotation.x;
-			MAIN.mesh1Clone.rotation.x = positionsToResetZoomTilt.mesh1Clone.rotation.x;
-			MAIN.mesh2.rotation.x = positionsToResetZoomTilt.mesh2.rotation.x;
-			MAIN.meshForScreenMode.rotation.x = positionsToResetZoomTilt.meshForScreenMode.rotation.x;
+			MAIN.mesh1.rotation.x = positionsToSaveForVRExit.meshes.mesh1.rotation.x;
+			MAIN.mesh1Clone.rotation.x = positionsToSaveForVRExit.meshes.mesh1Clone.rotation.x;
+			MAIN.mesh2.rotation.x = positionsToSaveForVRExit.meshes.mesh2.rotation.x;
+			MAIN.meshForScreenMode.rotation.x = positionsToSaveForVRExit.meshes.meshForScreenMode.rotation.x;
 			break;
 		default:
 			break;
@@ -158,15 +211,6 @@ export function force2DMode(bool) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Recenter
-
-export function recenter() {
-	if (MAIN.renderer.xr.isPresenting) {
-		startDrag();
-	} else {
-		setTimeout(restoreCameraNotInVR, 2000);
-	}
-}
 
 export let dragging = false;
 
@@ -186,16 +230,4 @@ export function stopDrag(view) {
 		});
 		dragging = false;
 	}
-}
-
-function restoreCameraNotInVR() {
-	restoreCamera(MAIN.camToSave.position, MAIN.camToSave.rotation, MAIN.camToSave.controlCenter);
-}
-
-function restoreCamera(position, rotation, controlCenter) {
-	MAIN.camera.position.set(position.x, position.y, position.z);
-	MAIN.camera.rotation.set(rotation.x, rotation.y, rotation.z);
-
-	MAIN.orbitControls.target.set(controlCenter.x, controlCenter.y, controlCenter.z);
-	MAIN.orbitControls.update();
 }

@@ -12,7 +12,7 @@ import { FileBrowserPanel } from './FileBrowserPanelUI.js';
 import * as ScreenManager from './ScreenManager.js';
 import * as UI from './UI.js';
 
-export let scene, camera, renderer, orbitControls, vrControl, vrControlCurrentlyUsedController, gamepad, video, video_src, videoTexture, mesh1, mesh2, mesh1Clone, meshForScreenMode;
+export let scene, camera, cameras, renderer, orbitControls, vrControl, vrControlCurrentlyUsedController, gamepad, video, video_src, videoTexture, mesh1, mesh2, mesh1Clone, meshForScreenMode, meshes;
 export let clickedButton = undefined;
 export let playMenuPanel;
 export let fileBrowserPanel;
@@ -80,6 +80,7 @@ function init() {
 	camera.layers.enable(1);
 	camera.position.y = CAMERAPOSITIONY;
 	scene.add(camera);
+	cameras = {camera: camera};
 
 	renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
 	renderer.localClippingEnabled = true;
@@ -168,6 +169,7 @@ function init() {
 	registerObjectToRecenter(mesh2, "player");
 	registerObjectToRecenter(mesh1Clone, "player");
 	registerObjectToRecenter(meshForScreenMode, "player");
+	meshes = {mesh1: mesh1, mesh2: mesh2, mesh1Clone: mesh1Clone, meshForScreenMode: meshForScreenMode};
 	
 	//////////
 	// Light
@@ -239,6 +241,7 @@ function init() {
 		.then(response => response.json())
 		.then(json => fileBrowserPanel = new FileBrowserPanel(json))
 		.then(a => fileBrowserPanel.showFileMenuPanel())
+		.then(a => ScreenManager.savePositions("fileBrowserPanel"))
 		.catch((error) => {
 			console.error('Error:', error);
 			alert('Failed parsing json file, check console for details.');
@@ -281,11 +284,13 @@ function init() {
 	camToSave.rotation = camera.rotation.clone();
 	camToSave.controlCenter = orbitControls.target.clone();
 
-	ScreenManager.saveMeshPositionAndRotation();
+	ScreenManager.savePositions("cameras");
+	ScreenManager.savePositions("meshes");
+	ScreenManager.savePositions("playMenuPanel");
 
 	// register listeners on XR session start
 	// change panels positions in VR
-	renderer.xr.addEventListener('sessionstart', ScreenManager.vrsessionstart);
+	// renderer.xr.addEventListener('sessionstart', ScreenManager.vrsessionstart);
 
 	renderer.xr.addEventListener('sessionend', ScreenManager.vrsessionend);
 
