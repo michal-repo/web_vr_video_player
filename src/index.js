@@ -80,7 +80,7 @@ function init() {
 	camera.layers.enable(1);
 	camera.position.y = CAMERAPOSITIONY;
 	scene.add(camera);
-	cameras = {camera: camera};
+	cameras = { camera: camera };
 
 	renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
 	renderer.localClippingEnabled = true;
@@ -169,8 +169,8 @@ function init() {
 	registerObjectToRecenter(mesh2, "player");
 	registerObjectToRecenter(mesh1Clone, "player");
 	registerObjectToRecenter(meshForScreenMode, "player");
-	meshes = {mesh1: mesh1, mesh2: mesh2, mesh1Clone: mesh1Clone, meshForScreenMode: meshForScreenMode};
-	
+	meshes = { mesh1: mesh1, mesh2: mesh2, mesh1Clone: mesh1Clone, meshForScreenMode: meshForScreenMode };
+
 	//////////
 	// Light
 	//////////
@@ -237,7 +237,9 @@ function init() {
 	UI.objsToTest.push(hiddenSphere);
 	playMenuPanel = new PlayerPanel(video);
 
-	fetch("files.json")
+	let json_file = document.getElementById('json_file').innerText;
+
+	fetch(json_file)
 		.then(response => response.json())
 		.then(json => fileBrowserPanel = new FileBrowserPanel(json))
 		.then(a => fileBrowserPanel.showFileMenuPanel())
@@ -342,11 +344,14 @@ let everyXframesUpdateProgBarInt = 0;
 let gamepadAxisActive = false;
 export let playbackIsActive = false;
 
-export function playbackChange(is_active = false) {
+export function playbackChange(is_active = false, screen_type = null) {
 	switch (is_active) {
 		case true:
 			playbackIsActive = true;
 			showMeshes3D();
+			if (screen_type !== null && screen_type === "screen") {
+				ScreenManager.switchModeVRScreen("screen");
+			}
 			playMenuPanel.buttonPlay.playbackStarted();
 			if (everyXframesUpdateProgBarInt < everyXframesUpdateProgBar) {
 				playMenuPanel.progressBarAndDuration();
@@ -367,37 +372,54 @@ function gamepadControlsUpdate() {
 				if (renderer.xr.getSession().inputSources.length >= 1) {
 					gamepad = renderer.xr.getSession().inputSources[vrControlCurrentlyUsedController].gamepad;
 					if (typeof gamepad !== 'undefined' && gamepad !== null) {
-						if (gamepad.axes[2] > 0.35 && gamepadAxisActive === false) {
-							if (playbackIsActive) {
-								playMenuPanel.videoPlaybackFFRew("FF", 10);
-							} else {
-								fileBrowserPanel.NextPage();
+						if (gamepad.mapping === "xr-standard") {
+							if (gamepad.axes[2] > 0.35 && gamepadAxisActive === false) {
+								if (playbackIsActive) {
+									playMenuPanel.videoPlaybackFFRew("FF", 10);
+								} else {
+									fileBrowserPanel.NextPage();
+								}
+								gamepadAxisActive = true;
+							} else if (gamepad.axes[2] < -0.35 && gamepadAxisActive === false) {
+								if (playbackIsActive) {
+									playMenuPanel.videoPlaybackFFRew("Rew", 10);
+								} else {
+									fileBrowserPanel.PreviousPage();
+								}
+								gamepadAxisActive = true;
+							} else if (gamepad.axes[3] > 0.35 && (gamepadAxisActive === false || gamepadAxisActive === "down")) {
+								if (playbackIsActive) {
+									ScreenManager.zoom("out", 0.2);
+								}
+								gamepadAxisActive = "down";
+							} else if (gamepad.axes[3] < -0.35 && (gamepadAxisActive === false || gamepadAxisActive === "up")) {
+								if (playbackIsActive) {
+									ScreenManager.zoom("in", 0.2);
+								}
+								gamepadAxisActive = "up";
+							} else if (gamepad.axes[2] < 0.35 && gamepad.axes[2] > -0.35) {
+								gamepadAxisActive = false;
+								gamepadButtonsCheck(gamepad.buttons);
 							}
-							gamepadAxisActive = true;
-						} else if (gamepad.axes[2] < -0.35 && gamepadAxisActive === false) {
-							if (playbackIsActive) {
-								playMenuPanel.videoPlaybackFFRew("Rew", 10);
-							} else {
-								fileBrowserPanel.PreviousPage();
-							}
-							gamepadAxisActive = true;
-						} else if (gamepad.axes[3] > 0.35 && (gamepadAxisActive === false || gamepadAxisActive === "down")) {
-							if (playbackIsActive) {
-								ScreenManager.zoom("out", 0.2);
-							}
-							gamepadAxisActive = "down";
-						} else if (gamepad.axes[3] < -0.35 && (gamepadAxisActive === false || gamepadAxisActive === "up")) {
-							if (playbackIsActive) {
-								ScreenManager.zoom("in", 0.2);
-							}
-							gamepadAxisActive = "up";
-						} else if (gamepad.axes[2] < 0.15 && gamepad.axes[2] > -0.15) {
-							gamepadAxisActive = false;
 						}
 					}
 				}
 			}
 		}
+	}
+}
+
+let buttonABXYpressed = false;
+
+function gamepadButtonsCheck(buttons) {
+	if (buttons[4].pressed && playbackIsActive && buttonABXYpressed === false) {
+		playMenuPanel.playPause();
+		buttonABXYpressed = true;
+	} else if (buttons[5].pressed && playbackIsActive && buttonABXYpressed === false) {
+		playMenuPanel.ExitToMain();
+		buttonABXYpressed = true;
+	} else if (!buttons[4].pressed && !buttons[5].pressed) {
+		buttonABXYpressed = false;
 	}
 }
 
@@ -496,6 +518,13 @@ function raycast() {
 
 	return UI.objsToTest.reduce((closestIntersection, obj) => {
 
+		// Keyboard
+		if (obj.type === 'Key' && fileBrowserPanel !== undefined && !fileBrowserPanel.keyboard.getObjectById(obj.id)) {
+
+			return closestIntersection;
+
+		}
+
 		const intersection = raycaster.intersectObject(obj, true);
 
 		if (!intersection[0]) return closestIntersection;
@@ -515,7 +544,7 @@ function raycast() {
 }
 
 export function registerObjectToRecenter(obj, view) {
-	if (!(view in objectsToRecenter)){
+	if (!(view in objectsToRecenter)) {
 		objectsToRecenter[view] = [];
 	}
 	objectsToRecenter[view].push(obj);

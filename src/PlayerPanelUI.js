@@ -424,23 +424,7 @@ export class PlayerPanel {
 			state: 'selected',
 			attributes: this.selectedAttributes,
 			onSet: () => {
-				if (Helpers.videoSrcExists()) {
-					switch (video.paused) {
-						case false:
-							video.pause();
-							this.buttonPlay.remove(this.pauseIconElement);
-							this.buttonPlay.add(this.playIconElement);
-							break;
-						default:
-						case true:
-							this.buttonPlay.remove(this.playIconElement);
-							this.buttonPlay.add(this.pauseIconElement);
-							video.play().catch((e) => {
-								console.warn(e);
-							});
-							break;
-					}
-				}
+				this.playPause();
 			}
 		});
 		this.buttonPlay.setupState(this.hoveredStateAttributes);
@@ -954,6 +938,26 @@ export class PlayerPanel {
 					this.videoElement.currentTime -= seconds;
 					break;
 				default:
+					break;
+			}
+		}
+	}
+
+	playPause(){
+		if (Helpers.videoSrcExists()) {
+			switch (this.videoElement.paused) {
+				case false:
+					this.videoElement.pause();
+					this.buttonPlay.remove(this.pauseIconElement);
+					this.buttonPlay.add(this.playIconElement);
+					break;
+				default:
+				case true:
+					this.buttonPlay.remove(this.playIconElement);
+					this.buttonPlay.add(this.pauseIconElement);
+					this.videoElement.play().catch((e) => {
+						console.warn(e);
+					});
 					break;
 			}
 		}
