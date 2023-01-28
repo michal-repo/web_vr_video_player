@@ -12,7 +12,7 @@ import { FileBrowserPanel } from './FileBrowserPanelUI.js';
 import * as ScreenManager from './ScreenManager.js';
 import * as UI from './UI.js';
 
-export let scene, camera, cameras, renderer, orbitControls, vrControl, vrControlCurrentlyUsedController, gamepad, video, video_src, videoTexture, mesh1, mesh2, mesh1Clone, meshForScreenMode, meshes;
+export let scene, camera, cameras, renderer, orbitControls, vrControl, vrControlCurrentlyUsedController, gamepad, video, video_src, videoTexture, meshLeftSBS, meshLeftTB, meshRightSBS, meshRightTB, mesh2dSBS, mesh2dTB, meshForScreenMode, meshes;
 export let clickedButton = undefined;
 export let playMenuPanel;
 export let fileBrowserPanel;
@@ -102,6 +102,7 @@ function init() {
 	video = document.getElementById('video');
 
 	videoTexture = new THREE.VideoTexture(video);
+	const material = new THREE.MeshBasicMaterial({ map: videoTexture });
 
 	// screen mode
 
@@ -109,67 +110,101 @@ function init() {
 	// invert the geometry on the x-axis so that all of the faces point inward
 	geometryScreen.scale(- 1, 1, 1);
 
-	const materialScreen = new THREE.MeshBasicMaterial({ map: videoTexture });
-
-	meshForScreenMode = new THREE.Mesh(geometryScreen, materialScreen);
+	meshForScreenMode = new THREE.Mesh(geometryScreen, material);
 	meshForScreenMode.visible = false;
 	scene.add(meshForScreenMode);
 
-	// left eye
 
-	const geometry1 = new THREE.SphereGeometry(120, 60, 40, Math.PI, Math.PI);
+	/////// EYES
+	const geometryLeftSBS = new THREE.SphereGeometry(120, 60, 40, Math.PI, Math.PI);
 	// invert the geometry on the x-axis so that all of the faces point inward
-	geometry1.scale(- 1, 1, 1);
+	geometryLeftSBS.scale(- 1, 1, 1);
+	const geometryLeftTB = geometryLeftSBS.clone();
+	const geometryRightSBS = geometryLeftSBS.clone();
+	const geometryRightTB = geometryLeftSBS.clone();
+	
+	//// left eye
+	// SBS
+	const uvsLeftSBS = geometryLeftSBS.attributes.uv.array;
+	for (let i = 0; i < uvsLeftSBS.length; i += 2) {
 
-	const uvs1 = geometry1.attributes.uv.array;
-
-	for (let i = 0; i < uvs1.length; i += 2) {
-
-		uvs1[i] *= 0.5;
+		uvsLeftSBS[i] *= 0.5;
 
 	}
 
-	const material1 = new THREE.MeshBasicMaterial({ map: videoTexture });
-
-	mesh1 = new THREE.Mesh(geometry1, material1);
-	mesh1.layers.set(1); // display in left eye only
-	mesh1.visible = false;
-	scene.add(mesh1);
+	meshLeftSBS = new THREE.Mesh(geometryLeftSBS, material);
+	meshLeftSBS.layers.set(1); // display in left eye only
+	meshLeftSBS.visible = false;
+	scene.add(meshLeftSBS);
 
 	// mesh for 2d mode
 
-	mesh1Clone = mesh1.clone();
-	mesh1Clone.layers.set(2);
-	mesh1Clone.visible = false;
-	scene.add(mesh1Clone);
+	mesh2dSBS = meshLeftSBS.clone();
+	mesh2dSBS.layers.set(2);
+	mesh2dSBS.visible = false;
+	scene.add(mesh2dSBS);
 
-	// right eye
+	// TB
+	const uvsLeftTB = geometryLeftTB.attributes.uv.array;
+	for (let i = 1; i < uvsLeftTB.length; i += 2) {
 
-	const geometry2 = new THREE.SphereGeometry(120, 60, 40, Math.PI, Math.PI);
-	geometry2.scale(- 1, 1, 1);
-
-	const uvs2 = geometry2.attributes.uv.array;
-
-	for (let i = 0; i < uvs2.length; i += 2) {
-
-		uvs2[i] *= 0.5;
-		uvs2[i] += 0.5;
+		uvsLeftTB[i] *= 0.5;
 
 	}
 
-	const material2 = new THREE.MeshBasicMaterial({ map: videoTexture });
+	meshLeftTB = new THREE.Mesh(geometryLeftTB, material);
+	meshLeftTB.layers.set(1); // display in left eye only
+	meshLeftTB.visible = false;
+	scene.add(meshLeftTB);
+	
+	// mesh for 2d mode
 
-	mesh2 = new THREE.Mesh(geometry2, material2);
-	mesh2.layers.set(2); // display in right eye only
-	mesh2.visible = false;
-	scene.add(mesh2);
+	mesh2dTB = meshLeftTB.clone();
+	mesh2dTB.layers.set(2);
+	mesh2dTB.visible = false;
+	scene.add(mesh2dTB);
 
 
-	registerObjectToRecenter(mesh1, "player");
-	registerObjectToRecenter(mesh2, "player");
-	registerObjectToRecenter(mesh1Clone, "player");
+
+	//// right eye
+	// SBS
+	const uvsRightSBS = geometryRightSBS.attributes.uv.array;
+
+	for (let i = 0; i < uvsRightSBS.length; i += 2) {
+
+		uvsRightSBS[i] *= 0.5;
+		uvsRightSBS[i] += 0.5;
+
+	}
+	meshRightSBS = new THREE.Mesh(geometryRightSBS, material);
+	meshRightSBS.layers.set(2); // display in right eye only
+	meshRightSBS.visible = false;
+	scene.add(meshRightSBS);
+
+	// TB
+	const uvsRightTB = geometryRightTB.attributes.uv.array;
+	for (let i = 1; i < uvsRightTB.length; i += 2) {
+
+		uvsRightTB[i] *= 0.5;
+		uvsRightTB[i] += 0.5;
+
+	}
+
+	meshRightTB = new THREE.Mesh(geometryRightTB, material);
+	meshRightTB.layers.set(2); // display in left eye only
+	meshRightTB.visible = false;
+	scene.add(meshRightTB);
+
+
+	// register for recenter
+	registerObjectToRecenter(meshLeftSBS, "player");
+	registerObjectToRecenter(meshLeftTB, "player");
+	registerObjectToRecenter(meshRightSBS, "player");
+	registerObjectToRecenter(meshRightTB, "player");
+	registerObjectToRecenter(mesh2dSBS, "player");
+	registerObjectToRecenter(mesh2dTB, "player");
 	registerObjectToRecenter(meshForScreenMode, "player");
-	meshes = { mesh1: mesh1, mesh2: mesh2, mesh1Clone: mesh1Clone, meshForScreenMode: meshForScreenMode };
+	meshes = { meshLeftSBS: meshLeftSBS, meshRightSBS: meshRightSBS, meshLeftTB: meshLeftTB, meshRightTB: meshRightTB, mesh2dSBS: mesh2dSBS, mesh2dTB: mesh2dTB, meshForScreenMode: meshForScreenMode };
 
 	//////////
 	// Light
@@ -300,6 +335,10 @@ function init() {
 
 }
 
+export function getCurrentZoom(){
+	return meshLeftSBS.position.z;
+}
+
 let showPopupTimeoutID;
 
 export function showPopupMessage(message) {
@@ -316,15 +355,14 @@ export function showPopupMessage(message) {
 }
 
 function showMeshes3D() {
-	mesh1.visible = true;
-	mesh2.visible = true;
+	meshLeftSBS.visible = true;
+	meshRightSBS.visible = true;
 }
 
 function hideMeshes() {
-	mesh1.visible = false;
-	mesh2.visible = false;
-	meshForScreenMode.visible = false;
-	mesh1Clone.visible = false;
+	for (let mesh in meshes) {
+		meshes[mesh].visible = false;
+	};
 }
 
 // Handle resizing the viewport
@@ -349,10 +387,11 @@ export function playbackChange(is_active = false, screen_type = null) {
 		case true:
 			playbackIsActive = true;
 			showMeshes3D();
-			if (screen_type !== null && screen_type === "screen") {
-				ScreenManager.switchModeVRScreen("screen");
+			if (screen_type !== null) {
+				ScreenManager.switchModeVRScreen(screen_type);
 			}
 			playMenuPanel.buttonPlay.playbackStarted();
+			playMenuPanel.VRSBSTBModeButtonText.set({ content: (ScreenManager.VRMode === 'tb' ? 'TB' : 'SBS') });
 			if (everyXframesUpdateProgBarInt < everyXframesUpdateProgBar) {
 				playMenuPanel.progressBarAndDuration();
 			}
@@ -389,12 +428,12 @@ function gamepadControlsUpdate() {
 								gamepadAxisActive = true;
 							} else if (gamepad.axes[3] > 0.35 && (gamepadAxisActive === false || gamepadAxisActive === "down")) {
 								if (playbackIsActive) {
-									ScreenManager.zoom("out", 0.2);
+									ScreenManager.zoom("out", 0.5);
 								}
 								gamepadAxisActive = "down";
 							} else if (gamepad.axes[3] < -0.35 && (gamepadAxisActive === false || gamepadAxisActive === "up")) {
 								if (playbackIsActive) {
-									ScreenManager.zoom("in", 0.2);
+									ScreenManager.zoom("in", 0.5);
 								}
 								gamepadAxisActive = "up";
 							} else if (gamepad.axes[2] < 0.35 && gamepad.axes[2] > -0.35) {

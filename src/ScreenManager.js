@@ -1,6 +1,7 @@
 import * as MAIN from './index.js';
 
 let isVRModeUsed = true;
+export let VRMode = "sbs";
 let currently_3d = true;
 export let force_2d_mode = false;
 let positionsToSaveForVRExit = {};
@@ -37,20 +38,32 @@ const panels = [
 		name: "meshes",
 		panels: [
 			{
-				ui_name: "mesh1",
-				save_as_name: "mesh1"
+				ui_name: "meshLeftSBS",
+				save_as_name: "meshLeftSBS"
 			},
 			{
-				ui_name: "mesh1Clone",
-				save_as_name: "mesh1Clone"
+				ui_name: "mesh2dSBS",
+				save_as_name: "mesh2dSBS"
 			},
 			{
-				ui_name: "mesh2",
-				save_as_name: "mesh2"
+				ui_name: "meshRightSBS",
+				save_as_name: "meshRightSBS"
 			},
 			{
 				ui_name: "meshForScreenMode",
 				save_as_name: "meshForScreenMode"
+			},
+			{
+				ui_name: "meshLeftTB",
+				save_as_name: "meshLeftTB"
+			},
+			{
+				ui_name: "mesh2dTB",
+				save_as_name: "mesh2dTB"
+			},
+			{
+				ui_name: "meshRightTB",
+				save_as_name: "meshRightTB"
 			},
 		]
 	},
@@ -106,29 +119,26 @@ export function resetPosition(ui) {
 }
 
 export function zoom(in_or_out, step = 10) {
-	currentZoom = MAIN.mesh1.position.z;
+	currentZoom = MAIN.getCurrentZoom();
 	switch (in_or_out) {
 		case "in":
 			if (currentZoom < 60) {
-				MAIN.mesh1.position.z += step;
-				MAIN.mesh1Clone.position.z += step;
-				MAIN.mesh2.position.z += step;
-				MAIN.meshForScreenMode.position.z += step;
+				for (let mesh in MAIN.meshes) {
+					MAIN.meshes[mesh].position.z += step;
+				};
 			}
 			break;
 		case "out":
 			if (currentZoom > -120) {
-				MAIN.mesh1.position.z -= step;
-				MAIN.mesh1Clone.position.z -= step;
-				MAIN.mesh2.position.z -= step;
-				MAIN.meshForScreenMode.position.z -= step;
+				for (let mesh in MAIN.meshes) {
+					MAIN.meshes[mesh].position.z -= step;
+				};
 			}
 			break;
 		case "reset":
-			MAIN.mesh1.position.z = positionsToSaveForVRExit.meshes.mesh1.position.z;
-			MAIN.mesh1Clone.position.z = positionsToSaveForVRExit.meshes.mesh1Clone.position.z;
-			MAIN.mesh2.position.z = positionsToSaveForVRExit.meshes.mesh2.position.z;
-			MAIN.meshForScreenMode.position.z = positionsToSaveForVRExit.meshes.meshForScreenMode.position.z;
+			for (let mesh in MAIN.meshes) {
+				MAIN.meshes[mesh].position.z = positionsToSaveForVRExit.meshes[mesh].position.z;
+			};
 			break;
 		default:
 			break;
@@ -138,22 +148,19 @@ export function zoom(in_or_out, step = 10) {
 export function tilt(up_or_down) {
 	switch (up_or_down) {
 		case "up":
-			MAIN.mesh1.rotation.x -= 0.01;
-			MAIN.mesh1Clone.rotation.x -= 0.01;
-			MAIN.mesh2.rotation.x -= 0.01;
-			MAIN.meshForScreenMode.rotation.x -= 0.01;
+			for (let mesh in MAIN.meshes) {
+				MAIN.meshes[mesh].rotation.x -= 0.01;
+			};
 			break;
 		case "down":
-			MAIN.mesh1.rotation.x += 0.01;
-			MAIN.mesh1Clone.rotation.x += 0.01;
-			MAIN.mesh2.rotation.x += 0.01;
-			MAIN.meshForScreenMode.rotation.x += 0.01;
+			for (let mesh in MAIN.meshes) {
+				MAIN.meshes[mesh].rotation.x += 0.01;
+			};
 			break;
 		case "reset":
-			MAIN.mesh1.rotation.x = positionsToSaveForVRExit.meshes.mesh1.rotation.x;
-			MAIN.mesh1Clone.rotation.x = positionsToSaveForVRExit.meshes.mesh1Clone.rotation.x;
-			MAIN.mesh2.rotation.x = positionsToSaveForVRExit.meshes.mesh2.rotation.x;
-			MAIN.meshForScreenMode.rotation.x = positionsToSaveForVRExit.meshes.meshForScreenMode.rotation.x;
+			for (let mesh in MAIN.meshes) {
+				MAIN.meshes[mesh].rotation.x = positionsToSaveForVRExit.meshes[mesh].rotation.x;
+			};
 			break;
 		default:
 			break;
@@ -169,14 +176,29 @@ export function switchModeVRScreen(vr_or_screen) {
 	}
 	switch (vr_or_screen) {
 		case "vr":
+		case "sbs":
 			MAIN.meshForScreenMode.visible = false;
-			MAIN.mesh1.visible = true;
-			MAIN.mesh2.visible = true;
+			MAIN.meshLeftTB.visible = false;
+			MAIN.meshRightTB.visible = false;
+			MAIN.meshLeftSBS.visible = true;
+			MAIN.meshRightSBS.visible = true;
 			isVRModeUsed = true;
+			VRMode = "sbs";
+			break;
+		case "tb":
+			MAIN.meshForScreenMode.visible = false;
+			MAIN.meshLeftSBS.visible = false;
+			MAIN.meshRightSBS.visible = false;
+			MAIN.meshLeftTB.visible = true;
+			MAIN.meshRightTB.visible = true;
+			isVRModeUsed = true;
+			VRMode = "tb";
 			break;
 		case "screen":
-			MAIN.mesh1.visible = false;
-			MAIN.mesh2.visible = false;
+			MAIN.meshLeftSBS.visible = false;
+			MAIN.meshRightSBS.visible = false;
+			MAIN.meshLeftTB.visible = false;
+			MAIN.meshRightTB.visible = false;
 			MAIN.meshForScreenMode.visible = true;
 			isVRModeUsed = false;
 			break;
@@ -190,13 +212,23 @@ export function switch2d3d(switch_2d_or_3d, forced = false) {
 	if (isVRModeUsed && (!force_2d_mode || forced)) {
 		switch (switch_2d_or_3d) {
 			case "2d":
-				MAIN.mesh2.visible = false;
-				MAIN.mesh1Clone.visible = true;
+				if (VRMode === 'sbs') {
+					MAIN.meshRightSBS.visible = false;
+					MAIN.mesh2dSBS.visible = true;
+				} else if (VRMode === 'tb'){
+					MAIN.meshRightTB.visible = false;
+					MAIN.mesh2dTB.visible = true;
+				}
 				currently_3d = false;
 				break;
 			case "3d":
-				MAIN.mesh1Clone.visible = false;
-				MAIN.mesh2.visible = true;
+				if (VRMode === 'sbs') {
+					MAIN.meshRightSBS.visible = true;
+					MAIN.mesh2dSBS.visible = false;
+				} else if (VRMode === 'tb'){
+					MAIN.meshRightTB.visible = true;
+					MAIN.mesh2dTB.visible = false;
+				}
 				currently_3d = true;
 				break;
 		}

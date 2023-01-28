@@ -3,9 +3,23 @@
 import os
 import json
 import configparser
+import sys
+import urllib.parse
+
+
+if not len(sys.argv) > 1:
+    print("Usage: pass config ini file as first parameter, you can force metadata rescan by setting second parameter to true (false by default)\neg.\npython3 generateJson.py config.ini\npython3 generateJson.py config.ini true")
+    quit()
+
+configFile = sys.argv[1]
+
+
+if not os.path.isfile(configFile):
+    print("Passed ini file do not exist")
+    quit()
 
 config = configparser.ConfigParser()
-config.read('config.ini')
+config.read(configFile)
 
 out_files = {"main dir": {"name": "main dir", "list": []}}
 
@@ -37,10 +51,18 @@ for (root, dirs, files) in os.walk(config['videos']['videos_relative_path']+"/"+
             if not subDir in out_files:
                 subDir = "main dir"
 
+            if "_TB" in title[-3:]:
+                screen_type = "tb"
+            elif "_SCREEN" in title[-7:]:
+                screen_type = "screen"
+            else:
+                screen_type = "sbs"
+
             out_files[subDir]["list"].append(
                 {"name": title,
-                 "src": fullfile,
-                 "thumbnail": img
+                 "src": urllib.parse.quote(fullfile),
+                 "thumbnail": urllib.parse.quote(img),
+                 "screen_type": screen_type
                  })
 
 out_json = []

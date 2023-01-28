@@ -53,6 +53,7 @@ export class PlayerPanel {
 	playIconElement;
 	pauseIconElement;
 	VR2DModeButtonText;
+	VRSBSTBModeButtonText;
 	draggingBox;
 
 
@@ -539,7 +540,7 @@ export class PlayerPanel {
 		// Progress Bar
 
 		this.progressBar = new Block(this.progressBarAttributes);
-		var parent = this;
+		let parent = this;
 		this.progressBar.onAfterUpdate = function () {
 			parent.progressBar.frame.layers.set(1);
 			parent.progressBar.frame.layers.enable(2);
@@ -609,11 +610,17 @@ export class PlayerPanel {
 		const VRModeButton = new Block(this.buttonOptions);
 		const ScreenModeButton = new Block(this.buttonOptions);
 		const VR2DModeButton = new Block(this.buttonOptions);
+		const VRSBSTBModeButton = new Block(this.buttonOptions);
 
 		this.VR2DModeButtonText = new Text({
 			content: '3D', fontSize: 0.07
 		});
 		VR2DModeButton.add(this.VR2DModeButtonText);
+
+		this.VRSBSTBModeButtonText = new Text({
+			content: 'SBS', fontSize: 0.07
+		});
+		VRSBSTBModeButton.add(this.VRSBSTBModeButtonText);
 
 		this.loader.load(CloseIcon, (texture) => {
 			closeSettingsButton.add(
@@ -748,7 +755,7 @@ export class PlayerPanel {
 			state: 'selected',
 			attributes: this.selectedAttributes,
 			onSet: () => {
-				ScreenManager.switchModeVRScreen("vr");
+				ScreenManager.switchModeVRScreen(ScreenManager.VRMode);
 			}
 		});
 		VRModeButton.setupState(this.hoveredStateAttributes);
@@ -780,6 +787,22 @@ export class PlayerPanel {
 		VR2DModeButton.setupState(this.hoveredStateAttributes);
 		VR2DModeButton.setupState(this.idleStateAttributes);
 
+		VRSBSTBModeButton.setupState({
+			state: 'selected',
+			attributes: this.selectedAttributes,
+			onSet: () => {
+				if (ScreenManager.VRMode === 'sbs') {
+					ScreenManager.switchModeVRScreen("tb");
+					this.VRSBSTBModeButtonText.set({ content: "TB" });
+				} else if (ScreenManager.VRMode === 'tb') {
+					ScreenManager.switchModeVRScreen("sbs");
+					this.VRSBSTBModeButtonText.set({ content: "SBS" });
+				}
+			}
+		});
+		VRSBSTBModeButton.setupState(this.hoveredStateAttributes);
+		VRSBSTBModeButton.setupState(this.idleStateAttributes);
+
 		// Labels
 		const zoomLabel = new Block(this.bigButtonOptions).add(new Text({
 			content: 'Zoom video', fontSize: 0.05
@@ -796,9 +819,9 @@ export class PlayerPanel {
 		settingsMenuTopBar.add(closeSettingsButton);
 		settingsMenuZoom.add(zoomLabel, zoomOutButton, zoomInButton, zoomResetButton);
 		settingsMenuTilt.add(tiltLabel, tiltDownButton, tiltUpButton, tiltResetButton);
-		settingsMenuModes.add(modeLabel, ScreenModeButton, VRModeButton, VR2DModeButton);
+		settingsMenuModes.add(modeLabel, ScreenModeButton, VRModeButton, VR2DModeButton, VRSBSTBModeButton);
 		this.settingsMenuContainer.add(settingsMenuTopBar, settingsMenuModes, settingsMenuZoom, settingsMenuTilt);
-		this.settingsMenuObjsToTest.push(closeSettingsButton, zoomInButton, zoomOutButton, zoomResetButton, tiltUpButton, tiltDownButton, tiltResetButton, ScreenModeButton, VRModeButton, VR2DModeButton, settingsButton, this.settingsMenuContainer, this.playMenuContainer, MAIN.hiddenSphere);
+		this.settingsMenuObjsToTest.push(closeSettingsButton, zoomInButton, zoomOutButton, zoomResetButton, tiltUpButton, tiltDownButton, tiltResetButton, ScreenModeButton, VRModeButton, VR2DModeButton, VRSBSTBModeButton, settingsButton, this.settingsMenuContainer, this.playMenuContainer, MAIN.hiddenSphere);
 
 		this.draggingBox = new Block({
 			justifyContent: 'center',
@@ -877,6 +900,7 @@ export class PlayerPanel {
 		this.hidePlayMenuPanel();
 		ScreenManager.force2DMode(false);
 		this.VR2DModeButtonText.set({ content: "3D" });
+		this.VRSBSTBModeButtonText.set({ content: "SBS" });
 		ScreenManager.resetPosition("playMenuPanel");
 		ScreenManager.resetPosition("meshes");
 		MAIN.fileBrowserPanel.showFileMenuPanel();

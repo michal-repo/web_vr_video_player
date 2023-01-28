@@ -26,7 +26,7 @@ export function removeVideoSrc() {
 
 export function testIfFileExist(url) {
 	try {
-		var xhr = new XMLHttpRequest();
+		let xhr = new XMLHttpRequest();
 		xhr.open('HEAD', url, false);
 		xhr.send();
 		if (xhr.status !== 200) {

@@ -529,18 +529,21 @@ export class FileBrowserPanel {
 
     }
 
+    prepareFilesWithSearchPhrase() {
+        let filesList = [];
+        this.FILES = this.VIDEOS[this.FOLDER].list;
+        this.FILES.forEach((file) => {
+            if (file.name.toLowerCase().includes(this.searchText.content.toLowerCase())) {
+                filesList.push(file);
+            }
+        });
+        this.FILES = filesList;
+        this.TOTAL_PAGES = (Math.ceil(this.FILES.length / (this.FILES_PER_ROW * this.FILES_ROWS))) - 1;
+    }
 
     generateView() {
-        let filesList = [];
         if (this.searchText.content !== this.defaultSearchText) {
-            this.FILES.forEach((file) => {
-                if (file.name.toLowerCase().includes(this.searchText.content.toLowerCase())) {
-                    filesList.push(file);
-                }
-            });
-            this.FILES = filesList;
-        } else {
-            filesList = this.FILES;
+            this.prepareFilesWithSearchPhrase();
         }
         let endOfFiles = false;
         let iterate = (this.CURRENT_PAGE > 0 ? ((this.FILES_PER_ROW * this.FILES_ROWS) * this.CURRENT_PAGE) : 0);
@@ -548,15 +551,15 @@ export class FileBrowserPanel {
             const thumbsContainerButtonsRow = new Block(this.thumbRowContainerAttributes);
             let addedThumbs = 0;
             for (let index = 0; index < this.FILES_PER_ROW; index++) {
-                if (!filesList[iterate]) {
+                if (!this.FILES[iterate]) {
                     endOfFiles = true;
                     break;
                 }
                 const thumb = new Block(this.thumbButtonContainerAttributes);
-                thumb.fileSRC = filesList[iterate].src;
-                let name = filesList[iterate].name;
-                const screen_type = filesList[iterate].screen_type;
-                this.loader.load((filesList[iterate].thumbnail == "" ? VideoIcon : filesList[iterate].thumbnail), (image) => {
+                thumb.fileSRC = this.FILES[iterate].src;
+                let name = this.FILES[iterate].name;
+                const screen_type = this.FILES[iterate].screen_type;
+                this.loader.load((this.FILES[iterate].thumbnail == "" ? VideoIcon : this.FILES[iterate].thumbnail), (image) => {
                     thumb.add(
                         new InlineBlock(this.textureAttributes(image)),
                         new Block(this.thumbTextContainerAttributes).add(
@@ -732,7 +735,6 @@ export class FileBrowserPanel {
                             case 'enter':
                                 if (target.content === "") {
                                     target.set({ content: this.defaultSearchText });
-                                    this.FILES = this.VIDEOS[this.FOLDER].list;
                                 }
                                 this.keyboard.visible = false;
                                 this.CURRENT_PAGE = 0;

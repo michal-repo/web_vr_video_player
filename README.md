@@ -21,6 +21,90 @@
 - If you don't have Thumbnails generated for your videos and want to use them run `generate_thumbnails.sh` script
 - Finally run `generate_files_json.sh` script to generate `files.json` containing list of VR files for player
 
+## Generating your own JSON file with video sources
+Player is using locally stored JSON file with video sources. It's configured in `index.html`, where you can provide your JSON file name:
+```
+<span id="json_file" hidden>files.json</span>
+```
+### Structure for JSON file
+
+```
+{
+    "videos": [
+        {
+            "name": "FOLDER_NAME",
+            "list": [
+                {
+                    "name": "FILE NAME DISPLAYED IN UI",
+                    "src": "SOURCE URL TO VIDEO FILE",
+                    "thumbnail": "SOURCE URL TO THUMBNAIL FILE",
+                    "screen_type": "TYPE OF SCREEN"
+                }
+            ]
+        }
+    ]
+}
+```
+#### Screen type
+`"screen_type"` can be set to one of values:
+
+`sbs` - Side by Side
+
+`tb` - Top Bottom
+
+`screen` - normal 2D screen
+
+#### JSON Example
+
+```
+{
+    "videos": [
+        {
+            "name": "Music",
+            "list": [
+                {
+                    "name": "K-POP COVER DANCE",
+                    "src": "../videos/Music/K-POP%20COVER%20DANCE.mp4",
+                    "thumbnail": "../videos/Thumbnails/Music/K-POP%20COVER%20DANCE.jpg",
+                    "screen_type": "sbs"
+                },
+                {
+                    "name": "Live Music at the Miami Beach",
+                    "src": "https://10.10.10.12/videos/Music/Live%20Music%20at%20the%20Miami%20Beach.mp4",
+                    "thumbnail": "https://10.10.10.12/videos/Thumbnails/Music/Live%20Music%20at%20the%20Miami%20Beach.jpg",
+                    "screen_type": "tb"
+                },
+                ....
+                ]
+        },
+        {
+            "name": "Nature",
+            "list": [
+                {
+                    "name": "Sunset Baltic in Germany",
+                    "src": "../videos/Nature/Sunset%20Baltic%20in%20Germany.mp4",
+                    "thumbnail": "../videos/Thumbnails/Nature/Sunset%20Baltic%20in%20Germany.jpg",
+                    "screen_type": "sbs"
+                },
+                ....
+                ]
+        },
+        {
+            "name": "Movies",
+            "list": [
+                {
+                    "name": "The Good the Bad and the Ugly",
+                    "src": "../videos/Movies/The%20Good%20the%20Bad%20and%20the%20Ugly.mp4",
+                    "thumbnail": "../videos/Thumbnails/Movies/The%20Good%20the%20Bad%20and%20the%20Ugly.jpg",
+                    "screen_type": "screen"
+                },
+                ....
+                ]
+        },
+        ....
+    ]
+}
+```
 
 ## Gamepad controls 
 
