@@ -417,6 +417,7 @@ export class FileBrowserPanel {
                     this.searchText.set({ content: this.defaultSearchText });
                     this.CURRENT_PAGE = 0;
                     this.FILES = this.VIDEOS[this.FOLDER].list;
+                    this.TOTAL_PAGES = (Math.ceil(this.FILES.length / (this.FILES_PER_ROW * this.FILES_ROWS))) - 1;
                     this.regenerateFileBrowser();
                 } else if (this.keyboard.visible) {
                     this.searchText.set({ content: '' });
