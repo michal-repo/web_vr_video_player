@@ -38,7 +38,9 @@ Player is using locally stored JSON file with video sources. It's configured in 
                     "name": "FILE NAME DISPLAYED IN UI",
                     "src": "SOURCE URL TO VIDEO FILE",
                     "thumbnail": "SOURCE URL TO THUMBNAIL FILE",
-                    "screen_type": "TYPE OF SCREEN"
+                    "screen_type": "TYPE OF SCREEN",
+                    "date": "DATE TIME (Python format: %Y-%m-%d %H:%M:%S)",
+                    "epoch": "(Python format: %s)"
                 }
             ]
         }
@@ -66,13 +68,17 @@ Player is using locally stored JSON file with video sources. It's configured in 
                     "name": "K-POP COVER DANCE",
                     "src": "../videos/Music/K-POP%20COVER%20DANCE.mp4",
                     "thumbnail": "../videos/Thumbnails/Music/K-POP%20COVER%20DANCE.jpg",
-                    "screen_type": "sbs"
+                    "screen_type": "sbs",
+                    "date": "2023-01-10 15:05:50",
+                    "epoch": "1673359550.854825"
                 },
                 {
                     "name": "Live Music at the Miami Beach",
                     "src": "https://10.10.10.12/videos/Music/Live%20Music%20at%20the%20Miami%20Beach.mp4",
                     "thumbnail": "https://10.10.10.12/videos/Thumbnails/Music/Live%20Music%20at%20the%20Miami%20Beach.jpg",
-                    "screen_type": "tb"
+                    "screen_type": "tb",
+                    "date": "2022-12-27 21:13:20",
+                    "epoch": "1672172000.0444932"
                 },
                 ....
                 ]
@@ -84,7 +90,9 @@ Player is using locally stored JSON file with video sources. It's configured in 
                     "name": "Sunset Baltic in Germany",
                     "src": "../videos/Nature/Sunset%20Baltic%20in%20Germany.mp4",
                     "thumbnail": "../videos/Thumbnails/Nature/Sunset%20Baltic%20in%20Germany.jpg",
-                    "screen_type": "sbs"
+                    "screen_type": "sbs",
+                    "date": "2023-01-10 15:05:50",
+                    "epoch": "1673359550.854825"
                 },
                 ....
                 ]
@@ -96,7 +104,9 @@ Player is using locally stored JSON file with video sources. It's configured in 
                     "name": "The Good the Bad and the Ugly",
                     "src": "../videos/Movies/The%20Good%20the%20Bad%20and%20the%20Ugly.mp4",
                     "thumbnail": "../videos/Thumbnails/Movies/The%20Good%20the%20Bad%20and%20the%20Ugly.jpg",
-                    "screen_type": "screen"
+                    "screen_type": "screen",
+                    "date": "2023-01-10 15:05:50",
+                    "epoch": "1673359550.854825"
                 },
                 ....
                 ]
@@ -124,4 +134,4 @@ If videos or player can't be loaded make sure that this app files are owned by w
 
 ## Building
 
-Save changes and run `npx build`
+Save changes and run `npx webpack`

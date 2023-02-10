@@ -5,7 +5,7 @@ import json
 import configparser
 import sys
 import urllib.parse
-
+from datetime import datetime
 
 if not len(sys.argv) > 1:
     print("Usage: pass config ini file as first parameter, you can force metadata rescan by setting second parameter to true (false by default)\neg.\npython3 generateJson.py config.ini\npython3 generateJson.py config.ini true")
@@ -32,11 +32,13 @@ for (root, dirs, files) in os.walk(config['videos']['videos_relative_path']+"/"+
     for file in sorted(files, key=str.casefold):
         title = ""
         extension = ""
+        date = ""
         if ".mp4" in file[-4:]:
             title = file[:-4]
             extension = file[-4:]
 
             fullfile = (os.path.join(root, file))
+            date = os.path.getmtime(fullfile) 
 
             entry = fullfile.replace(
                 config['videos']['videos_relative_path'], "")
@@ -62,7 +64,9 @@ for (root, dirs, files) in os.walk(config['videos']['videos_relative_path']+"/"+
                 {"name": title,
                  "src": urllib.parse.quote(fullfile),
                  "thumbnail": urllib.parse.quote(img),
-                 "screen_type": screen_type
+                 "screen_type": screen_type,
+                 "date": datetime.fromtimestamp(date).strftime('%Y-%m-%d %H:%M:%S'),
+                 "epoch": date
                  })
 
 out_json = []

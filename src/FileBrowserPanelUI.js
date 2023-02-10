@@ -30,11 +30,23 @@ export class FileBrowserPanel {
     foldersContainer;
     thumbsContainer;
     draggingBox;
+
     searchContainer;
     searchText;
     clearSearch;
     keyboard;
-    defaultSearchText = "Search...";
+    defaultSearchText = "Search in folder...";
+
+    sortContainer;
+    sortActiveColor = new Color(0xF9DC77);
+    sortInactiveColor = new Color(0xC5D564);
+    sortByName;
+    sortByNameColorRef = this.sortActiveColor;
+    sortByDate;
+    sortByDateColorRef = this.sortInactiveColor;
+    activeSorting = 'name';
+    sortDirectionBlock;
+    sortDirection = 'ASC';
 
     buttonLeft;
     buttonRight;
@@ -359,6 +371,9 @@ export class FileBrowserPanel {
                     objectsToTest.push(this.searchContainer);
                     objectsToTest.push(this.draggingBox);
                     objectsToTest.push(this.clearSearch);
+                    objectsToTest.push(this.sortByName);
+                    objectsToTest.push(this.sortByDate);
+                    objectsToTest.push(this.sortDirectionBlock);
                     UI.registerNewObjectsToTest(objectsToTest);
                 } else {
                     if (this.searchText.content === "") {
@@ -447,6 +462,196 @@ export class FileBrowserPanel {
 
         //////////////////////////////////////////////////////////////////////
 
+        this.sortDirectionBlock = new Block({
+            justifyContent: 'center',
+            contentDirection: 'row',
+            padding: 0.02,
+            margin: 0.02,
+            borderRadius: 0.08,
+            backgroundOpacity: 1,
+            backgroundColor: new Color(0xC5D564),
+            width: 0.4,
+            height: 0.2,
+            hiddenOverflow: true,
+            fontColor: new Color(0x000000)
+        });
+
+        this.sortDirection = new Text({
+            fontFamily: FontJSON,
+            fontTexture: FontImage,
+            fontSize: 0.12,
+            content: "ASC"
+        });
+
+        this.sortDirectionBlock.add(this.sortDirection);
+
+        this.sortDirectionBlock.setupState({
+            state: 'selected',
+            onSet: () => {
+                switch (this.sortDirection.content) {
+                    case 'DESC':
+                        this.sortDirection.set({ content: 'ASC' });
+                        break;
+                    default:
+                    case 'ASC':
+                        this.sortDirection.set({ content: 'DESC' });
+                        break;
+                }
+                this.sortFiles(this.activeSorting, this.sortDirection.content.toLowerCase());
+                this.regenerateFileBrowser();
+            }
+        });
+
+        this.sortDirectionBlock.setupState({
+            state: 'hovered',
+            attributes: {
+                backgroundColor: new Color(0xDCF63F),
+                backgroundOpacity: 1,
+                fontColor: new Color(0x000000)
+            }
+        });
+        this.sortDirectionBlock.setupState({
+            state: 'idle',
+            attributes: {
+                backgroundColor: new Color(0xC5D564),
+                backgroundOpacity: 1,
+                fontColor: new Color(0x000000)
+            }
+        });
+
+        ////////////
+
+        this.sortByName = new Block({
+            justifyContent: 'center',
+            contentDirection: 'row',
+            padding: 0.02,
+            margin: 0.02,
+            borderRadius: 0.08,
+            backgroundOpacity: 1,
+            backgroundColor: new Color(0xC5D564),
+            width: 0.4,
+            height: 0.2,
+            hiddenOverflow: true,
+            fontColor: new Color(0x000000)
+        });
+        this.sortByName.add(new Text({
+            fontFamily: FontJSON,
+            fontTexture: FontImage,
+            fontSize: 0.12,
+            content: "Name"
+        }));
+
+        this.sortByName.setupState({
+            state: 'selected',
+            onSet: () => {
+                if (this.activeSorting !== 'name') {
+                    this.sortByNameColorRef = this.sortActiveColor;
+                    this.sortByDateColorRef = this.sortInactiveColor;
+                    this.sortSetButtonsIdleState();
+                    this.activeSorting = 'name';
+                    this.sortFiles(this.activeSorting, this.sortDirection.content.toLowerCase());
+                    this.regenerateFileBrowser();
+                }
+            }
+        });
+
+        this.sortByName.setupState({
+            state: 'hovered',
+            attributes: {
+                backgroundColor: new Color(0xDCF63F),
+                backgroundOpacity: 1,
+                fontColor: new Color(0x000000)
+            }
+        });
+
+        ///////////////
+
+        this.sortByDate = new Block({
+            justifyContent: 'center',
+            contentDirection: 'row',
+            padding: 0.02,
+            margin: 0.02,
+            borderRadius: 0.08,
+            backgroundOpacity: 1,
+            backgroundColor: new Color(0xC5D564),
+            width: 0.4,
+            height: 0.2,
+            hiddenOverflow: true,
+            fontColor: new Color(0x000000)
+        });
+        this.sortByDate.add(new Text({
+            fontFamily: FontJSON,
+            fontTexture: FontImage,
+            fontSize: 0.12,
+            content: "Date"
+        }));
+
+        this.sortByDate.setupState({
+            state: 'selected',
+            onSet: () => {
+                if (this.activeSorting !== 'date') {
+                    this.sortByDateColorRef = this.sortActiveColor;
+                    this.sortByNameColorRef = this.sortInactiveColor;
+                    this.sortSetButtonsIdleState();
+                    this.activeSorting = 'date';
+                    this.sortFiles(this.activeSorting, this.sortDirection.content.toLowerCase());
+                    this.regenerateFileBrowser();
+                }
+            }
+        });
+
+        this.sortByDate.setupState({
+            state: 'hovered',
+            attributes: {
+                backgroundColor: new Color(0xDCF63F),
+                backgroundOpacity: 1,
+                fontColor: new Color(0x000000)
+            }
+        });
+
+        ///////////////
+
+        this.sortSetButtonsIdleState();
+
+        ///////////////
+
+        this.sortContainer = new Block({
+            justifyContent: 'center',
+            contentDirection: 'row',
+            padding: 0.02,
+            borderRadius: 0.08,
+            backgroundOpacity: 1,
+            width: 2,
+            height: 0.3,
+            hiddenOverflow: true,
+            fontColor: new Color(0x000000)
+        });
+        let label = new Block({
+            justifyContent: 'center',
+            contentDirection: 'row',
+            padding: 0.02,
+            borderRadius: 0.08,
+            backgroundOpacity: 1,
+            width: 0.7,
+            height: 0.2,
+            hiddenOverflow: true,
+            fontColor: new Color(0xffffff)
+        });
+        label.add(new Text({
+            fontFamily: FontJSON,
+            fontTexture: FontImage,
+            fontSize: 0.12,
+            content: "Sorting:"
+        }));
+        this.sortContainer.add(label);
+        this.sortContainer.add(this.sortByName);
+        this.sortContainer.add(this.sortByDate);
+        this.sortContainer.add(this.sortDirectionBlock);
+        this.sortContainer.position.set(1.98, 3.2, -4.2);
+        MAIN.scene.add(this.sortContainer);
+
+        //////////////////////////////////////////////////////////////////////
+
         ///////////////////////////
         // Add to main container
 
@@ -509,6 +714,9 @@ export class FileBrowserPanel {
 
         this.fileThumbsToTest.push(this.searchContainer);
         this.fileThumbsToTest.push(this.clearSearch);
+        this.fileThumbsToTest.push(this.sortByDate);
+        this.fileThumbsToTest.push(this.sortByName);
+        this.fileThumbsToTest.push(this.sortDirectionBlock);
         //////////////////////////////////////////////////////////////////////
 
         this.keyboardObjsToTest = this.makeKeyboard(this.searchText, this.searchTextSetContent);
@@ -527,6 +735,7 @@ export class FileBrowserPanel {
         MAIN.registerObjectToRecenter(this.keyboard, "files");
         MAIN.registerObjectToRecenter(this.foldersContainer, "files");
         MAIN.registerObjectToRecenter(this.fileBrowserContainer, "files");
+        MAIN.registerObjectToRecenter(this.sortContainer, "files");
 
     }
 
@@ -546,6 +755,7 @@ export class FileBrowserPanel {
         if (this.searchText.content !== this.defaultSearchText) {
             this.prepareFilesWithSearchPhrase();
         }
+        this.sortFiles(this.activeSorting, this.sortDirection.content.toLowerCase());
         let endOfFiles = false;
         let iterate = (this.CURRENT_PAGE > 0 ? ((this.FILES_PER_ROW * this.FILES_ROWS) * this.CURRENT_PAGE) : 0);
         for (let index = 0; index < this.FILES_ROWS; index++) {
@@ -601,12 +811,60 @@ export class FileBrowserPanel {
         }
     }
 
+    sortFiles(by, order) {
+        switch (by) {
+            case 'date':
+                switch (order) {
+                    case 'desc':
+                        this.FILES.sort((a, b) => b.epoch - a.epoch);
+                        break;
+
+                    default:
+                    case 'asc':
+                        this.FILES.sort((a, b) => a.epoch - b.epoch);
+                        break;
+                }
+                break;
+            default:
+            case 'name':
+                switch (order) {
+                    case 'desc':
+                        this.FILES.sort((a, b) => {
+                            const nameA = a.name.toUpperCase();
+                            const nameB = b.name.toUpperCase();
+                            if (nameA < nameB) {
+                                return 1;
+                            }
+                            if (nameA > nameB) {
+                                return -1;
+                            }
+                        });
+                        break;
+
+                    default:
+                    case 'asc':
+                        this.FILES.sort((a, b) => {
+                            const nameA = a.name.toUpperCase();
+                            const nameB = b.name.toUpperCase();
+                            if (nameA < nameB) {
+                                return -1;
+                            }
+                            if (nameA > nameB) {
+                                return 1;
+                            }
+                        });
+                        break;
+                }
+                break;
+        }
+    }
+
     regenerateFileBrowser() {
         deepDelete(this.thumbsContainer);
         this.thumbsContainer.set(this.thumbsContainerAttributes);
         this.fileThumbsToTest = [];
         this.fileThumbsToTest = this.foldersButtonsToTest.slice();
-        this.fileThumbsToTest.push(this.buttonLeft, this.buttonRight, this.draggingBox, this.searchContainer, this.clearSearch);
+        this.fileThumbsToTest.push(this.buttonLeft, this.buttonRight, this.draggingBox, this.searchContainer, this.clearSearch, this.sortByDate, this.sortByName, this.sortDirectionBlock);
 
         this.generateView();
 
@@ -631,13 +889,13 @@ export class FileBrowserPanel {
     // Hide / Show Menu
 
     showFileMenuPanel() {
-        UI.showMenu([this.fileBrowserContainer, this.foldersContainer, this.draggingBox, this.searchContainer, this.clearSearch], this.fileThumbsToTest, true);
+        UI.showMenu([this.fileBrowserContainer, this.foldersContainer, this.draggingBox, this.searchContainer, this.clearSearch, this.sortContainer], this.fileThumbsToTest, true);
         Helpers.removeVideoSrc();
         MAIN.playbackChange(false);
     }
 
     hideFileMenuPanel(screen_type = null) {
-        UI.hideMenu([this.fileBrowserContainer, this.foldersContainer, this.draggingBox, this.searchContainer, this.clearSearch, this.keyboard], [], true);
+        UI.hideMenu([this.fileBrowserContainer, this.foldersContainer, this.draggingBox, this.searchContainer, this.clearSearch, this.keyboard, this.sortContainer], [], true);
         MAIN.playbackChange(true, screen_type);
     }
 
@@ -770,5 +1028,28 @@ export class FileBrowserPanel {
         });
 
         return keyObjsToTest;
+    }
+
+    sortSetButtonsIdleState() {
+        this.sortByName.setupState({
+            state: 'idle',
+            attributes: {
+                backgroundColor: this.sortByNameColorRef,
+                backgroundOpacity: 1,
+                fontColor: new Color(0x000000)
+            }
+        });
+
+        this.sortByDate.setupState({
+            state: 'idle',
+            attributes: {
+                backgroundColor: this.sortByDateColorRef,
+                backgroundOpacity: 1,
+                fontColor: new Color(0x000000)
+            }
+        });
+
+        this.sortByName.set({backgroundColor: this.sortByNameColorRef});
+        this.sortByDate.set({backgroundColor: this.sortByDateColorRef});
     }
 }
