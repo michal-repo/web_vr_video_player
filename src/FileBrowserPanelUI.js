@@ -31,6 +31,8 @@ export class FileBrowserPanel {
     thumbsContainer;
     draggingBox;
 
+    defaultVideoThumbnail;
+
     searchContainer;
     searchText;
     clearSearch;
@@ -184,8 +186,17 @@ export class FileBrowserPanel {
         state: 'idle',
         attributes: {
             offset: 0.035,
-            // backgroundColor: new Color(0x666666),
             backgroundColor: new Color(0x4f4f4f),
+            backgroundOpacity: 1,
+            fontColor: new Color(0xffffff)
+        },
+    };
+
+    folderActiveIdleStateAttributes = {
+        state: 'idle',
+        attributes: {
+            offset: 0.035,
+            backgroundColor: new Color(0x008e7f),
             backgroundOpacity: 1,
             fontColor: new Color(0xffffff)
         },
@@ -203,6 +214,9 @@ export class FileBrowserPanel {
     //////////////////////////////////////////////////////////////////////////////
 
     constructor(files) {
+
+        this.defaultVideoThumbnail = this.loader.load(VideoIcon);
+
         if (files.videos) {
             this.VIDEOS = files.videos;
             this.FILES = this.VIDEOS[0].list;
@@ -297,22 +311,31 @@ export class FileBrowserPanel {
                     width: (this.PANELMAXWIDTH / 3) - 0.1,
                     backgroundOpacity: 1
                 }).add(new Text({ content: this.VIDEOS[index].name }));
+                folderButton.folderIndex = index
                 folderButton.setupState({
                     state: 'selected',
                     attributes: this.selectedAttributes,
                     onSet: () => {
-                        this.CURRENT_PAGE = 0;
-                        this.FILES = this.VIDEOS[index].list;
-                        this.FOLDER = index;
-                        this.TOTAL_PAGES = (Math.ceil(this.FILES.length / (this.FILES_PER_ROW * this.FILES_ROWS))) - 1;
-                        this.regenerateFileBrowser();
+                        if (this.FOLDER !== index){
+                            this.CURRENT_PAGE = 0;
+                            this.FOLDER = index;
+                            if (this.searchText.content !== this.defaultSearchText) {
+                                this.prepareFilesWithSearchPhrase();
+                            } else {
+                                this.FILES = this.VIDEOS[index].list;
+                                this.TOTAL_PAGES = (Math.ceil(this.FILES.length / (this.FILES_PER_ROW * this.FILES_ROWS))) - 1;
+                                this.sortFiles(this.activeSorting, this.sortDirection.content.toLowerCase());
+                            }
+                            this.foldersButtonsIdleState();
+                            this.regenerateFileBrowser();
+                        }
                     }
                 });
                 folderButton.setupState(this.hoveredStateAttributes);
-                folderButton.setupState(this.idleStateAttributes);
                 this.foldersContainer.add(folderButton);
                 this.foldersButtonsToTest.push(folderButton);
             }
+            this.foldersButtonsIdleState();
 
             MAIN.scene.add(this.foldersContainer);
             this.foldersContainer.position.set(-3.8, 1.4, -4);
@@ -371,18 +394,19 @@ export class FileBrowserPanel {
                     objectsToTest.push(this.searchContainer);
                     objectsToTest.push(this.draggingBox);
                     objectsToTest.push(this.clearSearch);
-                    objectsToTest.push(this.sortByName);
-                    objectsToTest.push(this.sortByDate);
-                    objectsToTest.push(this.sortDirectionBlock);
                     UI.registerNewObjectsToTest(objectsToTest);
                 } else {
                     if (this.searchText.content === "") {
                         this.searchText.set({ content: this.defaultSearchText });
                         this.CURRENT_PAGE = 0;
                         this.FILES = this.VIDEOS[this.FOLDER].list;
+                        this.sortFiles(this.activeSorting, this.sortDirection.content.toLowerCase());
+                    } else {
+                        this.prepareFilesWithSearchPhrase();
                     }
                     this.keyboard.visible = false;
                     UI.registerNewObjectsToTest(this.fileThumbsToTest);
+                    this.regenerateFileBrowser();
                 }
             }
         });
@@ -433,6 +457,7 @@ export class FileBrowserPanel {
                     this.CURRENT_PAGE = 0;
                     this.FILES = this.VIDEOS[this.FOLDER].list;
                     this.TOTAL_PAGES = (Math.ceil(this.FILES.length / (this.FILES_PER_ROW * this.FILES_ROWS))) - 1;
+                    this.sortFiles(this.activeSorting, this.sortDirection.content.toLowerCase());
                     this.regenerateFileBrowser();
                 } else if (this.keyboard.visible) {
                     this.searchText.set({ content: '' });
@@ -749,13 +774,10 @@ export class FileBrowserPanel {
         });
         this.FILES = filesList;
         this.TOTAL_PAGES = (Math.ceil(this.FILES.length / (this.FILES_PER_ROW * this.FILES_ROWS))) - 1;
+        this.sortFiles(this.activeSorting, this.sortDirection.content.toLowerCase());
     }
 
     generateView() {
-        if (this.searchText.content !== this.defaultSearchText) {
-            this.prepareFilesWithSearchPhrase();
-        }
-        this.sortFiles(this.activeSorting, this.sortDirection.content.toLowerCase());
         let endOfFiles = false;
         let iterate = (this.CURRENT_PAGE > 0 ? ((this.FILES_PER_ROW * this.FILES_ROWS) * this.CURRENT_PAGE) : 0);
         for (let index = 0; index < this.FILES_ROWS; index++) {
@@ -770,14 +792,26 @@ export class FileBrowserPanel {
                 thumb.fileSRC = this.FILES[iterate].src;
                 let name = this.FILES[iterate].name;
                 const screen_type = this.FILES[iterate].screen_type;
-                this.loader.load((this.FILES[iterate].thumbnail == "" ? VideoIcon : this.FILES[iterate].thumbnail), (image) => {
-                    thumb.add(
-                        new InlineBlock(this.textureAttributes(image)),
-                        new Block(this.thumbTextContainerAttributes).add(
-                            new Text(this.thumbTextAttributes(name))
-                        )
-                    );
-                });
+                this.loader.load(
+                    this.FILES[iterate].thumbnail,
+                    (image) => {
+                        thumb.add(
+                            new InlineBlock(this.textureAttributes(image)),
+                            new Block(this.thumbTextContainerAttributes).add(
+                                new Text(this.thumbTextAttributes(name))
+                            )
+                        );
+                    },
+                    undefined,
+                    () => {
+                        thumb.add(
+                            new InlineBlock(this.textureAttributes(this.defaultVideoThumbnail)),
+                            new Block(this.thumbTextContainerAttributes).add(
+                                new Text(this.thumbTextAttributes(name))
+                            )
+                        );
+                    }
+                );
 
                 //
 
@@ -992,11 +1026,16 @@ export class FileBrowserPanel {
                                 break;
 
                             case 'enter':
-                                if (target.content === "") {
-                                    target.set({ content: this.defaultSearchText });
-                                }
                                 this.keyboard.visible = false;
                                 this.CURRENT_PAGE = 0;
+                                if (target.content === "") {
+                                    target.set({ content: this.defaultSearchText });
+                                    this.FILES = this.VIDEOS[this.FOLDER].list;
+                                    this.sortFiles(this.activeSorting, this.sortDirection.content.toLowerCase());
+                                } else {
+                                    this.prepareFilesWithSearchPhrase();
+                                }
+                                UI.registerNewObjectsToTest(this.fileThumbsToTest);
                                 this.regenerateFileBrowser();
                                 break;
 
@@ -1030,6 +1069,18 @@ export class FileBrowserPanel {
         return keyObjsToTest;
     }
 
+    foldersButtonsIdleState() {
+        this.foldersButtonsToTest.forEach( (folder) => {
+            if (folder.folderIndex === this.FOLDER) {
+                folder.setupState(this.folderActiveIdleStateAttributes);
+                folder.set({ backgroundColor: this.sortActiveColor });
+            } else {
+                folder.setupState(this.idleStateAttributes);
+                folder.set({ backgroundColor: new Color(0x4f4f4f) });
+            }
+        });
+    }
+
     sortSetButtonsIdleState() {
         this.sortByName.setupState({
             state: 'idle',
@@ -1049,7 +1100,7 @@ export class FileBrowserPanel {
             }
         });
 
-        this.sortByName.set({backgroundColor: this.sortByNameColorRef});
-        this.sortByDate.set({backgroundColor: this.sortByDateColorRef});
+        this.sortByName.set({ backgroundColor: this.sortByNameColorRef });
+        this.sortByDate.set({ backgroundColor: this.sortByDateColorRef });
     }
 }
