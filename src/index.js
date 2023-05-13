@@ -122,7 +122,7 @@ function init() {
 	const geometryLeftTB = geometryLeftSBS.clone();
 	const geometryRightSBS = geometryLeftSBS.clone();
 	const geometryRightTB = geometryLeftSBS.clone();
-	
+
 	//// left eye
 	// SBS
 	const uvsLeftSBS = geometryLeftSBS.attributes.uv.array;
@@ -156,7 +156,7 @@ function init() {
 	meshLeftTB.layers.set(1); // display in left eye only
 	meshLeftTB.visible = false;
 	scene.add(meshLeftTB);
-	
+
 	// mesh for 2d mode
 
 	mesh2dTB = meshLeftTB.clone();
@@ -335,7 +335,7 @@ function init() {
 
 }
 
-export function getCurrentZoom(){
+export function getCurrentZoom() {
 	return meshLeftSBS.position.z;
 }
 
@@ -481,8 +481,10 @@ function loop() {
 	if (everyXframesUpdateProgBarInt++ >= everyXframesUpdateProgBar) {
 		playMenuPanel.progressBarAndDuration();
 		everyXframesUpdateProgBarInt = 0;
+		if (fileBrowserPanel !== undefined && !fileBrowserPanel.viewGeneratorFinished) {
+			fileBrowserPanel.generateThumbnails();
+		}
 	}
-
 }
 
 // Called in the loop, get intersection with either the mouse or the VR controllers,

@@ -67,10 +67,18 @@ export class FileBrowserPanel {
     CURRENT_PAGE = 0;
     TOTAL_PAGES;
 
+    viewGeneratorThumbs = [];
+    viewGeneratorThumbsIterator = 0;
+    viewGeneratorInProgress = false;
+    viewGeneratorFinished = true;
+
     loader = new TextureLoader();
 
     PANELMAXWIDTH = 4.5;
     PANELMAXHEIGHT = 3.2;
+    CENTERPANELZDISTANCE = -5.2;
+    SIDEPANELZDISTANCE = -5;
+    KEYBOARDZDISTANCE = -5;
 
     BUTTONWIDTHHEIGHT = (this.PANELMAXHEIGHT / this.FILES_ROWS - 0.5);
 
@@ -316,7 +324,7 @@ export class FileBrowserPanel {
                     state: 'selected',
                     attributes: this.selectedAttributes,
                     onSet: () => {
-                        if (this.FOLDER !== index){
+                        if (this.FOLDER !== index) {
                             this.CURRENT_PAGE = 0;
                             this.FOLDER = index;
                             if (this.searchText.content !== this.defaultSearchText) {
@@ -338,7 +346,7 @@ export class FileBrowserPanel {
             this.foldersButtonsIdleState();
 
             MAIN.scene.add(this.foldersContainer);
-            this.foldersContainer.position.set(-3.8, 1.4, -4);
+            this.foldersContainer.position.set(-3.8, 1.4, this.SIDEPANELZDISTANCE);
             this.foldersContainer.rotation.y = 0.5;
         }
 
@@ -380,7 +388,7 @@ export class FileBrowserPanel {
         this.searchContainer.add(textContainer);
 
         MAIN.scene.add(this.searchContainer);
-        this.searchContainer.position.set(-2, 3.2, -4.2);
+        this.searchContainer.position.set(-2, 3.2, this.CENTERPANELZDISTANCE);
 
         this.searchContainer.setupState({
             state: 'selected',
@@ -482,7 +490,7 @@ export class FileBrowserPanel {
             }
         });
 
-        this.clearSearch.position.set(-0.5, 3.2, -4.2);
+        this.clearSearch.position.set(-0.5, 3.2, this.CENTERPANELZDISTANCE);
         MAIN.scene.add(this.clearSearch);
 
         //////////////////////////////////////////////////////////////////////
@@ -672,7 +680,7 @@ export class FileBrowserPanel {
         this.sortContainer.add(this.sortByName);
         this.sortContainer.add(this.sortByDate);
         this.sortContainer.add(this.sortDirectionBlock);
-        this.sortContainer.position.set(1.98, 3.2, -4.2);
+        this.sortContainer.position.set(1.98, 3.2, this.CENTERPANELZDISTANCE);
         MAIN.scene.add(this.sortContainer);
 
         //////////////////////////////////////////////////////////////////////
@@ -689,11 +697,11 @@ export class FileBrowserPanel {
         this.fileThumbsToTest = this.foldersButtonsToTest.slice();
         this.fileThumbsToTest.push(this.buttonLeft, this.buttonRight);
 
-        if (this.FILES.length > 0) {
+        if (this.FILES.length > 0 && this.defaultVideoThumbnail !== undefined) {
             this.generateView();
         }
 
-        this.fileBrowserContainer.position.set(0, 1.4, -4.2);
+        this.fileBrowserContainer.position.set(0, 1.4, this.CENTERPANELZDISTANCE);
 
         this.draggingBox = new Block({
             justifyContent: 'center',
@@ -707,7 +715,7 @@ export class FileBrowserPanel {
         });
 
         MAIN.scene.add(this.draggingBox);
-        this.draggingBox.position.set(0, -0.35, -4.2);
+        this.draggingBox.position.set(0, -0.35, this.CENTERPANELZDISTANCE);
         this.draggingBox.setupState({
             state: 'selected',
             onSet: () => {
@@ -749,7 +757,7 @@ export class FileBrowserPanel {
 
 
         this.keyboard.visible = false;
-        this.keyboard.position.set(0, 2, -4);
+        this.keyboard.position.set(0, 2, this.KEYBOARDZDISTANCE);
         MAIN.scene.add(this.keyboard);
 
         //////////////////////////////////////////////////////////////////////
@@ -779,6 +787,8 @@ export class FileBrowserPanel {
 
     generateView() {
         let endOfFiles = false;
+        this.viewGeneratorThumbs = [];
+        this.viewGeneratorThumbsIterator = 0;
         let iterate = (this.CURRENT_PAGE > 0 ? ((this.FILES_PER_ROW * this.FILES_ROWS) * this.CURRENT_PAGE) : 0);
         for (let index = 0; index < this.FILES_ROWS; index++) {
             const thumbsContainerButtonsRow = new Block(this.thumbRowContainerAttributes);
@@ -790,28 +800,9 @@ export class FileBrowserPanel {
                 }
                 const thumb = new Block(this.thumbButtonContainerAttributes);
                 thumb.fileSRC = this.FILES[iterate].src;
-                let name = this.FILES[iterate].name;
+                thumb.fileNameButton = this.FILES[iterate].name;
+                thumb.fileThumbnail = this.FILES[iterate].thumbnail;
                 const screen_type = this.FILES[iterate].screen_type;
-                this.loader.load(
-                    this.FILES[iterate].thumbnail,
-                    (image) => {
-                        thumb.add(
-                            new InlineBlock(this.textureAttributes(image)),
-                            new Block(this.thumbTextContainerAttributes).add(
-                                new Text(this.thumbTextAttributes(name))
-                            )
-                        );
-                    },
-                    undefined,
-                    () => {
-                        thumb.add(
-                            new InlineBlock(this.textureAttributes(this.defaultVideoThumbnail)),
-                            new Block(this.thumbTextContainerAttributes).add(
-                                new Text(this.thumbTextAttributes(name))
-                            )
-                        );
-                    }
-                );
 
                 //
 
@@ -833,6 +824,7 @@ export class FileBrowserPanel {
 
                 thumbsContainerButtonsRow.add(thumb);
                 this.fileThumbsToTest.push(thumb);
+                this.viewGeneratorThumbs.push(thumb);
                 iterate++;
                 addedThumbs++;
             }
@@ -842,6 +834,39 @@ export class FileBrowserPanel {
             if (endOfFiles) {
                 break;
             }
+        }
+        this.viewGeneratorFinished = false;
+    }
+
+    generateThumbnails() {
+        if (this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator] && this.viewGeneratorFinished === false && this.viewGeneratorInProgress === false) {
+            this.viewGeneratorInProgress = true;
+            this.loader.load(
+                this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator].fileThumbnail,
+                (image) => {
+                    this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator].add(
+                        new InlineBlock(this.textureAttributes(image)),
+                        new Block(this.thumbTextContainerAttributes).add(
+                            new Text(this.thumbTextAttributes(this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator].fileNameButton))
+                        )
+                    );
+                    this.viewGeneratorThumbsIterator++;
+                    this.viewGeneratorInProgress = false;
+                },
+                undefined,
+                () => {
+                    this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator].add(
+                        new InlineBlock(this.textureAttributes(this.defaultVideoThumbnail)),
+                        new Block(this.thumbTextContainerAttributes).add(
+                            new Text(this.thumbTextAttributes(this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator].fileNameButton))
+                        )
+                    );
+                    this.viewGeneratorThumbsIterator++;
+                    this.viewGeneratorInProgress = false;
+                }
+            );
+        } else {
+            this.viewGeneratorFinished = true;
         }
     }
 
@@ -972,9 +997,6 @@ export class FileBrowserPanel {
             enterTexture: Enter
         });
 
-        this.keyboard.position.set(0, 0, -1);
-        // keyboard.rotation.x = -0.55;
-
         //
 
         this.keyboard.keys.forEach((key) => {
@@ -1070,7 +1092,7 @@ export class FileBrowserPanel {
     }
 
     foldersButtonsIdleState() {
-        this.foldersButtonsToTest.forEach( (folder) => {
+        this.foldersButtonsToTest.forEach((folder) => {
             if (folder.folderIndex === this.FOLDER) {
                 folder.setupState(this.folderActiveIdleStateAttributes);
                 folder.set({ backgroundColor: this.sortActiveColor });

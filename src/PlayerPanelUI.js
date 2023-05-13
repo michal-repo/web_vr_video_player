@@ -59,12 +59,13 @@ export class PlayerPanel {
 
 	loader = new TextureLoader();
 
-	PLAYERPANELMAXWIDTH = 4;
+	PLAYERPANELMAXWIDTH = 3;
 	PROGRESSPANELMAXWIDTH = this.PLAYERPANELMAXWIDTH - 0.1;
-	PROGRESSPANELHEIGHT = 0.05;
+	PROGRESSPANELHEIGHT = 0.08;
 	PROGRESSPANELMINWIDTH = 0.01;
 
-	SETTINGSPANELMAXWIDTH = (this.PLAYERPANELMAXWIDTH / 2);
+	SETTINGSPANELMAXWIDTH = (this.PLAYERPANELMAXWIDTH / 1.5);
+	BUTTONSPANELMAXWIDTH = this.PLAYERPANELMAXWIDTH - 0.2;
 
 	videoElement;
 
@@ -92,8 +93,9 @@ export class PlayerPanel {
 		width: this.PLAYERPANELMAXWIDTH
 	};
 
+	// Holds Play/Pause;FF;REW;Settings buttons
 	centerContainerAttributes = {
-		width: 1.33,
+		width: this.BUTTONSPANELMAXWIDTH / 3,
 		height: 0.15,
 		justifyContent: 'center',
 		contentDirection: 'row',
@@ -103,7 +105,7 @@ export class PlayerPanel {
 	};
 
 	exitButtonContainerAttributes = {
-		width: 0.60,
+		width: this.BUTTONSPANELMAXWIDTH / 6,
 		height: 0.15,
 		justifyContent: 'start',
 		contentDirection: 'row',
@@ -113,7 +115,7 @@ export class PlayerPanel {
 	};
 
 	muteButtonContainerAttributes = {
-		width: 0.66,
+		width: this.BUTTONSPANELMAXWIDTH / 6,
 		height: 0.15,
 		justifyContent: 'end',
 		contentDirection: 'row',
@@ -123,7 +125,7 @@ export class PlayerPanel {
 	};
 
 	hideButtonContainerAttributes = {
-		width: 1.27,
+		width: this.BUTTONSPANELMAXWIDTH / 3,
 		height: 0.15,
 		justifyContent: 'end',
 		contentDirection: 'row',
@@ -830,7 +832,7 @@ export class PlayerPanel {
 			borderRadius: 0.06,
 			backgroundOpacity: 1,
 			backgroundColor: new Color(0x5c5c5c),
-			width: this.PLAYERPANELMAXWIDTH / 3,
+			width: this.PLAYERPANELMAXWIDTH / 2,
 			height: 0.1
 		});
 		this.draggingBox.visible = false;
@@ -967,7 +969,7 @@ export class PlayerPanel {
 		}
 	}
 
-	playPause(){
+	playPause() {
 		if (Helpers.videoSrcExists()) {
 			switch (this.videoElement.paused) {
 				case false:
