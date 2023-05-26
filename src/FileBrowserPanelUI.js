@@ -776,7 +776,7 @@ export class FileBrowserPanel {
         let filesList = [];
         this.FILES = this.VIDEOS[this.FOLDER].list;
         this.FILES.forEach((file) => {
-            if (file.name.toLowerCase().includes(this.searchText.content.toLowerCase())) {
+            if (file.name.replace(/[^ qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890,\.\/\?;:\'"\[\{\}\]=\+-_!@#\$%\^\&\*\(\)\\\|\`\~]+/, '').toLowerCase().includes(this.searchText.content.toLowerCase())) {
                 filesList.push(file);
             }
         });
@@ -800,7 +800,7 @@ export class FileBrowserPanel {
                 }
                 const thumb = new Block(this.thumbButtonContainerAttributes);
                 thumb.fileSRC = this.FILES[iterate].src;
-                thumb.fileNameButton = this.FILES[iterate].name;
+                thumb.fileNameButton = this.FILES[iterate].name.replace(/[^ qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890,\.\/\?;:\'"\[\{\}\]=\+-_!@#\$%\^\&\*\(\)\\\|\`\~]+/, '');
                 thumb.fileThumbnail = this.FILES[iterate].thumbnail;
                 const screen_type = this.FILES[iterate].screen_type;
 
