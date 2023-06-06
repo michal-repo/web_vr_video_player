@@ -131,7 +131,9 @@ If videos or player can't be loaded make sure that this app files are owned by w
 ![Print-screen-2](https://github.com/michal-repo/web_vr_video_player/blob/main/examples/Screenshot_VR_player_2.png?raw=true)
 ![Print-screen-3](https://github.com/michal-repo/web_vr_video_player/blob/main/examples/Screenshot_VR_player_3.png?raw=true)
 
-
 ## Building
-
-Save changes and run `npx webpack`
+Save changes and run:
+### Development mode
+`npm run build-dev`
+### Production mode
+`npm run build`

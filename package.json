@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.html",
   "scripts": {
+    "build": "webpack --config webpack.config.js",
+    "build-dev": "webpack --config webpack.development.config.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "michal-repo",
