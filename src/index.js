@@ -331,8 +331,11 @@ function init() {
 
 	renderer.xr.addEventListener('sessionend', ScreenManager.vrsessionend);
 
-	renderer.setAnimationLoop(loop);
+	setTimeout(setLoop, 500);
+}
 
+function setLoop() {
+	renderer.setAnimationLoop(loop);
 }
 
 export function getCurrentZoom() {
@@ -368,17 +371,15 @@ function hideMeshes() {
 // Handle resizing the viewport
 
 function onWindowResize() {
-
-	camera.aspect = window.innerWidth / window.innerHeight;
-	camera.updateProjectionMatrix();
-	renderer.setSize(window.innerWidth, window.innerHeight);
-
+	if (camera !== undefined && renderer !== undefined) {
+		camera.aspect = window.innerWidth / window.innerHeight;
+		camera.updateProjectionMatrix();
+		renderer.setSize(window.innerWidth, window.innerHeight);
+	}
 }
 
 //
 
-const everyXframesUpdateProgBar = 15;
-let everyXframesUpdateProgBarInt = 0;
 let gamepadAxisActive = false;
 export let playbackIsActive = false;
 
@@ -392,9 +393,6 @@ export function playbackChange(is_active = false, screen_type = null) {
 			}
 			playMenuPanel.buttonPlay.playbackStarted();
 			playMenuPanel.VRSBSTBModeButtonText.set({ content: (ScreenManager.VRMode === 'tb' ? 'TB' : 'SBS') });
-			if (everyXframesUpdateProgBarInt < everyXframesUpdateProgBar) {
-				playMenuPanel.progressBarAndDuration();
-			}
 			break;
 		default:
 		case false:
@@ -464,26 +462,21 @@ function gamepadButtonsCheck(buttons) {
 
 function loop() {
 
-	// Don't forget, ThreeMeshUI must be updated manually.
-	// This has been introduced in version 3.0.0 in order
-	// to improve performance
+	renderer.render(scene, camera);
+
 	ThreeMeshUI.update();
 
 	orbitControls.update();
 
 	gamepadControlsUpdate();
 
-	renderer.render(scene, camera);
-
 	updateButtons();
 
-	// progressbar and duration time
-	if (everyXframesUpdateProgBarInt++ >= everyXframesUpdateProgBar) {
-		playMenuPanel.progressBarAndDuration();
-		everyXframesUpdateProgBarInt = 0;
-		if (fileBrowserPanel !== undefined && !fileBrowserPanel.viewGeneratorFinished) {
-			fileBrowserPanel.generateThumbnails();
-		}
+	playMenuPanel.progressBarAndDuration();
+
+	// Execute Thumbnails Loader
+	if (fileBrowserPanel !== undefined) {
+		fileBrowserPanel.generateThumbnails();
 	}
 }
 
@@ -593,7 +586,9 @@ export function registerObjectToRecenter(obj, view) {
 
 if (WebGL.isWebGLAvailable()) {
 	window.addEventListener('resize', onWindowResize);
-	init();
+	window.addEventListener("load", () => {
+		init();
+	});
 } else {
 	const warning = WebGL.getWebGLErrorMessage();
 	document.body.appendChild(warning);

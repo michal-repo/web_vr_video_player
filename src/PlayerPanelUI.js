@@ -920,12 +920,12 @@ export class PlayerPanel {
 				this.progressBar.set({ width: ((progressBarLength < this.PROGRESSPANELMINWIDTH) ? this.PROGRESSPANELMINWIDTH : progressBarLength) });
 				let playbackHelper = new Date(null);
 				playbackHelper.setSeconds(MAIN.video.currentTime);
-				let result = playbackHelper.toISOString().substr(11, 8);
+				let result = playbackHelper.toISOString().substring(11, 19);
 				result += " / ";
 				playbackHelper = new Date(null);
 				if (MAIN.video.duration) {
 					playbackHelper.setSeconds(MAIN.video.duration);
-					result += playbackHelper.toISOString().substr(11, 8);
+					result += playbackHelper.toISOString().substring(11, 19);
 					this.playbackLabelContainer.set({ content: result });
 				} else {
 					this.playbackLabelContainer.set({ content: "N/A" });

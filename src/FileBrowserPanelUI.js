@@ -839,34 +839,32 @@ export class FileBrowserPanel {
     }
 
     generateThumbnails() {
-        if (this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator] && this.viewGeneratorFinished === false && this.viewGeneratorInProgress === false) {
-            this.viewGeneratorInProgress = true;
-            this.loader.load(
-                this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator].fileThumbnail,
-                (image) => {
-                    this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator].add(
-                        new InlineBlock(this.textureAttributes(image)),
-                        new Block(this.thumbTextContainerAttributes).add(
-                            new Text(this.thumbTextAttributes(this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator].fileNameButton))
-                        )
-                    );
-                    this.viewGeneratorThumbsIterator++;
-                    this.viewGeneratorInProgress = false;
-                },
-                undefined,
-                () => {
-                    this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator].add(
-                        new InlineBlock(this.textureAttributes(this.defaultVideoThumbnail)),
-                        new Block(this.thumbTextContainerAttributes).add(
-                            new Text(this.thumbTextAttributes(this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator].fileNameButton))
-                        )
-                    );
-                    this.viewGeneratorThumbsIterator++;
-                    this.viewGeneratorInProgress = false;
-                }
-            );
-        } else {
-            this.viewGeneratorFinished = true;
+        if (this.viewGeneratorInProgress === false) {
+            if (this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator] && this.viewGeneratorFinished === false) {
+                this.viewGeneratorInProgress = true;
+                this.loader.loadAsync(
+                    this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator].fileThumbnail, undefined).then((image) => {
+                        this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator].add(
+                            new InlineBlock(this.textureAttributes(image)),
+                            new Block(this.thumbTextContainerAttributes).add(
+                                new Text(this.thumbTextAttributes(this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator].fileNameButton))
+                            )
+                        );
+                        this.viewGeneratorThumbsIterator++;
+                        this.viewGeneratorInProgress = false;
+                    }).catch(() => {
+                        this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator].add(
+                            new InlineBlock(this.textureAttributes(this.defaultVideoThumbnail)),
+                            new Block(this.thumbTextContainerAttributes).add(
+                                new Text(this.thumbTextAttributes(this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator].fileNameButton))
+                            )
+                        );
+                        this.viewGeneratorThumbsIterator++;
+                        this.viewGeneratorInProgress = false;
+                    });
+            } else {
+                this.viewGeneratorFinished = true;
+            }
         }
     }
 

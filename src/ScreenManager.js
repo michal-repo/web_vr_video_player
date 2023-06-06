@@ -215,7 +215,7 @@ export function switch2d3d(switch_2d_or_3d, forced = false) {
 				if (VRMode === 'sbs') {
 					MAIN.meshRightSBS.visible = false;
 					MAIN.mesh2dSBS.visible = true;
-				} else if (VRMode === 'tb'){
+				} else if (VRMode === 'tb') {
 					MAIN.meshRightTB.visible = false;
 					MAIN.mesh2dTB.visible = true;
 				}
@@ -225,7 +225,7 @@ export function switch2d3d(switch_2d_or_3d, forced = false) {
 				if (VRMode === 'sbs') {
 					MAIN.meshRightSBS.visible = true;
 					MAIN.mesh2dSBS.visible = false;
-				} else if (VRMode === 'tb'){
+				} else if (VRMode === 'tb') {
 					MAIN.meshRightTB.visible = true;
 					MAIN.mesh2dTB.visible = false;
 				}
