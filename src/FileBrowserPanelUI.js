@@ -842,15 +842,18 @@ export class FileBrowserPanel {
         if (this.viewGeneratorInProgress === false) {
             if (this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator] && this.viewGeneratorFinished === false) {
                 this.viewGeneratorInProgress = true;
+                let thumb = this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator].fileThumbnail
                 this.loader.loadAsync(
-                    this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator].fileThumbnail, undefined).then((image) => {
-                        this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator].add(
-                            new InlineBlock(this.textureAttributes(image)),
-                            new Block(this.thumbTextContainerAttributes).add(
-                                new Text(this.thumbTextAttributes(this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator].fileNameButton))
-                            )
-                        );
-                        this.viewGeneratorThumbsIterator++;
+                    thumb, undefined).then((image) => {
+                        if (thumb === this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator].fileThumbnail) {
+                            this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator].add(
+                                new InlineBlock(this.textureAttributes(image)),
+                                new Block(this.thumbTextContainerAttributes).add(
+                                    new Text(this.thumbTextAttributes(this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator].fileNameButton))
+                                )
+                            );
+                            this.viewGeneratorThumbsIterator++;
+                        }
                         this.viewGeneratorInProgress = false;
                     }).catch(() => {
                         this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator].add(
@@ -917,6 +920,7 @@ export class FileBrowserPanel {
     }
 
     regenerateFileBrowser() {
+        this.viewGeneratorFinished = true;
         deepDelete(this.thumbsContainer);
         this.thumbsContainer.set(this.thumbsContainerAttributes);
         this.fileThumbsToTest = [];
