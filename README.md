@@ -17,7 +17,17 @@
 ## Setup
 
 - Edit `config.ini` providing correct paths
-- Make `init.sh` file executable `chmod u+x init.sh` and run it
+
+    `videos_location` => absolute path to folder containing videos folder and thumbnails folder (eg. for  `/media/videos` set this to `videos_location=/media/videos`)
+    `videos_folder` => main folder where videos are located (eg. for /media/videos/vr set this to `videos_folder=vr`)
+    `thumbnails_folder` => main folder where Thumbnails are located (eg. for /media/videos/thumbnails set this to `thumbnails_folder=thumbnails`)
+    `videos_relative_path` => this is relative path from player folder to videos folder, must be inside www folder (eg. player is in `/var/www/html/web_vr_player` your videos are available via symlink from `/var/www/html/videos` then set this to `videos_relative_path=../videos`)
+    To create symlink => 
+        
+        cd /var/www/html/
+        ln /media/videos videos
+
+- Make `init.sh` file executable `chmod u+x init.sh` and run it. This script downloads ini parser for bash
 - If you don't have Thumbnails generated for your videos and want to use them run `generate_thumbnails.sh` script
 - Finally run `generate_files_json.sh` script to generate `files.json` containing list of VR files for player
 
