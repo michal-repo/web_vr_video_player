@@ -1,28 +1,30 @@
-import { Color, TextureLoader } from '../node_modules/three/build/three.module.js';
-import { Block, Text, InlineBlock, Keyboard } from '../node_modules/three-mesh-ui/build/three-mesh-ui.module.js';
+import { Color, TextureLoader, RingGeometry, MeshBasicMaterial, DoubleSide, Mesh, CircleGeometry } from '../../node_modules/three/build/three.module.js';
+import { Block, Text, InlineBlock, Keyboard } from '../../node_modules/three-mesh-ui/build/three-mesh-ui.module.js';
 
-import Backspace from '../node_modules/three-mesh-ui/examples/assets/backspace.png';
-import Enter from '../node_modules/three-mesh-ui/examples/assets/enter.png';
-import Shift from '../node_modules/three-mesh-ui/examples/assets/shift.png';
+import ThumbnailBlock from './ThumbnailBlock.js';
 
-import deepDelete from '../node_modules/three-mesh-ui/src/utils/deepDelete.js';
+import Backspace from '../../node_modules/three-mesh-ui/examples/assets/backspace.png';
+import Enter from '../../node_modules/three-mesh-ui/examples/assets/enter.png';
+import Shift from '../../node_modules/three-mesh-ui/examples/assets/shift.png';
 
-import FontJSON from '../assets/fonts/Roboto-Regular-msdf.json';
-import FontImage from '../assets/fonts/Roboto-Regular.png';
+import deepDelete from '../../node_modules/three-mesh-ui/src/utils/deepDelete.js';
 
-import * as MAIN from './index.js';
+import FontJSON from '../../assets/fonts/Roboto-Regular-msdf.json';
+import FontImage from '../../assets/fonts/Roboto-Regular.png';
 
-import * as UI from './UI.js';
+import * as MAIN from '../index.js';
 
-import * as Helpers from './Helpers.js';
+import * as UI from '../UI.js';
 
-import * as ScreenManager from './ScreenManager.js';
+import * as Helpers from '../Helpers.js';
+
+import * as ScreenManager from '../ScreenManager.js';
 
 // Import Icons
-import LeftIcon from '../assets/icons/left-arrow.png';
-import RightIcon from '../assets/icons/right-arrow.png';
-import VideoIcon from '../assets/icons/video.png';
-import FolderIcon from '../assets/icons/folder.png';
+import LeftIcon from '../../assets/icons/left-arrow.png';
+import RightIcon from '../../assets/icons/right-arrow.png';
+import VideoIcon from '../../assets/icons/video.png';
+import FolderIcon from '../../assets/icons/folder.png';
 
 export class FileBrowserPanel {
 
@@ -30,6 +32,8 @@ export class FileBrowserPanel {
     foldersContainer;
     thumbsContainer;
     draggingBox;
+
+    shouldVerifyVideoSRC;
 
     defaultVideoThumbnail;
 
@@ -53,9 +57,13 @@ export class FileBrowserPanel {
     buttonLeft;
     buttonRight;
 
-    fileThumbsToTest = [];
-    foldersButtonsToTest = [];
+    loadingAnimatedObj;
+    loadingAnimatedObjBackground;
+
+    fileBrowserObjectsToTest = [];
+    foldersButtons = [];
     keyboardObjsToTest = [];
+    defaultObjsToTest = [];
 
     VIDEOS = [];
     FILES = [];
@@ -181,33 +189,39 @@ export class FileBrowserPanel {
     // It must contain a 'state' parameter, which you will refer to with component.setState( 'name-of-the-state' ).
 
     hoveredStateAttributes = {
+        offset: 0.035,
+        backgroundColor: new Color(0xffff00),
+        backgroundOpacity: 1,
+        fontColor: new Color(0x000000)
+    };
+
+    hoveredState = {
         state: 'hovered',
-        attributes: {
-            offset: 0.035,
-            backgroundColor: new Color(0xffff00),
-            backgroundOpacity: 1,
-            fontColor: new Color(0x000000)
-        },
+        attributes: this.hoveredStateAttributes
     };
 
     idleStateAttributes = {
+        offset: 0.035,
+        backgroundColor: new Color(0x4f4f4f),
+        backgroundOpacity: 1,
+        fontColor: new Color(0xffffff)
+    };
+
+    idleState = {
         state: 'idle',
-        attributes: {
-            offset: 0.035,
-            backgroundColor: new Color(0x4f4f4f),
-            backgroundOpacity: 1,
-            fontColor: new Color(0xffffff)
-        },
+        attributes: this.idleStateAttributes
     };
 
     folderActiveIdleStateAttributes = {
+        offset: 0.035,
+        backgroundColor: new Color(0x008e7f),
+        backgroundOpacity: 1,
+        fontColor: new Color(0xffffff)
+    };
+
+    folderActiveIdleState = {
         state: 'idle',
-        attributes: {
-            offset: 0.035,
-            backgroundColor: new Color(0x008e7f),
-            backgroundOpacity: 1,
-            fontColor: new Color(0xffffff)
-        },
+        attributes: this.folderActiveIdleStateAttributes,
     };
 
     selectedAttributes = {
@@ -221,9 +235,10 @@ export class FileBrowserPanel {
     // CONSTRUCT
     //////////////////////////////////////////////////////////////////////////////
 
-    constructor(files) {
+    constructor(files, shouldVerifyVideoSRC = false) {
 
         this.defaultVideoThumbnail = this.loader.load(VideoIcon);
+        this.shouldVerifyVideoSRC = shouldVerifyVideoSRC;
 
         if (files.videos) {
             this.VIDEOS = files.videos;
@@ -232,6 +247,21 @@ export class FileBrowserPanel {
             this.TOTAL_PAGES = (Math.ceil(this.FILES.length / (this.FILES_PER_ROW * this.FILES_ROWS))) - 1;
         }
 
+        const circle = new CircleGeometry(2, 32);
+        const loadingAnimatedObjBackgroundMaterial = new MeshBasicMaterial({ color: 0x000000 });
+        this.loadingAnimatedObjBackground = new Mesh(circle, loadingAnimatedObjBackgroundMaterial);
+        MAIN.scene.add(this.loadingAnimatedObjBackground);
+        this.loadingAnimatedObjBackground.position.set(0, 1.4, this.CENTERPANELZDISTANCE + 0.18);
+        this.loadingAnimatedObjBackground.scale.set(0.1, 0.1, 0.1);
+        this.loadingAnimatedObjBackground.visible = false;
+
+        const ring = new RingGeometry(1, 1.5, 32, 1, Math.PI * 0.5, Math.PI * 1.5);
+        const loadingAnimatedObjMaterial = new MeshBasicMaterial({ color: 0xffff00, side: DoubleSide });
+        this.loadingAnimatedObj = new Mesh(ring, loadingAnimatedObjMaterial);
+        MAIN.scene.add(this.loadingAnimatedObj);
+        this.loadingAnimatedObj.position.set(0, 1.4, this.CENTERPANELZDISTANCE + 0.2);
+        this.loadingAnimatedObj.scale.set(0.1, 0.1, 0.1);
+        this.loadingAnimatedObj.visible = false;
 
         // Buttons
 
@@ -251,8 +281,8 @@ export class FileBrowserPanel {
                 this.PreviousPage();
             }
         });
-        this.buttonLeft.setupState(this.hoveredStateAttributes);
-        this.buttonLeft.setupState(this.idleStateAttributes);
+        this.buttonLeft.setupState(this.hoveredState);
+        this.buttonLeft.setupState(this.idleState);
 
         // Right
         this.buttonRight = new Block(this.bigButtonAttributes);
@@ -270,8 +300,8 @@ export class FileBrowserPanel {
                 this.NextPage();
             }
         });
-        this.buttonRight.setupState(this.hoveredStateAttributes);
-        this.buttonRight.setupState(this.idleStateAttributes);
+        this.buttonRight.setupState(this.hoveredState);
+        this.buttonRight.setupState(this.idleState);
 
         //////////////////////////////////////////////////
 
@@ -339,9 +369,9 @@ export class FileBrowserPanel {
                         }
                     }
                 });
-                folderButton.setupState(this.hoveredStateAttributes);
+                folderButton.setupState(this.hoveredState);
                 this.foldersContainer.add(folderButton);
-                this.foldersButtonsToTest.push(folderButton);
+                this.foldersButtons.push(folderButton);
             }
             this.foldersButtonsIdleState();
 
@@ -413,7 +443,7 @@ export class FileBrowserPanel {
                         this.prepareFilesWithSearchPhrase();
                     }
                     this.keyboard.visible = false;
-                    UI.registerNewObjectsToTest(this.fileThumbsToTest);
+                    UI.registerNewObjectsToTest(this.fileBrowserObjectsToTest);
                     this.regenerateFileBrowser();
                 }
             }
@@ -694,12 +724,8 @@ export class FileBrowserPanel {
 
         this.fileBrowserContainer.add(this.buttonRight);
 
-        this.fileThumbsToTest = this.foldersButtonsToTest.slice();
-        this.fileThumbsToTest.push(this.buttonLeft, this.buttonRight);
-
-        if (this.FILES.length > 0 && this.defaultVideoThumbnail !== undefined) {
-            this.generateView();
-        }
+        this.defaultObjsToTest = this.foldersButtons.slice();
+        this.defaultObjsToTest.push(this.buttonLeft, this.buttonRight);
 
         this.fileBrowserContainer.position.set(0, 1.4, this.CENTERPANELZDISTANCE);
 
@@ -743,13 +769,16 @@ export class FileBrowserPanel {
                 ScreenManager.stopDrag("files");
             }
         });
-        this.fileThumbsToTest.push(this.draggingBox);
+        this.defaultObjsToTest.push(this.draggingBox);
 
-        this.fileThumbsToTest.push(this.searchContainer);
-        this.fileThumbsToTest.push(this.clearSearch);
-        this.fileThumbsToTest.push(this.sortByDate);
-        this.fileThumbsToTest.push(this.sortByName);
-        this.fileThumbsToTest.push(this.sortDirectionBlock);
+        this.defaultObjsToTest.push(this.searchContainer);
+        this.defaultObjsToTest.push(this.clearSearch);
+        this.defaultObjsToTest.push(this.sortByDate);
+        this.defaultObjsToTest.push(this.sortByName);
+        this.defaultObjsToTest.push(this.sortDirectionBlock);
+
+        // Finally add defaultObjsToTest to main array used for testing.
+        this.fileBrowserObjectsToTest = this.defaultObjsToTest.slice();
         //////////////////////////////////////////////////////////////////////
 
         this.keyboardObjsToTest = this.makeKeyboard(this.searchText, this.searchTextSetContent);
@@ -762,14 +791,19 @@ export class FileBrowserPanel {
 
         //////////////////////////////////////////////////////////////////////
 
-        MAIN.registerObjectToRecenter(this.draggingBox, "files");
-        MAIN.registerObjectToRecenter(this.searchContainer, "files");
-        MAIN.registerObjectToRecenter(this.clearSearch, "files");
-        MAIN.registerObjectToRecenter(this.keyboard, "files");
-        MAIN.registerObjectToRecenter(this.foldersContainer, "files");
-        MAIN.registerObjectToRecenter(this.fileBrowserContainer, "files");
-        MAIN.registerObjectToRecenter(this.sortContainer, "files");
+        MAIN.registerObjectToDrag(this.draggingBox, "files");
+        MAIN.registerObjectToDrag(this.searchContainer, "files");
+        MAIN.registerObjectToDrag(this.clearSearch, "files");
+        MAIN.registerObjectToDrag(this.keyboard, "files");
+        MAIN.registerObjectToDrag(this.foldersContainer, "files");
+        MAIN.registerObjectToDrag(this.fileBrowserContainer, "files");
+        MAIN.registerObjectToDrag(this.sortContainer, "files");
+        MAIN.registerObjectToDrag(this.loadingAnimatedObj, "files");
+        MAIN.registerObjectToDrag(this.loadingAnimatedObjBackground, "files");
 
+        if (this.FILES.length > 0 && this.defaultVideoThumbnail !== undefined) {
+            this.generateView();
+        }
     }
 
     prepareFilesWithSearchPhrase() {
@@ -798,32 +832,23 @@ export class FileBrowserPanel {
                     endOfFiles = true;
                     break;
                 }
-                const thumb = new Block(this.thumbButtonContainerAttributes);
-                thumb.fileSRC = this.FILES[iterate].src;
-                thumb.fileNameButton = this.FILES[iterate].name.replace(/[^ qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890,\.\/\?;:\'"\[\{\}\]=\+-_!@#\$%\^\&\*\(\)\\\|\`\~]+/, '');
-                thumb.fileThumbnail = this.FILES[iterate].thumbnail;
-                const screen_type = this.FILES[iterate].screen_type;
 
-                //
-
-                thumb.setupState({
-                    state: 'selected',
-                    attributes: this.selectedAttributes,
-                    onSet: () => {
-                        const response = Helpers.testIfFileExist(thumb.fileSRC);
-                        if (response) {
-                            Helpers.setVideoSrc(thumb.fileSRC);
-                            this.hideFileMenuPanel(screen_type);
-                        } else {
-                            MAIN.showPopupMessage("Video file not found.");
-                        }
-                    }
-                });
-                thumb.setupState(this.hoveredStateAttributes);
-                thumb.setupState(this.idleStateAttributes);
+                const thumb = new ThumbnailBlock(
+                    this.thumbButtonContainerAttributes,
+                    this.FILES[iterate].src,
+                    this.FILES[iterate].name.replace(/[^ qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890,\.\/\?;:\'"\[\{\}\]=\+-_!@#\$%\^\&\*\(\)\\\|\`\~]+/, ''),
+                    this.FILES[iterate].thumbnail,
+                    this.FILES[iterate].screen_type,
+                    (this.FILES[iterate].frame_height ? this.FILES[iterate].frame_height : "1"),
+                    (this.FILES[iterate].frame_width ? this.FILES[iterate].frame_width : "1"),
+                    this.selectedAttributes,
+                    this.hoveredStateAttributes,
+                    this.idleStateAttributes,
+                    this.shouldVerifyVideoSRC
+                );
 
                 thumbsContainerButtonsRow.add(thumb);
-                this.fileThumbsToTest.push(thumb);
+                this.fileBrowserObjectsToTest.push(thumb);
                 this.viewGeneratorThumbs.push(thumb);
                 iterate++;
                 addedThumbs++;
@@ -923,13 +948,12 @@ export class FileBrowserPanel {
         this.viewGeneratorFinished = true;
         deepDelete(this.thumbsContainer);
         this.thumbsContainer.set(this.thumbsContainerAttributes);
-        this.fileThumbsToTest = [];
-        this.fileThumbsToTest = this.foldersButtonsToTest.slice();
-        this.fileThumbsToTest.push(this.buttonLeft, this.buttonRight, this.draggingBox, this.searchContainer, this.clearSearch, this.sortByDate, this.sortByName, this.sortDirectionBlock);
+        this.fileBrowserObjectsToTest = [];
+        this.fileBrowserObjectsToTest = this.defaultObjsToTest.slice();
 
         this.generateView();
 
-        UI.registerNewObjectsToTest(this.fileThumbsToTest);
+        UI.registerNewObjectsToTest(this.fileBrowserObjectsToTest);
     }
 
     PreviousPage() {
@@ -950,7 +974,7 @@ export class FileBrowserPanel {
     // Hide / Show Menu
 
     showFileMenuPanel() {
-        UI.showMenu([this.fileBrowserContainer, this.foldersContainer, this.draggingBox, this.searchContainer, this.clearSearch, this.sortContainer], this.fileThumbsToTest, true);
+        UI.showMenu([this.fileBrowserContainer, this.foldersContainer, this.draggingBox, this.searchContainer, this.clearSearch, this.sortContainer], this.fileBrowserObjectsToTest, true);
         Helpers.removeVideoSrc();
         MAIN.playbackChange(false);
     }
@@ -998,6 +1022,9 @@ export class FileBrowserPanel {
             shiftTexture: Shift,
             enterTexture: Enter
         });
+
+        // this.keyboard.position.set(0, 0, -1);
+        // keyboard.rotation.x = -0.55;
 
         //
 
@@ -1059,7 +1086,7 @@ export class FileBrowserPanel {
                                 } else {
                                     this.prepareFilesWithSearchPhrase();
                                 }
-                                UI.registerNewObjectsToTest(this.fileThumbsToTest);
+                                UI.registerNewObjectsToTest(this.fileBrowserObjectsToTest);
                                 this.regenerateFileBrowser();
                                 break;
 
@@ -1094,12 +1121,12 @@ export class FileBrowserPanel {
     }
 
     foldersButtonsIdleState() {
-        this.foldersButtonsToTest.forEach((folder) => {
+        this.foldersButtons.forEach((folder) => {
             if (folder.folderIndex === this.FOLDER) {
-                folder.setupState(this.folderActiveIdleStateAttributes);
+                folder.setupState(this.folderActiveIdleState);
                 folder.set({ backgroundColor: this.sortActiveColor });
             } else {
-                folder.setupState(this.idleStateAttributes);
+                folder.setupState(this.idleState);
                 folder.set({ backgroundColor: new Color(0x4f4f4f) });
             }
         });
@@ -1126,5 +1153,16 @@ export class FileBrowserPanel {
 
         this.sortByName.set({ backgroundColor: this.sortByNameColorRef });
         this.sortByDate.set({ backgroundColor: this.sortByDateColorRef });
+    }
+
+    loadingAnimation() {
+        if (this.viewGeneratorFinished === false) {
+            this.loadingAnimatedObj.visible = true;
+            this.loadingAnimatedObjBackground.visible = true;
+            this.loadingAnimatedObj.rotation.z = (this.loadingAnimatedObj.rotation.z - 0.2);
+        } else {
+            this.loadingAnimatedObj.visible = false;
+            this.loadingAnimatedObjBackground.visible = false;
+        }
     }
 }

@@ -8,7 +8,9 @@ import ThreeMeshUI from '../node_modules/three-mesh-ui/build/three-mesh-ui.modul
 import VRControl from '../node_modules/three-mesh-ui/examples/utils/VRControl.js';
 
 import { PlayerPanel } from './PlayerPanelUI.js';
-import { FileBrowserPanel } from './FileBrowserPanelUI.js';
+import { FileBrowserPanel } from './FileBrowser/FileBrowserPanelUI.js';
+import VideoEntry from './FileBrowser/VideoEntry.js';
+import FolderEntry from './FileBrowser/FolderEntry.js';
 import * as ScreenManager from './ScreenManager.js';
 import * as UI from './UI.js';
 
@@ -17,11 +19,13 @@ export let clickedButton = undefined;
 export let playMenuPanel;
 export let fileBrowserPanel;
 export let camToSave = {};
-export const objectsToRecenter = {};
+export const objectsToDrag = {};
 
 let popupMessage, popupContainer;
 import FontJSON from '../assets/fonts/Roboto-Regular-msdf.json';
 import FontImage from '../assets/fonts/Roboto-Regular.png';
+
+const verifyVideoSRC = true;
 
 export let hiddenSphere;
 const CAMERAPOSITIONY = 1.6;
@@ -106,22 +110,26 @@ function init() {
 
 	// screen mode
 
-	const geometryScreen = new THREE.SphereGeometry(120, 60, 40, (Math.PI / 16 + Math.PI / 4 + Math.PI), (Math.PI / 4 + Math.PI / 8), (Math.PI / 4 + Math.PI / 8), Math.PI / 4);
+	// const geometryScreen = new THREE.SphereGeometry(120, 60, 40, (Math.PI / 16 + Math.PI / 4 + Math.PI), (Math.PI / 4 + Math.PI / 8), (Math.PI / 4 + Math.PI / 8), Math.PI / 4);
+	const geometryScreen = new THREE.PlaneGeometry(60, 60);
 	// invert the geometry on the x-axis so that all of the faces point inward
-	geometryScreen.scale(- 1, 1, 1);
+	// geometryScreen.scale(- 1, 1, 1);
 
 	meshForScreenMode = new THREE.Mesh(geometryScreen, material);
 	meshForScreenMode.visible = false;
 	scene.add(meshForScreenMode);
-
+	meshForScreenMode.position.setZ(-75);
+	meshForScreenMode.position.setY(CAMERAPOSITIONY);
+	meshForScreenMode.scale.x = 1.5;
 
 	/////// EYES
 	const geometryLeftSBS = new THREE.SphereGeometry(120, 60, 40, Math.PI, Math.PI);
 	// invert the geometry on the x-axis so that all of the faces point inward
 	geometryLeftSBS.scale(- 1, 1, 1);
-	const geometryLeftTB = geometryLeftSBS.clone();
+	const geometryLeftTB = new THREE.SphereGeometry(120, 60, 40, Math.PI / 2 + Math.PI / 4, Math.PI + Math.PI / 2);
+	geometryLeftTB.scale(- 1, 1, 1);
 	const geometryRightSBS = geometryLeftSBS.clone();
-	const geometryRightTB = geometryLeftSBS.clone();
+	const geometryRightTB = geometryLeftTB.clone();
 
 	//// left eye
 	// SBS
@@ -197,13 +205,13 @@ function init() {
 
 
 	// register for recenter
-	registerObjectToRecenter(meshLeftSBS, "player");
-	registerObjectToRecenter(meshLeftTB, "player");
-	registerObjectToRecenter(meshRightSBS, "player");
-	registerObjectToRecenter(meshRightTB, "player");
-	registerObjectToRecenter(mesh2dSBS, "player");
-	registerObjectToRecenter(mesh2dTB, "player");
-	registerObjectToRecenter(meshForScreenMode, "player");
+	registerObjectToDrag(meshLeftSBS, "player");
+	registerObjectToDrag(meshLeftTB, "player");
+	registerObjectToDrag(meshRightSBS, "player");
+	registerObjectToDrag(meshRightTB, "player");
+	registerObjectToDrag(mesh2dSBS, "player");
+	registerObjectToDrag(mesh2dTB, "player");
+	registerObjectToDrag(meshForScreenMode, "player");
 	meshes = { meshLeftSBS: meshLeftSBS, meshRightSBS: meshRightSBS, meshLeftTB: meshLeftTB, meshRightTB: meshRightTB, mesh2dSBS: mesh2dSBS, mesh2dTB: mesh2dTB, meshForScreenMode: meshForScreenMode };
 
 	//////////
@@ -272,20 +280,6 @@ function init() {
 	UI.objsToTest.push(hiddenSphere);
 	playMenuPanel = new PlayerPanel(video);
 
-	let json_file = document.getElementById('json_file').innerText;
-
-	fetch(json_file)
-		.then(response => response.json())
-		.then(json => fileBrowserPanel = new FileBrowserPanel(json))
-		.then(a => fileBrowserPanel.showFileMenuPanel())
-		.then(a => ScreenManager.savePositions("fileBrowserPanel"))
-		.catch((error) => {
-			console.error('Error:', error);
-			alert('Failed parsing json file, check console for details.');
-		});
-
-
-
 	////////////////////////////////////////
 	popupContainer = new ThreeMeshUI.Block({
 		justifyContent: 'center',
@@ -331,7 +325,78 @@ function init() {
 
 	renderer.xr.addEventListener('sessionend', ScreenManager.vrsessionend);
 
+	//
+
+	if (document.getElementById('json_file')) {
+		let json_file = document.getElementById('json_file').innerText;
+
+		fetch(json_file)
+			.then(response => response.json())
+			.then(json => fileBrowserPanel = new FileBrowserPanel(json, verifyVideoSRC))
+			.then(a => fileBrowserPanel.showFileMenuPanel())
+			.then(a => ScreenManager.savePositions("fileBrowserPanel"))
+			.catch((error) => {
+				console.error('Error:', error);
+				alert('Failed parsing json file, check console for details.');
+			});
+	} else if (document.getElementById('stashapp')) {
+		let stashappURL = document.getElementById('stashapp').innerText;
+
+		fetch(stashappURL + (stashappURL.substring(stashappURL.length - 1) == '/' ? '' : '/') + 'graphql', {
+			method: "POST",
+			cache: "no-cache",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({ "query": "{ allScenes {title file_mod_time files {width height} paths { screenshot stream } studio { id name } tags { id name } } }" }),
+		}).then(response => response.json())
+			.then(jsonRaw => processStashAppData(jsonRaw))
+			.then(json => fileBrowserPanel = new FileBrowserPanel(json))
+			.then(a => fileBrowserPanel.showFileMenuPanel())
+			.then(a => ScreenManager.savePositions("fileBrowserPanel"))
+			.catch((error) => {
+				console.error('Error:', error);
+				alert('Failed parsing json file, check console for details.');
+			});;
+	} else {
+		MAIN.showPopupMessage("Video file not found.");
+	}
+
+	//
+
 	setTimeout(setLoop, 500);
+}
+
+function processStashAppData(json) {
+	let preparedJson = { "videos": [] };
+	let folders = [];
+	json.data.allScenes.forEach((scene) => {
+		if (scene.tags.filter(obj => { if (obj.name === 'VR' || obj.name === 'SBS' || obj.name === 'TB' || obj.name === 'SCREEN') { return true; } else { return false } })) {
+			let screen_type = "sbs";
+			scene.tags.forEach((tag) => {
+				switch (tag.name) {
+					case "SBS":
+						screen_type = 'sbs';
+						break;
+					case "TB":
+						screen_type = 'tb';
+						break;
+					case "SCREEN":
+						screen_type = 'screen';
+						break;
+				}
+			});
+			let epoch = Date.parse(scene.file_mod_time);
+			if (preparedJson.videos[folders[scene.studio.name] - 1]) {
+				preparedJson.videos[folders[scene.studio.name] - 1].list.push(new VideoEntry(scene.title, scene.paths.stream, scene.paths.screenshot, screen_type, scene.files[0].height, scene.files[0].width, scene.file_mod_time, epoch));
+			} else {
+				folders.push(scene.studio.name);
+				folders[scene.studio.name] = preparedJson.videos.push(new FolderEntry(scene.studio.name));
+				preparedJson.videos[folders[scene.studio.name] - 1].list.push(new VideoEntry(scene.title, scene.paths.stream, scene.paths.screenshot, screen_type, scene.files[0].height, scene.files[0].width, scene.file_mod_time, epoch));
+			}
+		}
+	});
+	return preparedJson;
 }
 
 function setLoop() {
@@ -476,6 +541,7 @@ function loop() {
 
 	// Execute Thumbnails Loader
 	if (fileBrowserPanel !== undefined) {
+		fileBrowserPanel.loadingAnimation();
 		fileBrowserPanel.generateThumbnails();
 	}
 }
@@ -577,11 +643,15 @@ function raycast() {
 
 }
 
-export function registerObjectToRecenter(obj, view) {
-	if (!(view in objectsToRecenter)) {
-		objectsToRecenter[view] = [];
+export function registerObjectToDrag(obj, view) {
+	if (!(view in objectsToDrag)) {
+		objectsToDrag[view] = [];
 	}
-	objectsToRecenter[view].push(obj);
+	objectsToDrag[view].push(obj);
+}
+
+export function scaleScreenMesh(x_scale) {
+	meshForScreenMode.scale.x = x_scale;
 }
 
 if (WebGL.isWebGLAvailable()) {

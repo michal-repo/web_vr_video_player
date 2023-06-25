@@ -98,7 +98,7 @@ export class HiddenSphere {
             }
         });
 
-        MAIN.registerObjectToRecenter(this.hiddenSphere, "player");
+        MAIN.registerObjectToDrag(this.hiddenSphere, "player");
 
         return this.hiddenSphere;
     }

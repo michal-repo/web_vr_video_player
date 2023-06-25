@@ -16,6 +16,8 @@
 
 ## Setup
 
+### Using JSON solution and provided Python scripts
+
 - Edit `config.ini` providing correct paths
 
     `videos_location` => absolute path to folder containing videos folder and thumbnails folder (eg. for  `/media/videos` set this to `videos_location=/media/videos`)
@@ -34,6 +36,16 @@
 - Make `init.sh` file executable `chmod u+x init.sh` and run it. This script downloads ini parser for bash
 - If you don't have Thumbnails generated for your videos and want to use them run `generate_thumbnails.sh` script
 - Finally run `generate_files_json.sh` script to generate `files.json` containing list of VR files for player
+
+Script can set screen type based on file name. Add one of following at the end of file name: `_TB` (Top-Bottom), `_SCREEN`. Default screen type is Side-by-Side.
+
+### Stashapp
+
+For stashapp comment json span in index and uncomment stashapp span, then provide url to app (it must be configured with SSL, browser will blocking mixed content if you use http)
+
+Tag your videos with one of these tags: `SBS`, `VR` (screen type is SBS), `TB`, `SCREEN`
+
+Videos are organized by Studios.
 
 ## Generating your own JSON file with video sources
 Player is using locally stored JSON file with video sources. It's configured in `index.html`, where you can provide your JSON file name:
@@ -119,6 +131,8 @@ Player is using locally stored JSON file with video sources. It's configured in 
                     "src": "../videos/Movies/The%20Good%20the%20Bad%20and%20the%20Ugly.mp4",
                     "thumbnail": "../videos/Thumbnails/Movies/The%20Good%20the%20Bad%20and%20the%20Ugly.jpg",
                     "screen_type": "screen",
+                    "frame_height": "720",
+                    "frame_width": "1280",
                     "date": "2023-01-10 15:05:50",
                     "epoch": "1673359550.854825"
                 },

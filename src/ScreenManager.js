@@ -247,8 +247,8 @@ export function force2DMode(bool) {
 export let dragging = false;
 
 export function startDrag(view) {
-	if (MAIN.renderer.xr.isPresenting && !dragging && view in MAIN.objectsToRecenter) {
-		MAIN.objectsToRecenter[view].forEach((obj) => {
+	if (MAIN.renderer.xr.isPresenting && !dragging && view in MAIN.objectsToDrag) {
+		MAIN.objectsToDrag[view].forEach((obj) => {
 			MAIN.vrControl.controllers[MAIN.vrControlCurrentlyUsedController].attach(obj);
 		});
 		dragging = true;
@@ -256,8 +256,8 @@ export function startDrag(view) {
 }
 
 export function stopDrag(view) {
-	if (MAIN.renderer.xr.isPresenting && dragging && view in MAIN.objectsToRecenter) {
-		MAIN.objectsToRecenter[view].forEach((obj) => {
+	if (MAIN.renderer.xr.isPresenting && dragging && view in MAIN.objectsToDrag) {
+		MAIN.objectsToDrag[view].forEach((obj) => {
 			MAIN.scene.attach(obj);
 		});
 		dragging = false;

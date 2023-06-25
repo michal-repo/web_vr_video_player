@@ -40,6 +40,7 @@ import VRIcon from '../assets/icons/vr-glasses.png';
 import ComputerIcon from '../assets/icons/computer.png';
 import WideScreenIcon from '../assets/icons/wide.png';
 import ResetIcon from '../assets/icons/reset.png';
+import FullScreenIcon from '../assets/icons/fullscreen.png';
 
 export class PlayerPanel {
 
@@ -124,7 +125,7 @@ export class PlayerPanel {
 		backgroundOpacity: 0
 	};
 
-	hideButtonContainerAttributes = {
+	moveButtonContainerAttributes = {
 		width: this.BUTTONSPANELMAXWIDTH / 3,
 		height: 0.15,
 		justifyContent: 'end',
@@ -242,23 +243,27 @@ export class PlayerPanel {
 	// It must contain a 'state' parameter, which you will refer to with component.setState( 'name-of-the-state' ).
 
 	hoveredStateAttributes = {
+		offset: 0.035,
+		backgroundColor: new Color(0xffff00),
+		backgroundOpacity: 1,
+		fontColor: new Color(0x000000)
+	};
+
+	hoveredState = {
 		state: 'hovered',
-		attributes: {
-			offset: 0.035,
-			backgroundColor: new Color(0xffff00),
-			backgroundOpacity: 1,
-			fontColor: new Color(0x000000)
-		},
+		attributes: this.hoveredStateAttributes,
 	};
 
 	idleStateAttributes = {
+		offset: 0.035,
+		backgroundColor: new Color(0x999999),
+		backgroundOpacity: 1,
+		fontColor: new Color(0xffffff)
+	};
+
+	idleState = {
 		state: 'idle',
-		attributes: {
-			offset: 0.035,
-			backgroundColor: new Color(0x999999),
-			backgroundOpacity: 1,
-			fontColor: new Color(0xffffff)
-		},
+		attributes: this.idleStateAttributes,
 	};
 
 	selectedAttributes = {
@@ -340,8 +345,8 @@ export class PlayerPanel {
 		const settingsButton = new Block(this.buttonOptions);
 		const buttonsPlaybackContainer = new Block(this.centerContainerAttributes).add(buttonPause, buttonRew, this.buttonPlay, buttonFF, settingsButton);
 
-		const hideButton = new Block(this.buttonOptions);
-		const hideButtonContainer = new Block(this.hideButtonContainerAttributes).add(hideButton);
+		const moveButton = new Block(this.buttonOptions);
+		const moveButtonContainer = new Block(this.moveButtonContainerAttributes).add(moveButton);
 
 		/////////////////////////////////////////////////////////////////////////////////
 
@@ -414,8 +419,8 @@ export class PlayerPanel {
 			);
 		});
 
-		this.loader.load(HideIcon, (texture) => {
-			hideButton.add(
+		this.loader.load(FullScreenIcon, (texture) => {
+			moveButton.add(
 				new InlineBlock(this.textureAttributes(texture))
 			);
 		});
@@ -430,8 +435,8 @@ export class PlayerPanel {
 				this.playPause();
 			}
 		});
-		this.buttonPlay.setupState(this.hoveredStateAttributes);
-		this.buttonPlay.setupState(this.idleStateAttributes);
+		this.buttonPlay.setupState(this.hoveredState);
+		this.buttonPlay.setupState(this.idleState);
 
 		this.buttonPlay.playbackStarted = () => {
 			this.buttonPlay.remove(this.playIconElement);
@@ -445,8 +450,8 @@ export class PlayerPanel {
 				this.videoPlaybackFFRew("FF");
 			}
 		});
-		buttonFF.setupState(this.hoveredStateAttributes);
-		buttonFF.setupState(this.idleStateAttributes);
+		buttonFF.setupState(this.hoveredState);
+		buttonFF.setupState(this.idleState);
 
 		//
 
@@ -457,8 +462,8 @@ export class PlayerPanel {
 				this.videoPlaybackFFRew("Rew");
 			}
 		});
-		buttonRew.setupState(this.hoveredStateAttributes);
-		buttonRew.setupState(this.idleStateAttributes);
+		buttonRew.setupState(this.hoveredState);
+		buttonRew.setupState(this.idleState);
 
 		//
 
@@ -469,8 +474,8 @@ export class PlayerPanel {
 				this.ExitToMain();
 			}
 		});
-		buttonExitToMain.setupState(this.hoveredStateAttributes);
-		buttonExitToMain.setupState(this.idleStateAttributes);
+		buttonExitToMain.setupState(this.hoveredState);
+		buttonExitToMain.setupState(this.idleState);
 
 		//
 
@@ -494,8 +499,8 @@ export class PlayerPanel {
 				}
 			}
 		});
-		buttonMute.setupState(this.hoveredStateAttributes);
-		buttonMute.setupState(this.idleStateAttributes);
+		buttonMute.setupState(this.hoveredState);
+		buttonMute.setupState(this.idleState);
 		buttonMute.setupState({
 			state: 'idlemuted',
 			attributes: {
@@ -522,22 +527,33 @@ export class PlayerPanel {
 				}
 			}
 		});
-		settingsButton.setupState(this.hoveredStateAttributes);
-		settingsButton.setupState(this.idleStateAttributes);
+		settingsButton.setupState(this.hoveredState);
+		settingsButton.setupState(this.idleState);
 
 		//
 
-		hideButton.setupState({
+		moveButton.setupState({
 			state: 'selected',
 			attributes: this.selectedAttributes,
 			onSet: () => {
-				if (MAIN.hiddenSphere.buttonsVisible) {
-					this.hidePlayMenuPanel();
-				}
+				ScreenManager.startDrag("playerControls");
 			}
 		});
-		hideButton.setupState(this.hoveredStateAttributes);
-		hideButton.setupState(this.idleStateAttributes);
+
+		moveButton.setupState({
+			state: 'hovered',
+			attributes: this.hoveredStateAttributes,
+			onSet: () => {
+				ScreenManager.stopDrag("playerControls");
+			}
+		});
+		moveButton.setupState({
+			state: 'idle',
+			attributes: this.idleStateAttributes,
+			onSet: () => {
+				ScreenManager.stopDrag("playerControls");
+			}
+		});
 
 		// Progress Bar
 
@@ -581,8 +597,8 @@ export class PlayerPanel {
 
 		this.playMenuContainer.add(this.progressBarContainer);
 
-		playMenuContainerButtons.add(buttonExitToMainContainer, buttonMuteContainer, buttonsPlaybackContainer, hideButtonContainer);
-		this.playMenuObjsToTest.push(hideButton, buttonExitToMain, buttonRew, this.buttonPlay, buttonFF, buttonMute, settingsButton, this.progressBarContainer, this.playMenuContainer, MAIN.hiddenSphere);
+		playMenuContainerButtons.add(buttonExitToMainContainer, buttonMuteContainer, buttonsPlaybackContainer, moveButtonContainer);
+		this.playMenuObjsToTest.push(moveButton, buttonExitToMain, buttonRew, this.buttonPlay, buttonFF, buttonMute, settingsButton, this.progressBarContainer, this.playMenuContainer, MAIN.hiddenSphere);
 
 		// Settings container
 
@@ -690,8 +706,8 @@ export class PlayerPanel {
 				this.hideSettingsMenuContainer();
 			}
 		});
-		closeSettingsButton.setupState(this.hoveredStateAttributes);
-		closeSettingsButton.setupState(this.idleStateAttributes);
+		closeSettingsButton.setupState(this.hoveredState);
+		closeSettingsButton.setupState(this.idleState);
 
 		zoomOutButton.setupState({
 			state: 'selected',
@@ -700,8 +716,8 @@ export class PlayerPanel {
 				ScreenManager.zoom("out");
 			}
 		});
-		zoomOutButton.setupState(this.hoveredStateAttributes);
-		zoomOutButton.setupState(this.idleStateAttributes);
+		zoomOutButton.setupState(this.hoveredState);
+		zoomOutButton.setupState(this.idleState);
 
 		zoomInButton.setupState({
 			state: 'selected',
@@ -710,8 +726,8 @@ export class PlayerPanel {
 				ScreenManager.zoom("in");
 			}
 		});
-		zoomInButton.setupState(this.hoveredStateAttributes);
-		zoomInButton.setupState(this.idleStateAttributes);
+		zoomInButton.setupState(this.hoveredState);
+		zoomInButton.setupState(this.idleState);
 
 		zoomResetButton.setupState({
 			state: 'selected',
@@ -720,8 +736,8 @@ export class PlayerPanel {
 				ScreenManager.zoom("reset");
 			}
 		});
-		zoomResetButton.setupState(this.hoveredStateAttributes);
-		zoomResetButton.setupState(this.idleStateAttributes);
+		zoomResetButton.setupState(this.hoveredState);
+		zoomResetButton.setupState(this.idleState);
 
 		tiltUpButton.setupState({
 			state: 'selected',
@@ -730,8 +746,8 @@ export class PlayerPanel {
 				ScreenManager.tilt("up");
 			}
 		});
-		tiltUpButton.setupState(this.hoveredStateAttributes);
-		tiltUpButton.setupState(this.idleStateAttributes);
+		tiltUpButton.setupState(this.hoveredState);
+		tiltUpButton.setupState(this.idleState);
 
 		tiltDownButton.setupState({
 			state: 'selected',
@@ -740,8 +756,8 @@ export class PlayerPanel {
 				ScreenManager.tilt("down");
 			}
 		});
-		tiltDownButton.setupState(this.hoveredStateAttributes);
-		tiltDownButton.setupState(this.idleStateAttributes);
+		tiltDownButton.setupState(this.hoveredState);
+		tiltDownButton.setupState(this.idleState);
 
 		tiltResetButton.setupState({
 			state: 'selected',
@@ -750,8 +766,8 @@ export class PlayerPanel {
 				ScreenManager.tilt("reset");
 			}
 		});
-		tiltResetButton.setupState(this.hoveredStateAttributes);
-		tiltResetButton.setupState(this.idleStateAttributes);
+		tiltResetButton.setupState(this.hoveredState);
+		tiltResetButton.setupState(this.idleState);
 
 		VRModeButton.setupState({
 			state: 'selected',
@@ -760,8 +776,8 @@ export class PlayerPanel {
 				ScreenManager.switchModeVRScreen(ScreenManager.VRMode);
 			}
 		});
-		VRModeButton.setupState(this.hoveredStateAttributes);
-		VRModeButton.setupState(this.idleStateAttributes);
+		VRModeButton.setupState(this.hoveredState);
+		VRModeButton.setupState(this.idleState);
 
 		ScreenModeButton.setupState({
 			state: 'selected',
@@ -770,8 +786,8 @@ export class PlayerPanel {
 				ScreenManager.switchModeVRScreen("screen");
 			}
 		});
-		ScreenModeButton.setupState(this.hoveredStateAttributes);
-		ScreenModeButton.setupState(this.idleStateAttributes);
+		ScreenModeButton.setupState(this.hoveredState);
+		ScreenModeButton.setupState(this.idleState);
 
 		VR2DModeButton.setupState({
 			state: 'selected',
@@ -786,8 +802,8 @@ export class PlayerPanel {
 				}
 			}
 		});
-		VR2DModeButton.setupState(this.hoveredStateAttributes);
-		VR2DModeButton.setupState(this.idleStateAttributes);
+		VR2DModeButton.setupState(this.hoveredState);
+		VR2DModeButton.setupState(this.idleState);
 
 		VRSBSTBModeButton.setupState({
 			state: 'selected',
@@ -802,8 +818,8 @@ export class PlayerPanel {
 				}
 			}
 		});
-		VRSBSTBModeButton.setupState(this.hoveredStateAttributes);
-		VRSBSTBModeButton.setupState(this.idleStateAttributes);
+		VRSBSTBModeButton.setupState(this.hoveredState);
+		VRSBSTBModeButton.setupState(this.idleState);
 
 		// Labels
 		const zoomLabel = new Block(this.bigButtonOptions).add(new Text({
@@ -867,9 +883,13 @@ export class PlayerPanel {
 		});
 		this.playMenuObjsToTest.push(this.draggingBox);
 
-		MAIN.registerObjectToRecenter(this.draggingBox, "player");
-		MAIN.registerObjectToRecenter(this.playMenuContainer, "player");
-		MAIN.registerObjectToRecenter(this.settingsMenuContainer, "player");
+		MAIN.registerObjectToDrag(this.draggingBox, "player");
+		MAIN.registerObjectToDrag(this.playMenuContainer, "player");
+		MAIN.registerObjectToDrag(this.settingsMenuContainer, "player");
+
+		MAIN.registerObjectToDrag(this.draggingBox, "playerControls");
+		MAIN.registerObjectToDrag(this.playMenuContainer, "playerControls");
+		MAIN.registerObjectToDrag(this.settingsMenuContainer, "playerControls");
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////
