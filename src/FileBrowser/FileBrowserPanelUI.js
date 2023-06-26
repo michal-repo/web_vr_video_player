@@ -36,6 +36,7 @@ export class FileBrowserPanel {
     shouldVerifyVideoSRC;
 
     defaultVideoThumbnail;
+    listOfVideoThumbnailTextures = [];
 
     searchContainer;
     searchText;
@@ -822,6 +823,7 @@ export class FileBrowserPanel {
     generateView() {
         let endOfFiles = false;
         this.viewGeneratorThumbs = [];
+        this.listOfVideoThumbnailTextures = [];
         this.viewGeneratorThumbsIterator = 0;
         let iterate = (this.CURRENT_PAGE > 0 ? ((this.FILES_PER_ROW * this.FILES_ROWS) * this.CURRENT_PAGE) : 0);
         for (let index = 0; index < this.FILES_ROWS; index++) {
@@ -867,12 +869,14 @@ export class FileBrowserPanel {
         if (this.viewGeneratorInProgress === false) {
             if (this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator] && this.viewGeneratorFinished === false) {
                 this.viewGeneratorInProgress = true;
-                let thumb = this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator].fileThumbnail
+                let thumb = this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator].fileThumbnail;
                 this.loader.loadAsync(
                     thumb, undefined).then((image) => {
                         if (thumb === this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator].fileThumbnail) {
+                            let inlineBlock = new InlineBlock(this.textureAttributes(image));
+                            this.listOfVideoThumbnailTextures.push(inlineBlock.getBackgroundTexture());
                             this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator].add(
-                                new InlineBlock(this.textureAttributes(image)),
+                                inlineBlock,
                                 new Block(this.thumbTextContainerAttributes).add(
                                     new Text(this.thumbTextAttributes(this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator].fileNameButton))
                                 )
@@ -947,6 +951,7 @@ export class FileBrowserPanel {
     regenerateFileBrowser() {
         this.viewGeneratorFinished = true;
         deepDelete(this.thumbsContainer);
+        this.listOfVideoThumbnailTextures.forEach(texture => { texture.dispose(); });
         this.thumbsContainer.set(this.thumbsContainerAttributes);
         this.fileBrowserObjectsToTest = [];
         this.fileBrowserObjectsToTest = this.defaultObjsToTest.slice();
