@@ -8,6 +8,44 @@
 
 ### Fonts are licensed under the Apache License, Version 2.0.
 
+## Functionality
+### Search in current folder
+Search will filter current folder with provided phrase.
+You can switch folders, search phrase will work until it's cleared.
+
+![Search-box](https://github.com/michal-repo/web_vr_video_player/blob/main/examples/Screenshot_VR_player_4.png?raw=true)
+
+![Search-box-keyboard](https://github.com/michal-repo/web_vr_video_player/blob/main/examples/Screenshot_VR_player_4_1.png?raw=true)
+### Sorting
+Sort by Name or Date, change order ascending/descending.
+
+![Sorting](https://github.com/michal-repo/web_vr_video_player/blob/main/examples/Screenshot_VR_player_5.png?raw=true)
+### Drag in Folders view
+You can reposition Folders view by holding trigger and dragging view using bottom bar.
+
+![drag](https://github.com/michal-repo/web_vr_video_player/blob/main/examples/Screenshot_VR_player_6.png?raw=true)
+### Drag in Player view
+You can reposition Player and Video Spheres by holding trigger and dragging view using bottom bar.
+
+![drag](https://github.com/michal-repo/web_vr_video_player/blob/main/examples/Screenshot_VR_player_7.png?raw=true)
+
+Second options is to reposition only Player controls
+
+![drag](https://github.com/michal-repo/web_vr_video_player/blob/main/examples/Screenshot_VR_player_8.png?raw=true)
+
+*Player controls and spheres will reset to default position on exit from current video playback*
+### Gamepad controls
+#### Playback control
+Thumbstick: 
+- up/down for zoom
+- left/right for rewind and fast forward (10 seconds jumps)
+
+*If there are two connected controllers pressing trigger switches active controller.*
+
+#### Folders view
+Thumbstick: 
+- left/right for switching pages
+
 ## Requirements
 
 - Linux server with installed and configured web server including https (WebXR requires https)
@@ -144,11 +182,6 @@ Player is using locally stored JSON file with video sources. It's configured in 
 }
 ```
 
-## Gamepad controls 
-
-Thumbstick up/down for zoom, left/right for rewind and fast forward.
-If there are two connected controllers pressing trigger switches active controller.
-
 ## Troubleshooting
 
 If videos or player can't be loaded make sure that this app files are owned by web server user (eg. www-data) and that web server user can read video and thumbnail files (eg. www-data is owner or permissions for others include read).
@@ -156,7 +189,9 @@ If videos or player can't be loaded make sure that this app files are owned by w
 ## Screenshots
 
 ![Print-screen-1](https://github.com/michal-repo/web_vr_video_player/blob/main/examples/Screenshot_VR_player_1.png?raw=true)
+
 ![Print-screen-2](https://github.com/michal-repo/web_vr_video_player/blob/main/examples/Screenshot_VR_player_2.png?raw=true)
+
 ![Print-screen-3](https://github.com/michal-repo/web_vr_video_player/blob/main/examples/Screenshot_VR_player_3.png?raw=true)
 
 ## Building
