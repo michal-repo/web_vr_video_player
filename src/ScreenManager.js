@@ -65,6 +65,18 @@ const panels = [
 				ui_name: "meshRightTB",
 				save_as_name: "meshRightTB"
 			},
+			{
+				ui_name: "meshLeft360",
+				save_as_name: "meshLeft360"
+			},
+			{
+				ui_name: "mesh2d360",
+				save_as_name: "mesh2d360"
+			},
+			{
+				ui_name: "meshRight360",
+				save_as_name: "meshRight360"
+			},
 		]
 	},
 	{
@@ -182,6 +194,8 @@ export function switchModeVRScreen(vr_or_screen) {
 			MAIN.meshRightTB.visible = false;
 			MAIN.meshLeftSBS.visible = true;
 			MAIN.meshRightSBS.visible = true;
+			MAIN.meshLeft360.visible = false;
+			MAIN.meshRight360.visible = false;
 			isVRModeUsed = true;
 			VRMode = "sbs";
 			break;
@@ -191,8 +205,21 @@ export function switchModeVRScreen(vr_or_screen) {
 			MAIN.meshRightSBS.visible = false;
 			MAIN.meshLeftTB.visible = true;
 			MAIN.meshRightTB.visible = true;
+			MAIN.meshLeft360.visible = false;
+			MAIN.meshRight360.visible = false;
 			isVRModeUsed = true;
 			VRMode = "tb";
+			break;
+		case "360":
+			MAIN.meshForScreenMode.visible = false;
+			MAIN.meshLeftSBS.visible = false;
+			MAIN.meshRightSBS.visible = false;
+			MAIN.meshLeftTB.visible = false;
+			MAIN.meshRightTB.visible = false;
+			MAIN.meshLeft360.visible = true;
+			MAIN.meshRight360.visible = true;
+			isVRModeUsed = true;
+			VRMode = "360";
 			break;
 		case "screen":
 			MAIN.meshLeftSBS.visible = false;
@@ -200,6 +227,8 @@ export function switchModeVRScreen(vr_or_screen) {
 			MAIN.meshLeftTB.visible = false;
 			MAIN.meshRightTB.visible = false;
 			MAIN.meshForScreenMode.visible = true;
+			MAIN.meshLeft360.visible = false;
+			MAIN.meshRight360.visible = false;
 			isVRModeUsed = false;
 			break;
 	}
@@ -218,6 +247,9 @@ export function switch2d3d(switch_2d_or_3d, forced = false) {
 				} else if (VRMode === 'tb') {
 					MAIN.meshRightTB.visible = false;
 					MAIN.mesh2dTB.visible = true;
+				} else if (VRMode === '360') {
+					MAIN.meshRight360.visible = false;
+					MAIN.mesh2d360.visible = true;
 				}
 				currently_3d = false;
 				break;
@@ -228,6 +260,9 @@ export function switch2d3d(switch_2d_or_3d, forced = false) {
 				} else if (VRMode === 'tb') {
 					MAIN.meshRightTB.visible = true;
 					MAIN.mesh2dTB.visible = false;
+				} else if (VRMode === '360') {
+					MAIN.meshRight360.visible = true;
+					MAIN.mesh2d360.visible = false;
 				}
 				currently_3d = true;
 				break;

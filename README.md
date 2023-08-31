@@ -81,7 +81,7 @@ Script can set screen type based on file name. Add one of following at the end o
 
 For stashapp comment json span in index and uncomment stashapp span, then provide url to app (it must be configured with SSL, browser will blocking mixed content if you use http)
 
-Tag your videos with one of these tags: `SBS`, `VR` (screen type is SBS), `TB`, `SCREEN`
+Tag your videos with one of these tags: `SBS`, `VR` (screen type is SBS), `TB`, `360`, `SCREEN`
 
 Videos are organized by Studios.
 
@@ -117,6 +117,8 @@ Player is using locally stored JSON file with video sources. It's configured in 
 `sbs` - Side by Side
 
 `tb` - Top Bottom
+
+`360` - Top Bottom 360
 
 `screen` - normal 2D screen
 

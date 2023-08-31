@@ -14,7 +14,7 @@ import FolderEntry from './FileBrowser/FolderEntry.js';
 import * as ScreenManager from './ScreenManager.js';
 import * as UI from './UI.js';
 
-export let scene, camera, cameras, renderer, orbitControls, vrControl, vrControlCurrentlyUsedController, gamepad, video, video_src, videoTexture, meshLeftSBS, meshLeftTB, meshRightSBS, meshRightTB, mesh2dSBS, mesh2dTB, meshForScreenMode, meshes;
+export let scene, camera, cameras, renderer, orbitControls, vrControl, vrControlCurrentlyUsedController, gamepad, video, video_src, videoTexture, meshLeftSBS, meshLeftTB, meshRightSBS, meshRightTB, mesh2dSBS, mesh2dTB, meshForScreenMode, meshes, meshLeft360, meshRight360, mesh2d360;
 export let clickedButton = undefined;
 export let playMenuPanel;
 export let fileBrowserPanel;
@@ -130,6 +130,9 @@ function init() {
 	geometryLeftTB.scale(- 1, 1, 1);
 	const geometryRightSBS = geometryLeftSBS.clone();
 	const geometryRightTB = geometryLeftTB.clone();
+	const geometryLeft360 = new THREE.SphereGeometry(240, 120, 80, Math.PI/2);
+	geometryLeft360.scale(- 1, 1, 1);
+	const geometryRight360 = geometryLeft360.clone();
 
 	//// left eye
 	// SBS
@@ -143,6 +146,7 @@ function init() {
 	meshLeftSBS = new THREE.Mesh(geometryLeftSBS, material);
 	meshLeftSBS.layers.set(1); // display in left eye only
 	meshLeftSBS.visible = false;
+	meshLeftSBS.position.setZ(-120);
 	scene.add(meshLeftSBS);
 
 	// mesh for 2d mode
@@ -157,12 +161,14 @@ function init() {
 	for (let i = 1; i < uvsLeftTB.length; i += 2) {
 
 		uvsLeftTB[i] *= 0.5;
+		uvsLeftTB[i] += 0.5;
 
 	}
 
 	meshLeftTB = new THREE.Mesh(geometryLeftTB, material);
 	meshLeftTB.layers.set(1); // display in left eye only
 	meshLeftTB.visible = false;
+	meshLeftTB.position.setZ(-120);
 	scene.add(meshLeftTB);
 
 	// mesh for 2d mode
@@ -172,7 +178,27 @@ function init() {
 	mesh2dTB.visible = false;
 	scene.add(mesh2dTB);
 
+	// 360
+	const uvsLeft360 = geometryLeft360.attributes.uv.array;
+	for (let i = 1; i < uvsLeft360.length; i += 2) {
 
+		uvsLeft360[i] *= 0.5;
+		uvsLeft360[i] += 0.5;
+
+	}
+
+	meshLeft360 = new THREE.Mesh(geometryLeft360, material);
+	meshLeft360.layers.set(1); // display in left eye only
+	meshLeft360.visible = false;
+	meshLeft360.position.setZ(-120);
+	scene.add(meshLeft360);
+
+	// mesh for 2d mode
+
+	mesh2d360 = meshLeft360.clone();
+	mesh2d360.layers.set(2);
+	mesh2d360.visible = false;
+	scene.add(mesh2d360);
 
 	//// right eye
 	// SBS
@@ -187,6 +213,7 @@ function init() {
 	meshRightSBS = new THREE.Mesh(geometryRightSBS, material);
 	meshRightSBS.layers.set(2); // display in right eye only
 	meshRightSBS.visible = false;
+	meshRightSBS.position.setZ(-120);
 	scene.add(meshRightSBS);
 
 	// TB
@@ -194,14 +221,29 @@ function init() {
 	for (let i = 1; i < uvsRightTB.length; i += 2) {
 
 		uvsRightTB[i] *= 0.5;
-		uvsRightTB[i] += 0.5;
 
 	}
 
 	meshRightTB = new THREE.Mesh(geometryRightTB, material);
 	meshRightTB.layers.set(2); // display in left eye only
 	meshRightTB.visible = false;
+	meshRightTB.position.setZ(-120);
 	scene.add(meshRightTB);
+
+	// 360
+
+	const uvsRight360 = geometryRight360.attributes.uv.array;
+	for (let i = 1; i < uvsRight360.length; i += 2) {
+
+		uvsRight360[i] *= 0.5;
+
+	}
+
+	meshRight360 = new THREE.Mesh(geometryRight360, material);
+	meshRight360.layers.set(2); // display in left eye only
+	meshRight360.visible = false;
+	meshRight360.position.setZ(-120);
+	scene.add(meshRight360);
 
 
 	// register for recenter
@@ -212,7 +254,21 @@ function init() {
 	registerObjectToDrag(mesh2dSBS, "player");
 	registerObjectToDrag(mesh2dTB, "player");
 	registerObjectToDrag(meshForScreenMode, "player");
-	meshes = { meshLeftSBS: meshLeftSBS, meshRightSBS: meshRightSBS, meshLeftTB: meshLeftTB, meshRightTB: meshRightTB, mesh2dSBS: mesh2dSBS, mesh2dTB: mesh2dTB, meshForScreenMode: meshForScreenMode };
+	registerObjectToDrag(meshLeft360, "player");
+	registerObjectToDrag(meshRight360, "player");
+	registerObjectToDrag(mesh2d360, "player");
+	meshes = {
+		meshLeftSBS: meshLeftSBS,
+		meshRightSBS: meshRightSBS,
+		meshLeftTB: meshLeftTB, 
+		meshRightTB: meshRightTB, 
+		mesh2dSBS: mesh2dSBS, 
+		mesh2dTB: mesh2dTB, 
+		meshForScreenMode: meshForScreenMode,
+		meshLeft360: meshLeft360,
+		meshRight360: meshRight360,
+		mesh2d360: mesh2d360,
+	};
 
 	//////////
 	// Light
@@ -457,7 +513,19 @@ export function playbackChange(is_active = false, screen_type = null) {
 				ScreenManager.switchModeVRScreen(screen_type);
 			}
 			playMenuPanel.buttonPlay.playbackStarted();
-			playMenuPanel.VRSBSTBModeButtonText.set({ content: (ScreenManager.VRMode === 'tb' ? 'TB' : 'SBS') });
+			switch (ScreenManager.VRMode) {
+				case 'tb':
+					playMenuPanel.VRSBSTBModeButtonText.set({ content: 'TB'});
+					break;
+				case '360':
+					playMenuPanel.VRSBSTBModeButtonText.set({ content: '360'});
+					break;
+				default:
+				case 'sbs':
+					playMenuPanel.VRSBSTBModeButtonText.set({ content: 'SBS'});
+					break;
+			}
+			
 			break;
 		default:
 		case false:

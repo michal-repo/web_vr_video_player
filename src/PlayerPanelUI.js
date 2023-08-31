@@ -813,6 +813,9 @@ export class PlayerPanel {
 					ScreenManager.switchModeVRScreen("tb");
 					this.VRSBSTBModeButtonText.set({ content: "TB" });
 				} else if (ScreenManager.VRMode === 'tb') {
+					ScreenManager.switchModeVRScreen("360");
+					this.VRSBSTBModeButtonText.set({ content: "360" });
+				} else if (ScreenManager.VRMode === '360') {
 					ScreenManager.switchModeVRScreen("sbs");
 					this.VRSBSTBModeButtonText.set({ content: "SBS" });
 				}
