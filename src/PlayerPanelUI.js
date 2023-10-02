@@ -6,7 +6,7 @@ import FontImage from '../assets/fonts/Roboto-Regular.png';
 
 import * as MAIN from './index.js';
 
-import * as ScreenManager from './ScreenManager.js';
+import * as ScreenManager from './ScreenManager/ScreenManager.js';
 
 import * as UI from './UI.js';
 
@@ -312,6 +312,8 @@ export class PlayerPanel {
 		this.playMenuContainer.setupState({ state: 'hovered' });
 		this.playMenuContainer.setupState({ state: 'idle' });
 
+		ScreenManager.registerPanel('playMenuPanel', 'playMenuContainer', 'playMenuContainer');
+
 		////////////////////////////////////////
 
 		// Time elapsed and duration info label
@@ -610,6 +612,7 @@ export class PlayerPanel {
 		this.settingsMenuContainer.setupState({ state: 'selected' });
 		this.settingsMenuContainer.setupState({ state: 'hovered' });
 		this.settingsMenuContainer.setupState({ state: 'idle' });
+		ScreenManager.registerPanel('playMenuPanel', 'settingsMenuContainer', 'settingsMenuContainer');
 
 		const settingsMenuTopBar = new Block(this.settingsRowBlockAttributes);
 		settingsMenuTopBar.set({ justifyContent: 'end', width: (this.SETTINGSPANELMAXWIDTH - this.SETTINGSPANELMAXWIDTH / 16) });
@@ -884,6 +887,7 @@ export class PlayerPanel {
 				ScreenManager.stopDrag("player");
 			}
 		});
+		ScreenManager.registerPanel('playMenuPanel', 'draggingBox', 'draggingBox');
 		this.playMenuObjsToTest.push(this.draggingBox);
 
 		MAIN.registerObjectToDrag(this.draggingBox, "player");

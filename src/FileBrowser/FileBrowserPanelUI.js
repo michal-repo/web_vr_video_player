@@ -18,7 +18,7 @@ import * as UI from '../UI.js';
 
 import * as Helpers from '../Helpers.js';
 
-import * as ScreenManager from '../ScreenManager.js';
+import * as ScreenManager from '../ScreenManager/ScreenManager.js';
 
 // Import Icons
 import LeftIcon from '../../assets/icons/left-arrow.png';
@@ -30,6 +30,9 @@ export class FileBrowserPanel {
 
     fileBrowserContainer;
     foldersContainer;
+    folderIndex = 1;
+    folderPageIndex = 0;
+    MAXFOLDERSPERPAGE = 12;
     thumbsContainer;
     draggingBox;
 
@@ -69,6 +72,7 @@ export class FileBrowserPanel {
     VIDEOS = [];
     FILES = [];
     FOLDER;
+    ACTIVEFOLDER;
 
     FILES_PER_ROW = 4;
     FILES_ROWS = 3;
@@ -232,6 +236,20 @@ export class FileBrowserPanel {
         fontColor: new Color(0x222222)
     };
 
+    foldersContainerAttributes = {
+        justifyContent: 'start',
+        contentDirection: 'column',
+        fontFamily: FontJSON,
+        fontTexture: FontImage,
+        fontSize: 0.12,
+        padding: 0.02,
+        borderRadius: 0,
+        backgroundOpacity: 1,
+        backgroundColor: new Color(0x292929),
+        width: this.PANELMAXWIDTH / 3,
+        height: this.PANELMAXHEIGHT
+    };
+
     //////////////////////////////////////////////////////////////////////////////
     // CONSTRUCT
     //////////////////////////////////////////////////////////////////////////////
@@ -245,6 +263,7 @@ export class FileBrowserPanel {
             this.VIDEOS = files.videos;
             this.FILES = this.VIDEOS[0].list;
             this.FOLDER = 0;
+            this.ACTIVEFOLDER = 1;
             this.TOTAL_PAGES = (Math.ceil(this.FILES.length / (this.FILES_PER_ROW * this.FILES_ROWS))) - 1;
         }
 
@@ -325,56 +344,9 @@ export class FileBrowserPanel {
         this.thumbsContainer = new Block(this.thumbsContainerAttributes);
 
         if (this.VIDEOS.length > 0) {
-            this.foldersContainer = new Block({
-                justifyContent: 'start',
-                contentDirection: 'column',
-                fontFamily: FontJSON,
-                fontTexture: FontImage,
-                fontSize: 0.12,
-                padding: 0.02,
-                borderRadius: 0,
-                backgroundOpacity: 1,
-                backgroundColor: new Color(0x292929),
-                width: this.PANELMAXWIDTH / 3,
-                height: this.PANELMAXHEIGHT
-            });
+            this.foldersContainer = new Block(this.foldersContainerAttributes);
 
-            for (let index = 0; index < this.VIDEOS.length; index++) {
-                const folderButton = new Block({
-                    justifyContent: 'center',
-                    contentDirection: 'row',
-                    height: 0.2,
-                    offset: 0.05,
-                    margin: 0.02,
-                    bestFit: 'shrink',
-                    width: (this.PANELMAXWIDTH / 3) - 0.1,
-                    backgroundOpacity: 1
-                }).add(new Text({ content: this.VIDEOS[index].name }));
-                folderButton.folderIndex = index
-                folderButton.setupState({
-                    state: 'selected',
-                    attributes: this.selectedAttributes,
-                    onSet: () => {
-                        if (this.FOLDER !== index) {
-                            this.CURRENT_PAGE = 0;
-                            this.FOLDER = index;
-                            if (this.searchText.content !== this.defaultSearchText) {
-                                this.prepareFilesWithSearchPhrase();
-                            } else {
-                                this.FILES = this.VIDEOS[index].list;
-                                this.TOTAL_PAGES = (Math.ceil(this.FILES.length / (this.FILES_PER_ROW * this.FILES_ROWS))) - 1;
-                                this.sortFiles(this.activeSorting, this.sortDirection.content.toLowerCase());
-                            }
-                            this.foldersButtonsIdleState();
-                            this.regenerateFileBrowser();
-                        }
-                    }
-                });
-                folderButton.setupState(this.hoveredState);
-                this.foldersContainer.add(folderButton);
-                this.foldersButtons.push(folderButton);
-            }
-            this.foldersButtonsIdleState();
+            this.generateFoldersButtons();
 
             MAIN.scene.add(this.foldersContainer);
             this.foldersContainer.position.set(-3.8, 1.4, this.SIDEPANELZDISTANCE);
@@ -725,7 +697,6 @@ export class FileBrowserPanel {
 
         this.fileBrowserContainer.add(this.buttonRight);
 
-        this.defaultObjsToTest = this.foldersButtons.slice();
         this.defaultObjsToTest.push(this.buttonLeft, this.buttonRight);
 
         this.fileBrowserContainer.position.set(0, 1.4, this.CENTERPANELZDISTANCE);
@@ -779,7 +750,7 @@ export class FileBrowserPanel {
         this.defaultObjsToTest.push(this.sortDirectionBlock);
 
         // Finally add defaultObjsToTest to main array used for testing.
-        this.fileBrowserObjectsToTest = this.defaultObjsToTest.slice();
+        this.resetFileBrowserObjectsToTest();
         //////////////////////////////////////////////////////////////////////
 
         this.keyboardObjsToTest = this.makeKeyboard(this.searchText, this.searchTextSetContent);
@@ -791,6 +762,16 @@ export class FileBrowserPanel {
         MAIN.scene.add(this.keyboard);
 
         //////////////////////////////////////////////////////////////////////
+
+        ScreenManager.registerPanel('fileBrowserPanel', 'draggingBox', 'draggingBox');
+        ScreenManager.registerPanel('fileBrowserPanel', 'searchContainer', 'searchContainer');
+        ScreenManager.registerPanel('fileBrowserPanel', 'clearSearch', 'clearSearch');
+        ScreenManager.registerPanel('fileBrowserPanel', 'keyboard', 'keyboard');
+        ScreenManager.registerPanel('fileBrowserPanel', 'foldersContainer', 'foldersContainer');
+        ScreenManager.registerPanel('fileBrowserPanel', 'fileBrowserContainer', 'fileBrowserContainer');
+        ScreenManager.registerPanel('fileBrowserPanel', 'sortContainer', 'sortContainer');
+        ScreenManager.registerPanel('fileBrowserPanel', 'loadingAnimatedObj', 'loadingAnimatedObj');
+        ScreenManager.registerPanel('fileBrowserPanel', 'loadingAnimatedObjBackground', 'loadingAnimatedObjBackground');
 
         MAIN.registerObjectToDrag(this.draggingBox, "files");
         MAIN.registerObjectToDrag(this.searchContainer, "files");
@@ -953,12 +934,17 @@ export class FileBrowserPanel {
         deepDelete(this.thumbsContainer);
         this.listOfVideoThumbnailTextures.forEach(texture => { texture.dispose(); });
         this.thumbsContainer.set(this.thumbsContainerAttributes);
-        this.fileBrowserObjectsToTest = [];
-        this.fileBrowserObjectsToTest = this.defaultObjsToTest.slice();
+        this.resetFileBrowserObjectsToTest();
 
         this.generateView();
 
         UI.registerNewObjectsToTest(this.fileBrowserObjectsToTest);
+    }
+
+    resetFileBrowserObjectsToTest() {
+        this.fileBrowserObjectsToTest = [];
+        this.fileBrowserObjectsToTest = this.defaultObjsToTest.slice();
+        this.fileBrowserObjectsToTest = this.fileBrowserObjectsToTest.concat(this.foldersButtons.slice());
     }
 
     PreviousPage() {
@@ -973,6 +959,97 @@ export class FileBrowserPanel {
             this.CURRENT_PAGE++;
             this.regenerateFileBrowser();
         }
+    }
+
+    generateFoldersButtons() {
+        let folderIndex = this.folderPageIndex;
+        // for (let index = 0; index < this.VIDEOS.length; index++) {
+        let index = 0;
+        while (index < this.MAXFOLDERSPERPAGE) {
+            if (folderIndex !== 0 && index === 0) {
+                const folderButton = this.createFolderButton(index++, 0, true, "Previous Page", "prev");
+                this.foldersContainer.add(folderButton);
+                this.foldersButtons.push(folderButton);
+            }
+            const folderButton = this.createFolderButton(index++, folderIndex++);
+            this.foldersContainer.add(folderButton);
+            this.foldersButtons.push(folderButton);
+            if (folderIndex >= this.VIDEOS.length) { break; }
+        }
+        if (folderIndex < this.VIDEOS.length) {
+            const folderButton = this.createFolderButton(index, folderIndex, true, "Next Page", "next");
+            this.foldersContainer.add(folderButton);
+            this.foldersButtons.push(folderButton);
+        }
+        this.foldersButtonsIdleState();
+    }
+
+    createFolderButton(id, index, isPageSwitcher = false, pageText = "", pageDirection = "") {
+        const folderButton = new Block({
+            justifyContent: 'center',
+            contentDirection: 'row',
+            height: 0.2,
+            offset: 0.05,
+            margin: 0.02,
+            bestFit: 'shrink',
+            width: (this.PANELMAXWIDTH / 3) - 0.1,
+            backgroundOpacity: 1
+        }).add(new Text({ content: (isPageSwitcher ? pageText : this.VIDEOS[index].name) }));
+        folderButton.folderId = id
+        folderButton.folderIndex = index
+        if (isPageSwitcher) {
+            folderButton.setupState({
+                state: 'selected',
+                attributes: this.selectedAttributes,
+                onSet: () => {
+                    switch (pageDirection) {
+                        case "prev":
+                            this.folderPageIndex = this.folderPageIndex - this.MAXFOLDERSPERPAGE;
+                            break;
+
+                        default:
+                        case "next":
+                            this.folderPageIndex = this.folderPageIndex + this.MAXFOLDERSPERPAGE;
+                            break;
+                    }
+                    this.regenerateFoldersButtons();
+                }
+            });
+        } else {
+            folderButton.setupState({
+                state: 'selected',
+                attributes: this.selectedAttributes,
+                onSet: () => {
+                    if (this.ACTIVEFOLDER !== id) {
+                        this.CURRENT_PAGE = 0;
+                        this.FOLDER = index;
+                        this.ACTIVEFOLDER = id;
+                        if (this.searchText.content !== this.defaultSearchText) {
+                            this.prepareFilesWithSearchPhrase();
+                        } else {
+                            this.FILES = this.VIDEOS[index].list;
+                            this.TOTAL_PAGES = (Math.ceil(this.FILES.length / (this.FILES_PER_ROW * this.FILES_ROWS))) - 1;
+                            this.sortFiles(this.activeSorting, this.sortDirection.content.toLowerCase());
+                        }
+                        this.foldersButtonsIdleState();
+                        this.regenerateFileBrowser();
+                    }
+                }
+            });
+        }
+        folderButton.setupState(this.hoveredState);
+        return folderButton;
+    }
+
+    regenerateFoldersButtons() {
+        deepDelete(this.foldersContainer);
+        this.foldersContainer.set(this.foldersContainerAttributes);
+        this.foldersButtons = [];
+        this.generateFoldersButtons();
+
+        this.resetFileBrowserObjectsToTest();
+
+        UI.registerNewObjectsToTest(this.fileBrowserObjectsToTest);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////

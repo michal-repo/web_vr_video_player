@@ -11,7 +11,7 @@ import { PlayerPanel } from './PlayerPanelUI.js';
 import { FileBrowserPanel } from './FileBrowser/FileBrowserPanelUI.js';
 import VideoEntry from './FileBrowser/VideoEntry.js';
 import FolderEntry from './FileBrowser/FolderEntry.js';
-import * as ScreenManager from './ScreenManager.js';
+import * as ScreenManager from './ScreenManager/ScreenManager.js';
 import * as UI from './UI.js';
 
 export let scene, camera, cameras, renderer, orbitControls, vrControl, vrControlCurrentlyUsedController, gamepad, video, video_src, videoTexture, meshLeftSBS, meshLeftTB, meshRightSBS, meshRightTB, mesh2dSBS, mesh2dTB, meshForScreenMode, meshes, meshLeft360, meshRight360, mesh2d360;
@@ -84,6 +84,7 @@ function init() {
 	camera.layers.enable(1);
 	camera.position.y = CAMERAPOSITIONY;
 	scene.add(camera);
+	ScreenManager.registerPanel('cameras', 'camera', 'camera');
 	cameras = { camera: camera };
 
 	renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
@@ -245,7 +246,16 @@ function init() {
 	meshRight360.position.setZ(-120);
 	scene.add(meshRight360);
 
-
+	ScreenManager.registerMeshPanel('meshLeftSBS', 'meshLeftSBS', '3d', 'sbs', 'left');
+	ScreenManager.registerMeshPanel('meshLeftTB', 'meshLeftTB', '3d', 'tb', 'left');
+	ScreenManager.registerMeshPanel('meshRightSBS', 'meshRightSBS', '3d', 'sbs', 'right');
+	ScreenManager.registerMeshPanel('meshRightTB', 'meshRightTB', '3d', 'tb', 'right');
+	ScreenManager.registerMeshPanel('mesh2dSBS', 'mesh2dSBS', '2d', 'sbs', 'right');
+	ScreenManager.registerMeshPanel('mesh2dTB', 'mesh2dTB', '2d', 'tb', 'right');
+	ScreenManager.registerMeshPanel('meshForScreenMode', 'meshForScreenMode', 'screen', 'screen', 'both');
+	ScreenManager.registerMeshPanel('meshLeft360', 'meshLeft360', '3d', '360', 'left');
+	ScreenManager.registerMeshPanel('meshRight360', 'meshRight360', '3d', '360', 'right');
+	ScreenManager.registerMeshPanel('mesh2d360', 'mesh2d360', '2d', '360', 'right');
 	// register for recenter
 	registerObjectToDrag(meshLeftSBS, "player");
 	registerObjectToDrag(meshLeftTB, "player");
@@ -415,7 +425,7 @@ function init() {
 				alert('Failed parsing json file, check console for details.');
 			});;
 	} else {
-		MAIN.showPopupMessage("Video file not found.");
+		showPopupMessage("No video sources defined.");
 	}
 
 	//

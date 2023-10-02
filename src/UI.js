@@ -2,7 +2,7 @@ import * as THREE from '../node_modules/three/build/three.module.js';
 
 import * as MAIN from './index.js';
 
-import * as ScreenManager from './ScreenManager.js';
+import * as ScreenManager from './ScreenManager/ScreenManager.js';
 
 import * as Helpers from './Helpers.js';
 

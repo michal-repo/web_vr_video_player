@@ -1,4 +1,4 @@
-import { Block, Text, InlineBlock, Keyboard } from '../../node_modules/three-mesh-ui/build/three-mesh-ui.module.js';
+import { Block } from '../../node_modules/three-mesh-ui/build/three-mesh-ui.module.js';
 
 import * as Helpers from '../Helpers.js';
 import { fileBrowserPanel } from '../index.js';
