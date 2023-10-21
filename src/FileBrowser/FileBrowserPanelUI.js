@@ -32,6 +32,7 @@ export class FileBrowserPanel {
     foldersContainer;
     folderIndex = 1;
     folderPageIndex = 0;
+    currentFolderPageIndex = 0;
     MAXFOLDERSPERPAGE = 12;
     thumbsContainer;
     draggingBox;
@@ -1020,10 +1021,12 @@ export class FileBrowserPanel {
                 state: 'selected',
                 attributes: this.selectedAttributes,
                 onSet: () => {
-                    if (this.ACTIVEFOLDER !== id) {
+                    console.log(this.folderPageIndex, this.currentFolderPageIndex, id);
+                    if (this.ACTIVEFOLDER !== id || this.currentFolderPageIndex !== this.folderPageIndex) {
                         this.CURRENT_PAGE = 0;
                         this.FOLDER = index;
                         this.ACTIVEFOLDER = id;
+                        this.currentFolderPageIndex = this.folderPageIndex;
                         if (this.searchText.content !== this.defaultSearchText) {
                             this.prepareFilesWithSearchPhrase();
                         } else {
