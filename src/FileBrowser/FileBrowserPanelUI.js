@@ -46,7 +46,7 @@ export class FileBrowserPanel {
     searchText;
     clearSearch;
     keyboard;
-    defaultSearchText = "Search in folder...";
+    defaultSearchText = Helpers.getWordFromLang('search_in_folders');
 
     sortContainer;
     sortActiveColor = new Color(0xF9DC77);
@@ -412,7 +412,7 @@ export class FileBrowserPanel {
                         this.searchText.set({ content: this.defaultSearchText });
                         this.CURRENT_PAGE = 0;
                         this.FILES = this.VIDEOS[this.FOLDER].list;
-                        this.sortFiles(this.activeSorting, this.sortDirection.content.toLowerCase());
+                        this.sortFiles(this.activeSorting, this.sortDirection.sortDirection);
                     } else {
                         this.prepareFilesWithSearchPhrase();
                     }
@@ -458,7 +458,7 @@ export class FileBrowserPanel {
             fontFamily: FontJSON,
             fontTexture: FontImage,
             fontSize: 0.12,
-            content: "Clear"
+            content: Helpers.getWordFromLang('clear')
         }));
 
         this.clearSearch.setupState({
@@ -469,7 +469,7 @@ export class FileBrowserPanel {
                     this.CURRENT_PAGE = 0;
                     this.FILES = this.VIDEOS[this.FOLDER].list;
                     this.TOTAL_PAGES = (Math.ceil(this.FILES.length / (this.FILES_PER_ROW * this.FILES_ROWS))) - 1;
-                    this.sortFiles(this.activeSorting, this.sortDirection.content.toLowerCase());
+                    this.sortFiles(this.activeSorting, this.sortDirection.sortDirection);
                     this.regenerateFileBrowser();
                 } else if (this.keyboard.visible) {
                     this.searchText.set({ content: '' });
@@ -517,7 +517,8 @@ export class FileBrowserPanel {
             fontFamily: FontJSON,
             fontTexture: FontImage,
             fontSize: 0.12,
-            content: "ASC"
+            content: Helpers.getWordFromLang('ascending'),
+            sortDirection: 'asc'
         });
 
         this.sortDirectionBlock.add(this.sortDirection);
@@ -525,16 +526,18 @@ export class FileBrowserPanel {
         this.sortDirectionBlock.setupState({
             state: 'selected',
             onSet: () => {
-                switch (this.sortDirection.content) {
-                    case 'DESC':
-                        this.sortDirection.set({ content: 'ASC' });
+                switch (this.sortDirection.sortDirection) {
+                    case 'desc':
+                        this.sortDirection.set({ content: Helpers.getWordFromLang('ascending') });
+                        this.sortDirection.sortDirection = 'asc';
                         break;
                     default:
-                    case 'ASC':
-                        this.sortDirection.set({ content: 'DESC' });
+                    case 'asc':
+                        this.sortDirection.set({ content: Helpers.getWordFromLang('descending') });
+                        this.sortDirection.sortDirection = 'desc';
                         break;
                 }
-                this.sortFiles(this.activeSorting, this.sortDirection.content.toLowerCase());
+                this.sortFiles(this.activeSorting, this.sortDirection.sortDirection);
                 this.regenerateFileBrowser();
             }
         });
@@ -575,7 +578,7 @@ export class FileBrowserPanel {
             fontFamily: FontJSON,
             fontTexture: FontImage,
             fontSize: 0.12,
-            content: "Name"
+            content: Helpers.getWordFromLang('name')
         }));
 
         this.sortByName.setupState({
@@ -586,7 +589,7 @@ export class FileBrowserPanel {
                     this.sortByDateColorRef = this.sortInactiveColor;
                     this.sortSetButtonsIdleState();
                     this.activeSorting = 'name';
-                    this.sortFiles(this.activeSorting, this.sortDirection.content.toLowerCase());
+                    this.sortFiles(this.activeSorting, this.sortDirection.sortDirection);
                     this.regenerateFileBrowser();
                 }
             }
@@ -620,7 +623,7 @@ export class FileBrowserPanel {
             fontFamily: FontJSON,
             fontTexture: FontImage,
             fontSize: 0.12,
-            content: "Date"
+            content: Helpers.getWordFromLang('date')
         }));
 
         this.sortByDate.setupState({
@@ -631,7 +634,7 @@ export class FileBrowserPanel {
                     this.sortByNameColorRef = this.sortInactiveColor;
                     this.sortSetButtonsIdleState();
                     this.activeSorting = 'date';
-                    this.sortFiles(this.activeSorting, this.sortDirection.content.toLowerCase());
+                    this.sortFiles(this.activeSorting, this.sortDirection.sortDirection);
                     this.regenerateFileBrowser();
                 }
             }
@@ -678,7 +681,7 @@ export class FileBrowserPanel {
             fontFamily: FontJSON,
             fontTexture: FontImage,
             fontSize: 0.12,
-            content: "Sorting:"
+            content: Helpers.getWordFromLang('sorting') + ":"
         }));
         this.sortContainer.add(label);
         this.sortContainer.add(this.sortByName);
@@ -799,7 +802,7 @@ export class FileBrowserPanel {
         });
         this.FILES = filesList;
         this.TOTAL_PAGES = (Math.ceil(this.FILES.length / (this.FILES_PER_ROW * this.FILES_ROWS))) - 1;
-        this.sortFiles(this.activeSorting, this.sortDirection.content.toLowerCase());
+        this.sortFiles(this.activeSorting, this.sortDirection.sortDirection);
     }
 
     generateView() {
@@ -968,7 +971,7 @@ export class FileBrowserPanel {
         let index = 0;
         while (index < this.MAXFOLDERSPERPAGE) {
             if (folderIndex !== 0 && index === 0) {
-                const folderButton = this.createFolderButton(index++, 0, true, "Previous Page", "prev");
+                const folderButton = this.createFolderButton(index++, 0, true, Helpers.getWordFromLang('previous_page'), "prev");
                 this.foldersContainer.add(folderButton);
                 this.foldersButtons.push(folderButton);
             }
@@ -978,7 +981,7 @@ export class FileBrowserPanel {
             if (folderIndex >= this.VIDEOS.length) { break; }
         }
         if (folderIndex < this.VIDEOS.length) {
-            const folderButton = this.createFolderButton(index, folderIndex, true, "Next Page", "next");
+            const folderButton = this.createFolderButton(index, folderIndex, true, Helpers.getWordFromLang('next_page'), "next");
             this.foldersContainer.add(folderButton);
             this.foldersButtons.push(folderButton);
         }
@@ -1032,7 +1035,7 @@ export class FileBrowserPanel {
                         } else {
                             this.FILES = this.VIDEOS[index].list;
                             this.TOTAL_PAGES = (Math.ceil(this.FILES.length / (this.FILES_PER_ROW * this.FILES_ROWS))) - 1;
-                            this.sortFiles(this.activeSorting, this.sortDirection.content.toLowerCase());
+                            this.sortFiles(this.activeSorting, this.sortDirection.sortDirection);
                         }
                         this.foldersButtonsIdleState();
                         this.regenerateFileBrowser();
@@ -1167,7 +1170,7 @@ export class FileBrowserPanel {
                                 if (target.content === "") {
                                     target.set({ content: this.defaultSearchText });
                                     this.FILES = this.VIDEOS[this.FOLDER].list;
-                                    this.sortFiles(this.activeSorting, this.sortDirection.content.toLowerCase());
+                                    this.sortFiles(this.activeSorting, this.sortDirection.sortDirection);
                                 } else {
                                     this.prepareFilesWithSearchPhrase();
                                 }

@@ -47,7 +47,7 @@ export default class ThumbnailBlock extends Block {
                         Helpers.setVideoSrc(this.fileSRC);
                         fileBrowserPanel.hideFileMenuPanel(this.screen_type);
                     } else {
-                        MAIN.showPopupMessage("Video file not found.");
+                        MAIN.showPopupMessage(Helpers.getWordFromLang('video_not_found'));
                     }
                 }
             });

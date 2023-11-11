@@ -100,6 +100,12 @@ for (root, dirs, files) in os.walk(config['videos']['videos_relative_path']+"/"+
                 screen_type = "tb"
             elif "_SCREEN" in title[-7:]:
                 screen_type = "screen"
+            elif "_2D_180" in title[-7:]:
+                screen_type = "sphere180"
+            elif "_2D_360" in title[-7:]:
+                screen_type = "sphere360"
+            elif "_360" in title[-4:]:
+                screen_type = "360"
             else:
                 screen_type = "sbs"
 

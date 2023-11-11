@@ -77,6 +77,20 @@ Thumbstick:
 
 Script can set screen type based on file name. Add one of following at the end of file name: `_TB` (Top-Bottom), `_SCREEN`. Default screen type is Side-by-Side.
 
+Supported tags:
+
+`_SCREEN` - normal 2D screen
+
+`_SBS` - Side by Side
+
+`_TB` - Top Bottom 180
+
+`_360` - Top Bottom 360
+
+`_2D_180` - fisheye 180, not VR (one lens)
+
+`_2D_360` - fisheye 360, not VR (one lens)
+
 ### Stashapp
 
 For stashapp comment json span in index and uncomment stashapp span, then provide url to app (it must be configured with SSL, browser will blocking mixed content if you use http)
@@ -116,9 +130,13 @@ Player is using locally stored JSON file with video sources. It's configured in 
 
 `sbs` - Side by Side
 
-`tb` - Top Bottom
+`tb` - Top Bottom 180
 
 `360` - Top Bottom 360
+
+`sphere180` - fisheye 180, not VR (one lens)
+
+`sphere360` - fisheye 360, not VR (one lens)
 
 `screen` - normal 2D screen
 

@@ -1,5 +1,9 @@
 let video_src = document.getElementById('video_src');
 
+const LANG = require('./lang.json');
+
+let selected_lang = 'en';
+
 export function videoSrcExists() {
 	if (typeof video_src !== 'undefined' && video_src.src != window.location.href) {
 		return true;
@@ -38,4 +42,8 @@ export function testIfFileExist(url) {
 		console.warn(e);
 		return false;
 	}
+}
+
+export function getWordFromLang(key){
+	return LANG[selected_lang][key];
 }
