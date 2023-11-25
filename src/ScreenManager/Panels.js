@@ -1,10 +1,10 @@
-import * as MAIN from '../index.js';
+import * as MAIN from "../index.js";
 
 export default class PanelsList {
-    cameras
-    playMenuPanel
-    meshes
-    fileBrowserPanel
+    cameras;
+    playMenuPanel;
+    meshes;
+    fileBrowserPanel;
 
     constructor() {
         this.cameras = new Panels();
@@ -13,17 +13,19 @@ export default class PanelsList {
         this.fileBrowserPanel = new Panels();
     }
 
-    addPanel(panel, ui_name, save_as_name) {
-        this[panel].panels.push(new Panel(ui_name, save_as_name));
+    addPanel(ref, panel, ui_name, save_as_name) {
+        this[panel].panels.push(new Panel(ref, ui_name, save_as_name));
     }
 
-    addMesh(ui_name, save_as_name, mode, screen_type, eye) {
-        this.meshes.panels.push(new MeshPanel(ui_name, save_as_name, mode, screen_type, eye));
+    addMesh(ref, ui_name, save_as_name, mode, screen_type, eye) {
+        this.meshes.panels.push(
+            new MeshPanel(ref, ui_name, save_as_name, mode, screen_type, eye)
+        );
     }
 }
 
 class Panels {
-    panels
+    panels;
 
     constructor() {
         this.panels = [];
@@ -31,25 +33,28 @@ class Panels {
 }
 
 class Panel {
-    ui_name
-    save_as_name
+    ui_name;
+    save_as_name;
+    reference;
+    position;
+    rotation;
 
-    constructor(ui_name, save_as_name) {
+    constructor(ref, ui_name, save_as_name) {
+        this.reference = ref;
+        this.position = ref.position.clone();
+        this.rotation = ref.rotation.clone();
         this.ui_name = ui_name;
         this.save_as_name = save_as_name;
     }
 }
 
-class MeshPanel {
-    ui_name
-    save_as_name
-    mode
-    screen_type
-    eye
+class MeshPanel extends Panel {
+    mode;
+    screen_type;
+    eye;
 
-    constructor(ui_name, save_as_name, mode, screen_type, eye) {
-        this.ui_name = ui_name;
-        this.save_as_name = save_as_name;
+    constructor(ref, ui_name, save_as_name, mode, screen_type, eye) {
+        super(ref, ui_name, save_as_name);
         this.mode = mode;
         this.screen_type = screen_type;
         this.eye = eye;
@@ -64,8 +69,10 @@ class MeshPanel {
     }
 
     switch2d3d(switch_2d_or_3d, VRMode) {
-        if ((this.mode === switch_2d_or_3d && this.screen_type === VRMode)
-            || (this.screen_type === VRMode && this.eye === 'left')) {
+        if (
+            (this.mode === switch_2d_or_3d && this.screen_type === VRMode) ||
+            (this.screen_type === VRMode && this.eye === "left")
+        ) {
             MAIN[this.ui_name].visible = true;
         } else {
             MAIN[this.ui_name].visible = false;

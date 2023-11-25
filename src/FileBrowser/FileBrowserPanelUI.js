@@ -1,33 +1,45 @@
-import { Color, TextureLoader, RingGeometry, MeshBasicMaterial, DoubleSide, Mesh, CircleGeometry } from '../../node_modules/three/build/three.module.js';
-import { Block, Text, InlineBlock, Keyboard } from '../../node_modules/three-mesh-ui/build/three-mesh-ui.module.js';
+import {
+    Color,
+    TextureLoader,
+    RingGeometry,
+    MeshBasicMaterial,
+    DoubleSide,
+    Mesh,
+    CircleGeometry,
+} from "../../node_modules/three/build/three.module.js";
+import {
+    Block,
+    Text,
+    InlineBlock,
+    Keyboard,
+} from "../../node_modules/three-mesh-ui/build/three-mesh-ui.module.js";
 
-import ThumbnailBlock from './ThumbnailBlock.js';
+import ThumbnailBlock from "./ThumbnailBlock.js";
 
-import Backspace from '../../node_modules/three-mesh-ui/examples/assets/backspace.png';
-import Enter from '../../node_modules/three-mesh-ui/examples/assets/enter.png';
-import Shift from '../../node_modules/three-mesh-ui/examples/assets/shift.png';
+import Backspace from "../../node_modules/three-mesh-ui/examples/assets/backspace.png";
+import Enter from "../../node_modules/three-mesh-ui/examples/assets/enter.png";
+import Shift from "../../node_modules/three-mesh-ui/examples/assets/shift.png";
 
-import deepDelete from '../../node_modules/three-mesh-ui/src/utils/deepDelete.js';
+import deepDelete from "../../node_modules/three-mesh-ui/src/utils/deepDelete.js";
 
-import FontJSON from '../../assets/fonts/Roboto-Regular-msdf.json';
-import FontImage from '../../assets/fonts/Roboto-Regular.png';
+import FontJSON from "../../assets/fonts/Roboto-Regular-msdf.json";
+import FontImage from "../../assets/fonts/Roboto-Regular.png";
 
-import * as MAIN from '../index.js';
+import * as MAIN from "../index.js";
 
-import * as UI from '../UI.js';
+import * as UI from "../UI.js";
 
-import * as Helpers from '../Helpers.js';
+import * as Helpers from "../Helpers.js";
 
-import * as ScreenManager from '../ScreenManager/ScreenManager.js';
+import * as ScreenManager from "../ScreenManager/ScreenManager.js";
 
 // Import Icons
-import LeftIcon from '../../assets/icons/left-arrow.png';
-import RightIcon from '../../assets/icons/right-arrow.png';
-import VideoIcon from '../../assets/icons/video.png';
-import FolderIcon from '../../assets/icons/folder.png';
+import LeftIcon from "../../assets/icons/left-arrow.png";
+import RightIcon from "../../assets/icons/right-arrow.png";
+import VideoIcon from "../../assets/icons/video.png";
+import FolderIcon from "../../assets/icons/folder.png";
 
 export class FileBrowserPanel {
-
     fileBrowserContainer;
     foldersContainer;
     folderIndex = 1;
@@ -46,18 +58,18 @@ export class FileBrowserPanel {
     searchText;
     clearSearch;
     keyboard;
-    defaultSearchText = Helpers.getWordFromLang('search_in_folders');
+    defaultSearchText = Helpers.getWordFromLang("search_in_folders");
 
     sortContainer;
-    sortActiveColor = new Color(0xF9DC77);
-    sortInactiveColor = new Color(0xC5D564);
+    sortActiveColor = new Color(0xf9dc77);
+    sortInactiveColor = new Color(0xc5d564);
     sortByName;
     sortByNameColorRef = this.sortActiveColor;
     sortByDate;
     sortByDateColorRef = this.sortInactiveColor;
-    activeSorting = 'name';
+    activeSorting = "name";
     sortDirectionBlock;
-    sortDirection = 'ASC';
+    sortDirection = "ASC";
 
     buttonLeft;
     buttonRight;
@@ -94,26 +106,30 @@ export class FileBrowserPanel {
     SIDEPANELZDISTANCE = -5;
     KEYBOARDZDISTANCE = -5;
 
-    BUTTONWIDTHHEIGHT = (this.PANELMAXHEIGHT / this.FILES_ROWS - 0.5);
+    BUTTONWIDTHHEIGHT = this.PANELMAXHEIGHT / this.FILES_ROWS - 0.5;
 
-    THUMBTEXTUREHEIGHT = ((this.PANELMAXHEIGHT / this.FILES_ROWS) - ((this.PANELMAXHEIGHT / this.FILES_ROWS) * 0.25));
-    THUMBTEXTUREWIDTH = ((this.PANELMAXWIDTH - this.PANELMAXWIDTH / 16) / this.FILES_PER_ROW - 0.05);
+    THUMBTEXTUREHEIGHT =
+        this.PANELMAXHEIGHT / this.FILES_ROWS -
+        (this.PANELMAXHEIGHT / this.FILES_ROWS) * 0.25;
+    THUMBTEXTUREWIDTH =
+        (this.PANELMAXWIDTH - this.PANELMAXWIDTH / 16) / this.FILES_PER_ROW -
+        0.05;
 
     thumbRowContainerAttributes = {
         width: this.PANELMAXWIDTH,
-        height: ((this.PANELMAXHEIGHT) / this.FILES_ROWS),
-        contentDirection: 'row',
-        justifyContent: 'center',
+        height: this.PANELMAXHEIGHT / this.FILES_ROWS,
+        contentDirection: "row",
+        justifyContent: "center",
         offset: 0.05,
         margin: 0.02,
         hiddenOverflow: true,
         backgroundOpacity: 1,
-        borderRadius: 0.08
+        borderRadius: 0.08,
     };
 
     thumbsContainerAttributes = {
-        justifyContent: 'center',
-        contentDirection: 'column',
+        justifyContent: "center",
+        contentDirection: "column",
         fontFamily: FontJSON,
         fontTexture: FontImage,
         fontSize: 0.07,
@@ -122,14 +138,15 @@ export class FileBrowserPanel {
         backgroundOpacity: 0,
         hiddenOverflow: true,
         width: this.PANELMAXWIDTH,
-        height: this.PANELMAXHEIGHT
+        height: this.PANELMAXHEIGHT,
     };
 
     thumbButtonContainerAttributes = {
-        height: (this.PANELMAXHEIGHT / this.FILES_ROWS),
-        width: ((this.PANELMAXWIDTH - this.PANELMAXWIDTH / 16) / this.FILES_PER_ROW),
-        justifyContent: 'start',
-        contentDirection: 'column',
+        height: this.PANELMAXHEIGHT / this.FILES_ROWS,
+        width:
+            (this.PANELMAXWIDTH - this.PANELMAXWIDTH / 16) / this.FILES_PER_ROW,
+        justifyContent: "start",
+        contentDirection: "column",
         padding: 0,
         hiddenOverflow: true,
         borderRadius: 0,
@@ -140,15 +157,18 @@ export class FileBrowserPanel {
             height: this.THUMBTEXTUREHEIGHT,
             width: this.THUMBTEXTUREWIDTH,
             backgroundTexture: texture,
-            borderRadius: 0
-        }
-    };
+            borderRadius: 0,
+        };
+    }
 
     thumbTextContainerAttributes = {
-        height: (this.PANELMAXHEIGHT / this.FILES_ROWS) - this.THUMBTEXTUREHEIGHT - 0.025,
+        height:
+            this.PANELMAXHEIGHT / this.FILES_ROWS -
+            this.THUMBTEXTUREHEIGHT -
+            0.025,
         width: this.THUMBTEXTUREWIDTH,
         backgroundOpacity: 0,
-        bestFit: 'shrink'
+        bestFit: "shrink",
     };
 
     thumbTextAttributes(name) {
@@ -156,19 +176,19 @@ export class FileBrowserPanel {
             fontFamily: FontJSON,
             fontTexture: FontImage,
             fontSize: this.PANELMAXHEIGHT * 0.029,
-            content: name
-        }
-    };
+            content: name,
+        };
+    }
 
     bigButtonAttributes = {
         height: this.BUTTONWIDTHHEIGHT,
         width: this.BUTTONWIDTHHEIGHT,
-        justifyContent: 'center',
+        justifyContent: "center",
         offset: 0.05,
         margin: 0.02,
         backgroundColor: new Color(0x999999),
         backgroundOpacity: 1,
-        borderRadius: 0.075
+        borderRadius: 0.075,
     };
 
     bigButtonAttributesTextureAttributes(texture) {
@@ -176,19 +196,19 @@ export class FileBrowserPanel {
             height: this.BUTTONWIDTHHEIGHT,
             width: this.BUTTONWIDTHHEIGHT,
             backgroundTexture: texture,
-            borderRadius: 0
-        }
-    };
+            borderRadius: 0,
+        };
+    }
 
     buttonOptions = {
         width: 0.15,
         height: 0.15,
         backgroundColor: new Color(0x999999),
-        justifyContent: 'center',
+        justifyContent: "center",
         offset: 0.05,
         margin: 0.02,
         backgroundOpacity: 1,
-        borderRadius: 0.08
+        borderRadius: 0.08,
     };
 
     // Options for component.setupState().
@@ -198,35 +218,35 @@ export class FileBrowserPanel {
         offset: 0.035,
         backgroundColor: new Color(0xffff00),
         backgroundOpacity: 1,
-        fontColor: new Color(0x000000)
+        fontColor: new Color(0x000000),
     };
 
     hoveredState = {
-        state: 'hovered',
-        attributes: this.hoveredStateAttributes
+        state: "hovered",
+        attributes: this.hoveredStateAttributes,
     };
 
     idleStateAttributes = {
         offset: 0.035,
         backgroundColor: new Color(0x4f4f4f),
         backgroundOpacity: 1,
-        fontColor: new Color(0xffffff)
+        fontColor: new Color(0xffffff),
     };
 
     idleState = {
-        state: 'idle',
-        attributes: this.idleStateAttributes
+        state: "idle",
+        attributes: this.idleStateAttributes,
     };
 
     folderActiveIdleStateAttributes = {
         offset: 0.035,
         backgroundColor: new Color(0x008e7f),
         backgroundOpacity: 1,
-        fontColor: new Color(0xffffff)
+        fontColor: new Color(0xffffff),
     };
 
     folderActiveIdleState = {
-        state: 'idle',
+        state: "idle",
         attributes: this.folderActiveIdleStateAttributes,
     };
 
@@ -234,12 +254,12 @@ export class FileBrowserPanel {
         offset: 0.02,
         backgroundColor: new Color(0x777777),
         backgroundOpacity: 1,
-        fontColor: new Color(0x222222)
+        fontColor: new Color(0x222222),
     };
 
     foldersContainerAttributes = {
-        justifyContent: 'start',
-        contentDirection: 'column',
+        justifyContent: "start",
+        contentDirection: "column",
         fontFamily: FontJSON,
         fontTexture: FontImage,
         fontSize: 0.12,
@@ -248,7 +268,7 @@ export class FileBrowserPanel {
         backgroundOpacity: 1,
         backgroundColor: new Color(0x292929),
         width: this.PANELMAXWIDTH / 3,
-        height: this.PANELMAXHEIGHT
+        height: this.PANELMAXHEIGHT,
     };
 
     //////////////////////////////////////////////////////////////////////////////
@@ -256,7 +276,6 @@ export class FileBrowserPanel {
     //////////////////////////////////////////////////////////////////////////////
 
     constructor(files, shouldVerifyVideoSRC = false) {
-
         this.defaultVideoThumbnail = this.loader.load(VideoIcon);
         this.shouldVerifyVideoSRC = shouldVerifyVideoSRC;
 
@@ -264,23 +283,49 @@ export class FileBrowserPanel {
             this.VIDEOS = files.videos;
             this.FILES = this.VIDEOS[0].list;
             this.FOLDER = 0;
-            this.ACTIVEFOLDER = 1;
-            this.TOTAL_PAGES = (Math.ceil(this.FILES.length / (this.FILES_PER_ROW * this.FILES_ROWS))) - 1;
+            this.ACTIVEFOLDER = 0;
+            this.TOTAL_PAGES =
+                Math.ceil(
+                    this.FILES.length / (this.FILES_PER_ROW * this.FILES_ROWS)
+                ) - 1;
         }
 
         const circle = new CircleGeometry(2, 32);
-        const loadingAnimatedObjBackgroundMaterial = new MeshBasicMaterial({ color: 0x000000 });
-        this.loadingAnimatedObjBackground = new Mesh(circle, loadingAnimatedObjBackgroundMaterial);
+        const loadingAnimatedObjBackgroundMaterial = new MeshBasicMaterial({
+            color: 0x000000,
+        });
+        this.loadingAnimatedObjBackground = new Mesh(
+            circle,
+            loadingAnimatedObjBackgroundMaterial
+        );
         MAIN.scene.add(this.loadingAnimatedObjBackground);
-        this.loadingAnimatedObjBackground.position.set(0, 1.4, this.CENTERPANELZDISTANCE + 0.18);
+        this.loadingAnimatedObjBackground.position.set(
+            0,
+            1.4,
+            this.CENTERPANELZDISTANCE + 0.18
+        );
         this.loadingAnimatedObjBackground.scale.set(0.1, 0.1, 0.1);
         this.loadingAnimatedObjBackground.visible = false;
 
-        const ring = new RingGeometry(1, 1.5, 32, 1, Math.PI * 0.5, Math.PI * 1.5);
-        const loadingAnimatedObjMaterial = new MeshBasicMaterial({ color: 0xffff00, side: DoubleSide });
+        const ring = new RingGeometry(
+            1,
+            1.5,
+            32,
+            1,
+            Math.PI * 0.5,
+            Math.PI * 1.5
+        );
+        const loadingAnimatedObjMaterial = new MeshBasicMaterial({
+            color: 0xffff00,
+            side: DoubleSide,
+        });
         this.loadingAnimatedObj = new Mesh(ring, loadingAnimatedObjMaterial);
         MAIN.scene.add(this.loadingAnimatedObj);
-        this.loadingAnimatedObj.position.set(0, 1.4, this.CENTERPANELZDISTANCE + 0.2);
+        this.loadingAnimatedObj.position.set(
+            0,
+            1.4,
+            this.CENTERPANELZDISTANCE + 0.2
+        );
         this.loadingAnimatedObj.scale.set(0.1, 0.1, 0.1);
         this.loadingAnimatedObj.visible = false;
 
@@ -291,16 +336,18 @@ export class FileBrowserPanel {
 
         this.loader.load(LeftIcon, (texture) => {
             this.buttonLeft.add(
-                new InlineBlock(this.bigButtonAttributesTextureAttributes(texture))
+                new InlineBlock(
+                    this.bigButtonAttributesTextureAttributes(texture)
+                )
             );
         });
 
         this.buttonLeft.setupState({
-            state: 'selected',
+            state: "selected",
             attributes: this.selectedAttributes,
             onSet: () => {
                 this.PreviousPage();
-            }
+            },
         });
         this.buttonLeft.setupState(this.hoveredState);
         this.buttonLeft.setupState(this.idleState);
@@ -310,16 +357,18 @@ export class FileBrowserPanel {
 
         this.loader.load(RightIcon, (texture) => {
             this.buttonRight.add(
-                new InlineBlock(this.bigButtonAttributesTextureAttributes(texture))
+                new InlineBlock(
+                    this.bigButtonAttributesTextureAttributes(texture)
+                )
             );
         });
 
         this.buttonRight.setupState({
-            state: 'selected',
+            state: "selected",
             attributes: this.selectedAttributes,
             onSet: () => {
                 this.NextPage();
-            }
+            },
         });
         this.buttonRight.setupState(this.hoveredState);
         this.buttonRight.setupState(this.idleState);
@@ -327,8 +376,8 @@ export class FileBrowserPanel {
         //////////////////////////////////////////////////
 
         this.fileBrowserContainer = new Block({
-            justifyContent: 'center',
-            contentDirection: 'row',
+            justifyContent: "center",
+            contentDirection: "row",
             fontFamily: FontJSON,
             fontTexture: FontImage,
             fontSize: 0.07,
@@ -336,8 +385,8 @@ export class FileBrowserPanel {
             borderRadius: 0,
             backgroundOpacity: 1,
             backgroundColor: new Color(0x292929),
-            width: this.PANELMAXWIDTH + 0.3 + (this.BUTTONWIDTHHEIGHT * 2),
-            height: this.PANELMAXHEIGHT
+            width: this.PANELMAXWIDTH + 0.3 + this.BUTTONWIDTHHEIGHT * 2,
+            height: this.PANELMAXHEIGHT,
         });
 
         MAIN.scene.add(this.fileBrowserContainer);
@@ -350,7 +399,11 @@ export class FileBrowserPanel {
             this.generateFoldersButtons();
 
             MAIN.scene.add(this.foldersContainer);
-            this.foldersContainer.position.set(-3.8, 1.4, this.SIDEPANELZDISTANCE);
+            this.foldersContainer.position.set(
+                -3.8,
+                1.4,
+                this.SIDEPANELZDISTANCE
+            );
             this.foldersContainer.rotation.y = 0.5;
         }
 
@@ -358,33 +411,33 @@ export class FileBrowserPanel {
         // Search
 
         this.searchContainer = new Block({
-            justifyContent: 'end',
-            contentDirection: 'row',
+            justifyContent: "end",
+            contentDirection: "row",
             padding: 0.02,
             borderRadius: 0.08,
             backgroundOpacity: 1,
             backgroundColor: new Color(0x292929),
             width: 2,
             height: 0.2,
-            hiddenOverflow: true
+            hiddenOverflow: true,
         });
 
         const textContainer = new Block({
-            justifyContent: 'start',
-            contentDirection: 'row',
+            justifyContent: "start",
+            contentDirection: "row",
             width: 1.9,
             height: 0.15,
             padding: 0.02,
             backgroundOpacity: 0,
-            alignItems: 'start',
-            textAlign: 'left'
+            alignItems: "start",
+            textAlign: "left",
         });
 
         this.searchText = new Text({
             fontFamily: FontJSON,
             fontTexture: FontImage,
             fontSize: 0.12,
-            content: this.defaultSearchText
+            content: this.defaultSearchText,
         });
 
         textContainer.add(this.searchText);
@@ -395,11 +448,11 @@ export class FileBrowserPanel {
         this.searchContainer.position.set(-2, 3.2, this.CENTERPANELZDISTANCE);
 
         this.searchContainer.setupState({
-            state: 'selected',
+            state: "selected",
             onSet: () => {
                 if (!this.keyboard.visible) {
                     if (this.searchText.content === this.defaultSearchText) {
-                        this.searchText.set({ content: '' });
+                        this.searchText.set({ content: "" });
                     }
                     this.keyboard.visible = true;
                     let objectsToTest = this.keyboardObjsToTest.slice();
@@ -409,10 +462,15 @@ export class FileBrowserPanel {
                     UI.registerNewObjectsToTest(objectsToTest);
                 } else {
                     if (this.searchText.content === "") {
-                        this.searchText.set({ content: this.defaultSearchText });
+                        this.searchText.set({
+                            content: this.defaultSearchText,
+                        });
                         this.CURRENT_PAGE = 0;
                         this.FILES = this.VIDEOS[this.FOLDER].list;
-                        this.sortFiles(this.activeSorting, this.sortDirection.sortDirection);
+                        this.sortFiles(
+                            this.activeSorting,
+                            this.sortDirection.sortDirection
+                        );
                     } else {
                         this.prepareFilesWithSearchPhrase();
                     }
@@ -420,31 +478,31 @@ export class FileBrowserPanel {
                     UI.registerNewObjectsToTest(this.fileBrowserObjectsToTest);
                     this.regenerateFileBrowser();
                 }
-            }
+            },
         });
 
         this.searchContainer.setupState({
-            state: 'hovered',
+            state: "hovered",
             attributes: {
                 backgroundColor: new Color(0xffff00),
                 backgroundOpacity: 1,
-                fontColor: new Color(0x000000)
-            }
+                fontColor: new Color(0x000000),
+            },
         });
         this.searchContainer.setupState({
-            state: 'idle',
+            state: "idle",
             attributes: {
                 backgroundColor: new Color(0x5c5c5c),
                 backgroundOpacity: 1,
-                fontColor: new Color(0xffffff)
-            }
+                fontColor: new Color(0xffffff),
+            },
         });
 
         ///////////////////////////
 
         this.clearSearch = new Block({
-            justifyContent: 'center',
-            contentDirection: 'row',
+            justifyContent: "center",
+            contentDirection: "row",
             padding: 0.02,
             borderRadius: 0.08,
             backgroundOpacity: 1,
@@ -452,46 +510,58 @@ export class FileBrowserPanel {
             width: 0.7,
             height: 0.2,
             hiddenOverflow: true,
-            fontColor: new Color(0x000000)
+            fontColor: new Color(0x000000),
         });
-        this.clearSearch.add(new Text({
-            fontFamily: FontJSON,
-            fontTexture: FontImage,
-            fontSize: 0.12,
-            content: Helpers.getWordFromLang('clear')
-        }));
+        this.clearSearch.add(
+            new Text({
+                fontFamily: FontJSON,
+                fontTexture: FontImage,
+                fontSize: 0.12,
+                content: Helpers.getWordFromLang("clear"),
+            })
+        );
 
         this.clearSearch.setupState({
-            state: 'selected',
+            state: "selected",
             onSet: () => {
-                if (!this.keyboard.visible && this.searchText.content !== this.defaultSearchText) {
+                if (
+                    !this.keyboard.visible &&
+                    this.searchText.content !== this.defaultSearchText
+                ) {
                     this.searchText.set({ content: this.defaultSearchText });
                     this.CURRENT_PAGE = 0;
                     this.FILES = this.VIDEOS[this.FOLDER].list;
-                    this.TOTAL_PAGES = (Math.ceil(this.FILES.length / (this.FILES_PER_ROW * this.FILES_ROWS))) - 1;
-                    this.sortFiles(this.activeSorting, this.sortDirection.sortDirection);
+                    this.TOTAL_PAGES =
+                        Math.ceil(
+                            this.FILES.length /
+                                (this.FILES_PER_ROW * this.FILES_ROWS)
+                        ) - 1;
+                    this.sortFiles(
+                        this.activeSorting,
+                        this.sortDirection.sortDirection
+                    );
                     this.regenerateFileBrowser();
                 } else if (this.keyboard.visible) {
-                    this.searchText.set({ content: '' });
+                    this.searchText.set({ content: "" });
                 }
-            }
+            },
         });
 
         this.clearSearch.setupState({
-            state: 'hovered',
+            state: "hovered",
             attributes: {
                 backgroundColor: new Color(0xf44336),
                 backgroundOpacity: 1,
-                fontColor: new Color(0x000000)
-            }
+                fontColor: new Color(0x000000),
+            },
         });
         this.clearSearch.setupState({
-            state: 'idle',
+            state: "idle",
             attributes: {
                 backgroundColor: new Color(0xf88e86),
                 backgroundOpacity: 1,
-                fontColor: new Color(0x000000)
-            }
+                fontColor: new Color(0x000000),
+            },
         });
 
         this.clearSearch.position.set(-0.5, 3.2, this.CENTERPANELZDISTANCE);
@@ -500,153 +570,170 @@ export class FileBrowserPanel {
         //////////////////////////////////////////////////////////////////////
 
         this.sortDirectionBlock = new Block({
-            justifyContent: 'center',
-            contentDirection: 'row',
+            justifyContent: "center",
+            contentDirection: "row",
             padding: 0.02,
             margin: 0.02,
             borderRadius: 0.08,
             backgroundOpacity: 1,
-            backgroundColor: new Color(0xC5D564),
+            backgroundColor: new Color(0xc5d564),
             width: 0.4,
             height: 0.2,
             hiddenOverflow: true,
-            fontColor: new Color(0x000000)
+            fontColor: new Color(0x000000),
         });
 
         this.sortDirection = new Text({
             fontFamily: FontJSON,
             fontTexture: FontImage,
             fontSize: 0.12,
-            content: Helpers.getWordFromLang('ascending'),
-            sortDirection: 'asc'
+            content: Helpers.getWordFromLang("ascending"),
+            sortDirection: "asc",
         });
 
         this.sortDirectionBlock.add(this.sortDirection);
 
         this.sortDirectionBlock.setupState({
-            state: 'selected',
+            state: "selected",
             onSet: () => {
                 switch (this.sortDirection.sortDirection) {
-                    case 'desc':
-                        this.sortDirection.set({ content: Helpers.getWordFromLang('ascending') });
-                        this.sortDirection.sortDirection = 'asc';
+                    case "desc":
+                        this.sortDirection.set({
+                            content: Helpers.getWordFromLang("ascending"),
+                        });
+                        this.sortDirection.sortDirection = "asc";
                         break;
                     default:
-                    case 'asc':
-                        this.sortDirection.set({ content: Helpers.getWordFromLang('descending') });
-                        this.sortDirection.sortDirection = 'desc';
+                    case "asc":
+                        this.sortDirection.set({
+                            content: Helpers.getWordFromLang("descending"),
+                        });
+                        this.sortDirection.sortDirection = "desc";
                         break;
                 }
-                this.sortFiles(this.activeSorting, this.sortDirection.sortDirection);
+                this.sortFiles(
+                    this.activeSorting,
+                    this.sortDirection.sortDirection
+                );
                 this.regenerateFileBrowser();
-            }
+            },
         });
 
         this.sortDirectionBlock.setupState({
-            state: 'hovered',
+            state: "hovered",
             attributes: {
-                backgroundColor: new Color(0xDCF63F),
+                backgroundColor: new Color(0xdcf63f),
                 backgroundOpacity: 1,
-                fontColor: new Color(0x000000)
-            }
+                fontColor: new Color(0x000000),
+            },
         });
         this.sortDirectionBlock.setupState({
-            state: 'idle',
+            state: "idle",
             attributes: {
-                backgroundColor: new Color(0xC5D564),
+                backgroundColor: new Color(0xc5d564),
                 backgroundOpacity: 1,
-                fontColor: new Color(0x000000)
-            }
+                fontColor: new Color(0x000000),
+            },
         });
 
         ////////////
 
         this.sortByName = new Block({
-            justifyContent: 'center',
-            contentDirection: 'row',
+            justifyContent: "center",
+            contentDirection: "row",
             padding: 0.02,
             margin: 0.02,
             borderRadius: 0.08,
             backgroundOpacity: 1,
-            backgroundColor: new Color(0xC5D564),
+            backgroundColor: new Color(0xc5d564),
             width: 0.4,
             height: 0.2,
             hiddenOverflow: true,
-            fontColor: new Color(0x000000)
+            fontColor: new Color(0x000000),
         });
-        this.sortByName.add(new Text({
-            fontFamily: FontJSON,
-            fontTexture: FontImage,
-            fontSize: 0.12,
-            content: Helpers.getWordFromLang('name')
-        }));
+        this.sortByName.add(
+            new Text({
+                fontFamily: FontJSON,
+                fontTexture: FontImage,
+                fontSize: 0.12,
+                content: Helpers.getWordFromLang("name"),
+            })
+        );
 
         this.sortByName.setupState({
-            state: 'selected',
+            state: "selected",
             onSet: () => {
-                if (this.activeSorting !== 'name') {
+                if (this.activeSorting !== "name") {
                     this.sortByNameColorRef = this.sortActiveColor;
                     this.sortByDateColorRef = this.sortInactiveColor;
                     this.sortSetButtonsIdleState();
-                    this.activeSorting = 'name';
-                    this.sortFiles(this.activeSorting, this.sortDirection.sortDirection);
+                    this.activeSorting = "name";
+                    this.sortFiles(
+                        this.activeSorting,
+                        this.sortDirection.sortDirection
+                    );
                     this.regenerateFileBrowser();
                 }
-            }
+            },
         });
 
         this.sortByName.setupState({
-            state: 'hovered',
+            state: "hovered",
             attributes: {
-                backgroundColor: new Color(0xDCF63F),
+                backgroundColor: new Color(0xdcf63f),
                 backgroundOpacity: 1,
-                fontColor: new Color(0x000000)
-            }
+                fontColor: new Color(0x000000),
+            },
         });
 
         ///////////////
 
         this.sortByDate = new Block({
-            justifyContent: 'center',
-            contentDirection: 'row',
+            justifyContent: "center",
+            contentDirection: "row",
             padding: 0.02,
             margin: 0.02,
             borderRadius: 0.08,
             backgroundOpacity: 1,
-            backgroundColor: new Color(0xC5D564),
+            backgroundColor: new Color(0xc5d564),
             width: 0.4,
             height: 0.2,
             hiddenOverflow: true,
-            fontColor: new Color(0x000000)
+            fontColor: new Color(0x000000),
         });
-        this.sortByDate.add(new Text({
-            fontFamily: FontJSON,
-            fontTexture: FontImage,
-            fontSize: 0.12,
-            content: Helpers.getWordFromLang('date')
-        }));
+        this.sortByDate.add(
+            new Text({
+                fontFamily: FontJSON,
+                fontTexture: FontImage,
+                fontSize: 0.12,
+                content: Helpers.getWordFromLang("date"),
+            })
+        );
 
         this.sortByDate.setupState({
-            state: 'selected',
+            state: "selected",
             onSet: () => {
-                if (this.activeSorting !== 'date') {
+                if (this.activeSorting !== "date") {
                     this.sortByDateColorRef = this.sortActiveColor;
                     this.sortByNameColorRef = this.sortInactiveColor;
                     this.sortSetButtonsIdleState();
-                    this.activeSorting = 'date';
-                    this.sortFiles(this.activeSorting, this.sortDirection.sortDirection);
+                    this.activeSorting = "date";
+                    this.sortFiles(
+                        this.activeSorting,
+                        this.sortDirection.sortDirection
+                    );
                     this.regenerateFileBrowser();
                 }
-            }
+            },
         });
 
         this.sortByDate.setupState({
-            state: 'hovered',
+            state: "hovered",
             attributes: {
-                backgroundColor: new Color(0xDCF63F),
+                backgroundColor: new Color(0xdcf63f),
                 backgroundOpacity: 1,
-                fontColor: new Color(0x000000)
-            }
+                fontColor: new Color(0x000000),
+            },
         });
 
         ///////////////
@@ -656,33 +743,35 @@ export class FileBrowserPanel {
         ///////////////
 
         this.sortContainer = new Block({
-            justifyContent: 'center',
-            contentDirection: 'row',
+            justifyContent: "center",
+            contentDirection: "row",
             padding: 0.02,
             borderRadius: 0.08,
             backgroundOpacity: 1,
             width: 2,
             height: 0.3,
             hiddenOverflow: true,
-            fontColor: new Color(0x000000)
+            fontColor: new Color(0x000000),
         });
         let label = new Block({
-            justifyContent: 'center',
-            contentDirection: 'row',
+            justifyContent: "center",
+            contentDirection: "row",
             padding: 0.02,
             borderRadius: 0.08,
             backgroundOpacity: 1,
             width: 0.7,
             height: 0.2,
             hiddenOverflow: true,
-            fontColor: new Color(0xffffff)
+            fontColor: new Color(0xffffff),
         });
-        label.add(new Text({
-            fontFamily: FontJSON,
-            fontTexture: FontImage,
-            fontSize: 0.12,
-            content: Helpers.getWordFromLang('sorting') + ":"
-        }));
+        label.add(
+            new Text({
+                fontFamily: FontJSON,
+                fontTexture: FontImage,
+                fontSize: 0.12,
+                content: Helpers.getWordFromLang("sorting") + ":",
+            })
+        );
         this.sortContainer.add(label);
         this.sortContainer.add(this.sortByName);
         this.sortContainer.add(this.sortByDate);
@@ -703,47 +792,51 @@ export class FileBrowserPanel {
 
         this.defaultObjsToTest.push(this.buttonLeft, this.buttonRight);
 
-        this.fileBrowserContainer.position.set(0, 1.4, this.CENTERPANELZDISTANCE);
+        this.fileBrowserContainer.position.set(
+            0,
+            1.4,
+            this.CENTERPANELZDISTANCE
+        );
 
         this.draggingBox = new Block({
-            justifyContent: 'center',
-            contentDirection: 'row',
+            justifyContent: "center",
+            contentDirection: "row",
             padding: 0.02,
             borderRadius: 0.06,
             backgroundOpacity: 1,
             backgroundColor: new Color(0x5c5c5c),
             width: this.PANELMAXWIDTH / 3,
-            height: 0.1
+            height: 0.1,
         });
 
         MAIN.scene.add(this.draggingBox);
         this.draggingBox.position.set(0, -0.35, this.CENTERPANELZDISTANCE);
         this.draggingBox.setupState({
-            state: 'selected',
+            state: "selected",
             onSet: () => {
                 ScreenManager.startDrag("files");
-            }
+            },
         });
 
         this.draggingBox.setupState({
-            state: 'hovered',
+            state: "hovered",
             attributes: {
                 backgroundColor: new Color(0xffff00),
-                backgroundOpacity: 1
+                backgroundOpacity: 1,
             },
             onSet: () => {
                 ScreenManager.stopDrag("files");
-            }
+            },
         });
         this.draggingBox.setupState({
-            state: 'idle',
+            state: "idle",
             attributes: {
                 backgroundColor: new Color(0x5c5c5c),
-                backgroundOpacity: 1
+                backgroundOpacity: 1,
             },
             onSet: () => {
                 ScreenManager.stopDrag("files");
-            }
+            },
         });
         this.defaultObjsToTest.push(this.draggingBox);
 
@@ -757,9 +850,10 @@ export class FileBrowserPanel {
         this.resetFileBrowserObjectsToTest();
         //////////////////////////////////////////////////////////////////////
 
-        this.keyboardObjsToTest = this.makeKeyboard(this.searchText, this.searchTextSetContent);
-
-
+        this.keyboardObjsToTest = this.makeKeyboard(
+            this.searchText,
+            this.searchTextSetContent
+        );
 
         this.keyboard.visible = false;
         this.keyboard.position.set(0, 2, this.KEYBOARDZDISTANCE);
@@ -767,25 +861,106 @@ export class FileBrowserPanel {
 
         //////////////////////////////////////////////////////////////////////
 
-        ScreenManager.registerPanel('fileBrowserPanel', 'draggingBox', 'draggingBox');
-        ScreenManager.registerPanel('fileBrowserPanel', 'searchContainer', 'searchContainer');
-        ScreenManager.registerPanel('fileBrowserPanel', 'clearSearch', 'clearSearch');
-        ScreenManager.registerPanel('fileBrowserPanel', 'keyboard', 'keyboard');
-        ScreenManager.registerPanel('fileBrowserPanel', 'foldersContainer', 'foldersContainer');
-        ScreenManager.registerPanel('fileBrowserPanel', 'fileBrowserContainer', 'fileBrowserContainer');
-        ScreenManager.registerPanel('fileBrowserPanel', 'sortContainer', 'sortContainer');
-        ScreenManager.registerPanel('fileBrowserPanel', 'loadingAnimatedObj', 'loadingAnimatedObj');
-        ScreenManager.registerPanel('fileBrowserPanel', 'loadingAnimatedObjBackground', 'loadingAnimatedObjBackground');
+        ScreenManager.registerPanel(
+            this.draggingBox,
+            "fileBrowserPanel",
+            "draggingBox",
+            "draggingBox"
+        );
+        ScreenManager.registerPanel(
+            this.searchContainer,
+            "fileBrowserPanel",
+            "searchContainer",
+            "searchContainer"
+        );
+        ScreenManager.registerPanel(
+            this.clearSearch,
+            "fileBrowserPanel",
+            "clearSearch",
+            "clearSearch"
+        );
+        ScreenManager.registerPanel(
+            this.keyboard,
+            "fileBrowserPanel",
+            "keyboard",
+            "keyboard"
+        );
+        ScreenManager.registerPanel(
+            this.foldersContainer,
+            "fileBrowserPanel",
+            "foldersContainer",
+            "foldersContainer"
+        );
+        ScreenManager.registerPanel(
+            this.fileBrowserContainer,
+            "fileBrowserPanel",
+            "fileBrowserContainer",
+            "fileBrowserContainer"
+        );
+        ScreenManager.registerPanel(
+            this.sortContainer,
+            "fileBrowserPanel",
+            "sortContainer",
+            "sortContainer"
+        );
+        ScreenManager.registerPanel(
+            this.loadingAnimatedObj,
+            "fileBrowserPanel",
+            "loadingAnimatedObj",
+            "loadingAnimatedObj"
+        );
+        ScreenManager.registerPanel(
+            this.loadingAnimatedObjBackground,
+            "fileBrowserPanel",
+            "loadingAnimatedObjBackground",
+            "loadingAnimatedObjBackground"
+        );
 
-        MAIN.registerObjectToDrag(this.draggingBox, "files");
-        MAIN.registerObjectToDrag(this.searchContainer, "files");
-        MAIN.registerObjectToDrag(this.clearSearch, "files");
-        MAIN.registerObjectToDrag(this.keyboard, "files");
-        MAIN.registerObjectToDrag(this.foldersContainer, "files");
-        MAIN.registerObjectToDrag(this.fileBrowserContainer, "files");
-        MAIN.registerObjectToDrag(this.sortContainer, "files");
-        MAIN.registerObjectToDrag(this.loadingAnimatedObj, "files");
-        MAIN.registerObjectToDrag(this.loadingAnimatedObjBackground, "files");
+        ScreenManager.registerObjectToDrag(
+            this.draggingBox,
+            "files",
+            "fileBrowserPanel"
+        );
+        ScreenManager.registerObjectToDrag(
+            this.searchContainer,
+            "files",
+            "fileBrowserPanel"
+        );
+        ScreenManager.registerObjectToDrag(
+            this.clearSearch,
+            "files",
+            "fileBrowserPanel"
+        );
+        ScreenManager.registerObjectToDrag(
+            this.keyboard,
+            "files",
+            "fileBrowserPanel"
+        );
+        ScreenManager.registerObjectToDrag(
+            this.foldersContainer,
+            "files",
+            "fileBrowserPanel"
+        );
+        ScreenManager.registerObjectToDrag(
+            this.fileBrowserContainer,
+            "files",
+            "fileBrowserPanel"
+        );
+        ScreenManager.registerObjectToDrag(
+            this.sortContainer,
+            "files",
+            "fileBrowserPanel"
+        );
+        ScreenManager.registerObjectToDrag(
+            this.loadingAnimatedObj,
+            "files",
+            "fileBrowserPanel"
+        );
+        ScreenManager.registerObjectToDrag(
+            this.loadingAnimatedObjBackground,
+            "files",
+            "fileBrowserPanel"
+        );
 
         if (this.FILES.length > 0 && this.defaultVideoThumbnail !== undefined) {
             this.generateView();
@@ -796,12 +971,23 @@ export class FileBrowserPanel {
         let filesList = [];
         this.FILES = this.VIDEOS[this.FOLDER].list;
         this.FILES.forEach((file) => {
-            if (file.name.replace(/[^ qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890,\.\/\?;:\'"\[\{\}\]=\+-_!@#\$%\^\&\*\(\)\\\|\`\~]+/, '').toLowerCase().includes(this.searchText.content.toLowerCase())) {
+            if (
+                file.name
+                    .replace(
+                        /[^ qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890,\.\/\?;:\'"\[\{\}\]=\+-_!@#\$%\^\&\*\(\)\\\|\`\~]+/,
+                        ""
+                    )
+                    .toLowerCase()
+                    .includes(this.searchText.content.toLowerCase())
+            ) {
                 filesList.push(file);
             }
         });
         this.FILES = filesList;
-        this.TOTAL_PAGES = (Math.ceil(this.FILES.length / (this.FILES_PER_ROW * this.FILES_ROWS))) - 1;
+        this.TOTAL_PAGES =
+            Math.ceil(
+                this.FILES.length / (this.FILES_PER_ROW * this.FILES_ROWS)
+            ) - 1;
         this.sortFiles(this.activeSorting, this.sortDirection.sortDirection);
     }
 
@@ -810,9 +996,14 @@ export class FileBrowserPanel {
         this.viewGeneratorThumbs = [];
         this.listOfVideoThumbnailTextures = [];
         this.viewGeneratorThumbsIterator = 0;
-        let iterate = (this.CURRENT_PAGE > 0 ? ((this.FILES_PER_ROW * this.FILES_ROWS) * this.CURRENT_PAGE) : 0);
+        let iterate =
+            this.CURRENT_PAGE > 0
+                ? this.FILES_PER_ROW * this.FILES_ROWS * this.CURRENT_PAGE
+                : 0;
         for (let index = 0; index < this.FILES_ROWS; index++) {
-            const thumbsContainerButtonsRow = new Block(this.thumbRowContainerAttributes);
+            const thumbsContainerButtonsRow = new Block(
+                this.thumbRowContainerAttributes
+            );
             let addedThumbs = 0;
             for (let index = 0; index < this.FILES_PER_ROW; index++) {
                 if (!this.FILES[iterate]) {
@@ -823,11 +1014,18 @@ export class FileBrowserPanel {
                 const thumb = new ThumbnailBlock(
                     this.thumbButtonContainerAttributes,
                     this.FILES[iterate].src,
-                    this.FILES[iterate].name.replace(/[^ qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890,\.\/\?;:\'"\[\{\}\]=\+-_!@#\$%\^\&\*\(\)\\\|\`\~]+/, ''),
+                    this.FILES[iterate].name.replace(
+                        /[^ qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890,\.\/\?;:\'"\[\{\}\]=\+-_!@#\$%\^\&\*\(\)\\\|\`\~]+/,
+                        ""
+                    ),
                     this.FILES[iterate].thumbnail,
                     this.FILES[iterate].screen_type,
-                    (this.FILES[iterate].frame_height ? this.FILES[iterate].frame_height : "1"),
-                    (this.FILES[iterate].frame_width ? this.FILES[iterate].frame_width : "1"),
+                    this.FILES[iterate].frame_height
+                        ? this.FILES[iterate].frame_height
+                        : "1",
+                    this.FILES[iterate].frame_width
+                        ? this.FILES[iterate].frame_width
+                        : "1",
                     this.selectedAttributes,
                     this.hoveredStateAttributes,
                     this.idleStateAttributes,
@@ -852,28 +1050,66 @@ export class FileBrowserPanel {
 
     generateThumbnails() {
         if (this.viewGeneratorInProgress === false) {
-            if (this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator] && this.viewGeneratorFinished === false) {
+            if (
+                this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator] &&
+                this.viewGeneratorFinished === false
+            ) {
                 this.viewGeneratorInProgress = true;
-                let thumb = this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator].fileThumbnail;
-                this.loader.loadAsync(
-                    thumb, undefined).then((image) => {
-                        if (thumb === this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator].fileThumbnail) {
-                            let inlineBlock = new InlineBlock(this.textureAttributes(image));
-                            this.listOfVideoThumbnailTextures.push(inlineBlock.getBackgroundTexture());
-                            this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator].add(
+                let thumb =
+                    this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator]
+                        .fileThumbnail;
+                this.loader
+                    .loadAsync(thumb, undefined)
+                    .then((image) => {
+                        if (
+                            thumb ===
+                            this.viewGeneratorThumbs[
+                                this.viewGeneratorThumbsIterator
+                            ].fileThumbnail
+                        ) {
+                            let inlineBlock = new InlineBlock(
+                                this.textureAttributes(image)
+                            );
+                            this.listOfVideoThumbnailTextures.push(
+                                inlineBlock.getBackgroundTexture()
+                            );
+                            this.viewGeneratorThumbs[
+                                this.viewGeneratorThumbsIterator
+                            ].add(
                                 inlineBlock,
-                                new Block(this.thumbTextContainerAttributes).add(
-                                    new Text(this.thumbTextAttributes(this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator].fileNameButton))
+                                new Block(
+                                    this.thumbTextContainerAttributes
+                                ).add(
+                                    new Text(
+                                        this.thumbTextAttributes(
+                                            this.viewGeneratorThumbs[
+                                                this.viewGeneratorThumbsIterator
+                                            ].fileNameButton
+                                        )
+                                    )
                                 )
                             );
                             this.viewGeneratorThumbsIterator++;
                         }
                         this.viewGeneratorInProgress = false;
-                    }).catch(() => {
-                        this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator].add(
-                            new InlineBlock(this.textureAttributes(this.defaultVideoThumbnail)),
+                    })
+                    .catch(() => {
+                        this.viewGeneratorThumbs[
+                            this.viewGeneratorThumbsIterator
+                        ].add(
+                            new InlineBlock(
+                                this.textureAttributes(
+                                    this.defaultVideoThumbnail
+                                )
+                            ),
                             new Block(this.thumbTextContainerAttributes).add(
-                                new Text(this.thumbTextAttributes(this.viewGeneratorThumbs[this.viewGeneratorThumbsIterator].fileNameButton))
+                                new Text(
+                                    this.thumbTextAttributes(
+                                        this.viewGeneratorThumbs[
+                                            this.viewGeneratorThumbsIterator
+                                        ].fileNameButton
+                                    )
+                                )
                             )
                         );
                         this.viewGeneratorThumbsIterator++;
@@ -887,22 +1123,22 @@ export class FileBrowserPanel {
 
     sortFiles(by, order) {
         switch (by) {
-            case 'date':
+            case "date":
                 switch (order) {
-                    case 'desc':
+                    case "desc":
                         this.FILES.sort((a, b) => b.epoch - a.epoch);
                         break;
 
                     default:
-                    case 'asc':
+                    case "asc":
                         this.FILES.sort((a, b) => a.epoch - b.epoch);
                         break;
                 }
                 break;
             default:
-            case 'name':
+            case "name":
                 switch (order) {
-                    case 'desc':
+                    case "desc":
                         this.FILES.sort((a, b) => {
                             const nameA = a.name.toUpperCase();
                             const nameB = b.name.toUpperCase();
@@ -916,7 +1152,7 @@ export class FileBrowserPanel {
                         break;
 
                     default:
-                    case 'asc':
+                    case "asc":
                         this.FILES.sort((a, b) => {
                             const nameA = a.name.toUpperCase();
                             const nameB = b.name.toUpperCase();
@@ -936,7 +1172,9 @@ export class FileBrowserPanel {
     regenerateFileBrowser() {
         this.viewGeneratorFinished = true;
         deepDelete(this.thumbsContainer);
-        this.listOfVideoThumbnailTextures.forEach(texture => { texture.dispose(); });
+        this.listOfVideoThumbnailTextures.forEach((texture) => {
+            texture.dispose();
+        });
         this.thumbsContainer.set(this.thumbsContainerAttributes);
         this.resetFileBrowserObjectsToTest();
 
@@ -948,7 +1186,9 @@ export class FileBrowserPanel {
     resetFileBrowserObjectsToTest() {
         this.fileBrowserObjectsToTest = [];
         this.fileBrowserObjectsToTest = this.defaultObjsToTest.slice();
-        this.fileBrowserObjectsToTest = this.fileBrowserObjectsToTest.concat(this.foldersButtons.slice());
+        this.fileBrowserObjectsToTest = this.fileBrowserObjectsToTest.concat(
+            this.foldersButtons.slice()
+        );
     }
 
     PreviousPage() {
@@ -971,76 +1211,116 @@ export class FileBrowserPanel {
         let index = 0;
         while (index < this.MAXFOLDERSPERPAGE) {
             if (folderIndex !== 0 && index === 0) {
-                const folderButton = this.createFolderButton(index++, 0, true, Helpers.getWordFromLang('previous_page'), "prev");
+                const folderButton = this.createFolderButton(
+                    index++,
+                    0,
+                    true,
+                    Helpers.getWordFromLang("previous_page"),
+                    "prev"
+                );
                 this.foldersContainer.add(folderButton);
                 this.foldersButtons.push(folderButton);
             }
-            const folderButton = this.createFolderButton(index++, folderIndex++);
+            const folderButton = this.createFolderButton(
+                index++,
+                folderIndex++
+            );
             this.foldersContainer.add(folderButton);
             this.foldersButtons.push(folderButton);
-            if (folderIndex >= this.VIDEOS.length) { break; }
+            if (folderIndex >= this.VIDEOS.length) {
+                break;
+            }
         }
         if (folderIndex < this.VIDEOS.length) {
-            const folderButton = this.createFolderButton(index, folderIndex, true, Helpers.getWordFromLang('next_page'), "next");
+            const folderButton = this.createFolderButton(
+                index,
+                folderIndex,
+                true,
+                Helpers.getWordFromLang("next_page"),
+                "next"
+            );
             this.foldersContainer.add(folderButton);
             this.foldersButtons.push(folderButton);
         }
         this.foldersButtonsIdleState();
     }
 
-    createFolderButton(id, index, isPageSwitcher = false, pageText = "", pageDirection = "") {
+    createFolderButton(
+        id,
+        index,
+        isPageSwitcher = false,
+        pageText = "",
+        pageDirection = ""
+    ) {
         const folderButton = new Block({
-            justifyContent: 'center',
-            contentDirection: 'row',
+            justifyContent: "center",
+            contentDirection: "row",
             height: 0.2,
             offset: 0.05,
             margin: 0.02,
-            bestFit: 'shrink',
-            width: (this.PANELMAXWIDTH / 3) - 0.1,
-            backgroundOpacity: 1
-        }).add(new Text({ content: (isPageSwitcher ? pageText : this.VIDEOS[index].name) }));
-        folderButton.folderId = id
-        folderButton.folderIndex = index
+            bestFit: "shrink",
+            width: this.PANELMAXWIDTH / 3 - 0.1,
+            backgroundOpacity: 1,
+        }).add(
+            new Text({
+                content: isPageSwitcher ? pageText : this.VIDEOS[index].name,
+            })
+        );
+        folderButton.folderId = id;
+        folderButton.folderIndex = index;
         if (isPageSwitcher) {
             folderButton.setupState({
-                state: 'selected',
+                state: "selected",
                 attributes: this.selectedAttributes,
                 onSet: () => {
                     switch (pageDirection) {
                         case "prev":
-                            this.folderPageIndex = this.folderPageIndex - this.MAXFOLDERSPERPAGE;
+                            this.folderPageIndex =
+                                this.folderPageIndex - this.MAXFOLDERSPERPAGE;
                             break;
 
                         default:
                         case "next":
-                            this.folderPageIndex = this.folderPageIndex + this.MAXFOLDERSPERPAGE;
+                            this.folderPageIndex =
+                                this.folderPageIndex + this.MAXFOLDERSPERPAGE;
                             break;
                     }
                     this.regenerateFoldersButtons();
-                }
+                },
             });
         } else {
             folderButton.setupState({
-                state: 'selected',
+                state: "selected",
                 attributes: this.selectedAttributes,
                 onSet: () => {
-                    console.log(this.folderPageIndex, this.currentFolderPageIndex, id);
-                    if (this.ACTIVEFOLDER !== id || this.currentFolderPageIndex !== this.folderPageIndex) {
+                    if (
+                        this.ACTIVEFOLDER !== id ||
+                        this.currentFolderPageIndex !== this.folderPageIndex
+                    ) {
                         this.CURRENT_PAGE = 0;
                         this.FOLDER = index;
                         this.ACTIVEFOLDER = id;
                         this.currentFolderPageIndex = this.folderPageIndex;
-                        if (this.searchText.content !== this.defaultSearchText) {
+                        if (
+                            this.searchText.content !== this.defaultSearchText
+                        ) {
                             this.prepareFilesWithSearchPhrase();
                         } else {
                             this.FILES = this.VIDEOS[index].list;
-                            this.TOTAL_PAGES = (Math.ceil(this.FILES.length / (this.FILES_PER_ROW * this.FILES_ROWS))) - 1;
-                            this.sortFiles(this.activeSorting, this.sortDirection.sortDirection);
+                            this.TOTAL_PAGES =
+                                Math.ceil(
+                                    this.FILES.length /
+                                        (this.FILES_PER_ROW * this.FILES_ROWS)
+                                ) - 1;
+                            this.sortFiles(
+                                this.activeSorting,
+                                this.sortDirection.sortDirection
+                            );
                         }
                         this.foldersButtonsIdleState();
                         this.regenerateFileBrowser();
                     }
-                }
+                },
             });
         }
         folderButton.setupState(this.hoveredState);
@@ -1062,20 +1342,45 @@ export class FileBrowserPanel {
     // Hide / Show Menu
 
     showFileMenuPanel() {
-        UI.showMenu([this.fileBrowserContainer, this.foldersContainer, this.draggingBox, this.searchContainer, this.clearSearch, this.sortContainer], this.fileBrowserObjectsToTest, true);
+        UI.showMenu(
+            [
+                this.fileBrowserContainer,
+                this.foldersContainer,
+                this.draggingBox,
+                this.searchContainer,
+                this.clearSearch,
+                this.sortContainer,
+            ],
+            this.fileBrowserObjectsToTest,
+            true
+        );
         Helpers.removeVideoSrc();
         MAIN.playbackChange(false);
     }
 
     hideFileMenuPanel(screen_type = null) {
-        UI.hideMenu([this.fileBrowserContainer, this.foldersContainer, this.draggingBox, this.searchContainer, this.clearSearch, this.keyboard, this.sortContainer], [], true);
+        UI.hideMenu(
+            [
+                this.fileBrowserContainer,
+                this.foldersContainer,
+                this.draggingBox,
+                this.searchContainer,
+                this.clearSearch,
+                this.keyboard,
+                this.sortContainer,
+            ],
+            [],
+            true
+        );
         MAIN.playbackChange(true, screen_type);
     }
 
     searchTextSetContent(target, newContent) {
         let width = 0;
         if (target.inlines !== null && target.inlines !== undefined) {
-            target.inlines.forEach((line) => { width += line.width });
+            target.inlines.forEach((line) => {
+                width += line.width;
+            });
             if (width >= 1.7) {
                 target.parent.set({ width: width + 0.2 });
             } else {
@@ -1083,16 +1388,15 @@ export class FileBrowserPanel {
             }
         }
         target.set({ content: newContent });
-    };
+    }
 
-    makeKeyboard(target, targetSetContentFoo, language = 'eng') {
-
+    makeKeyboard(target, targetSetContentFoo, language = "eng") {
         const keyboardColors = {
             keyboardBack: 0x858585,
             panelBack: 0x262626,
             button: 0x363636,
             hovered: 0x1c1c1c,
-            selected: 0x109c5d
+            selected: 0x109c5d,
         };
 
         let keyObjsToTest = [];
@@ -1108,7 +1412,7 @@ export class FileBrowserPanel {
             backgroundOpacity: 1,
             backspaceTexture: Backspace,
             shiftTexture: Shift,
-            enterTexture: Enter
+            enterTexture: Enter,
         });
 
         // this.keyboard.position.set(0, 0, -1);
@@ -1117,92 +1421,102 @@ export class FileBrowserPanel {
         //
 
         this.keyboard.keys.forEach((key) => {
-
             keyObjsToTest.push(key);
 
             key.setupState({
-                state: 'idle',
+                state: "idle",
                 attributes: {
                     offset: 0,
                     backgroundColor: new Color(keyboardColors.button),
-                    backgroundOpacity: 1
-                }
+                    backgroundOpacity: 1,
+                },
             });
 
             key.setupState({
-                state: 'hovered',
+                state: "hovered",
                 attributes: {
                     offset: 0,
                     backgroundColor: new Color(keyboardColors.hovered),
-                    backgroundOpacity: 1
-                }
+                    backgroundOpacity: 1,
+                },
             });
 
             key.setupState({
-                state: 'selected',
+                state: "selected",
                 attributes: {
                     offset: -0.009,
                     backgroundColor: new Color(keyboardColors.selected),
-                    backgroundOpacity: 1
+                    backgroundOpacity: 1,
                 },
                 // triggered when the user clicked on a keyboard's key
                 onSet: () => {
-
                     // if the key have a command (eg: 'backspace', 'switch', 'enter'...)
                     // special actions are taken
                     if (key.info.command) {
-
                         switch (key.info.command) {
-
                             // switch between panels
-                            case 'switch':
+                            case "switch":
                                 this.keyboard.setNextPanel();
                                 break;
 
                             // switch between panel charsets (eg: russian/english)
-                            case 'switch-set':
+                            case "switch-set":
                                 this.keyboard.setNextCharset();
                                 break;
 
-                            case 'enter':
+                            case "enter":
                                 this.keyboard.visible = false;
                                 this.CURRENT_PAGE = 0;
                                 if (target.content === "") {
-                                    target.set({ content: this.defaultSearchText });
+                                    target.set({
+                                        content: this.defaultSearchText,
+                                    });
                                     this.FILES = this.VIDEOS[this.FOLDER].list;
-                                    this.sortFiles(this.activeSorting, this.sortDirection.sortDirection);
+                                    this.sortFiles(
+                                        this.activeSorting,
+                                        this.sortDirection.sortDirection
+                                    );
                                 } else {
                                     this.prepareFilesWithSearchPhrase();
                                 }
-                                UI.registerNewObjectsToTest(this.fileBrowserObjectsToTest);
+                                UI.registerNewObjectsToTest(
+                                    this.fileBrowserObjectsToTest
+                                );
                                 this.regenerateFileBrowser();
                                 break;
 
-                            case 'space':
-                                targetSetContentFoo(target, (target.content + ' '));
+                            case "space":
+                                targetSetContentFoo(
+                                    target,
+                                    target.content + " "
+                                );
                                 break;
 
-                            case 'backspace':
+                            case "backspace":
                                 if (!target.content.length) break;
-                                targetSetContentFoo(target, (target.content.substring(0, target.content.length - 1) || ''));
+                                targetSetContentFoo(
+                                    target,
+                                    target.content.substring(
+                                        0,
+                                        target.content.length - 1
+                                    ) || ""
+                                );
                                 break;
 
-                            case 'shift':
+                            case "shift":
                                 this.keyboard.toggleCase();
                                 break;
-
                         }
 
                         // print a glyph, if any
                     } else if (key.info.input) {
-
-                        targetSetContentFoo(target, (target.content + key.info.input));
-
+                        targetSetContentFoo(
+                            target,
+                            target.content + key.info.input
+                        );
                     }
-
-                }
+                },
             });
-
         });
 
         return keyObjsToTest;
@@ -1222,21 +1536,21 @@ export class FileBrowserPanel {
 
     sortSetButtonsIdleState() {
         this.sortByName.setupState({
-            state: 'idle',
+            state: "idle",
             attributes: {
                 backgroundColor: this.sortByNameColorRef,
                 backgroundOpacity: 1,
-                fontColor: new Color(0x000000)
-            }
+                fontColor: new Color(0x000000),
+            },
         });
 
         this.sortByDate.setupState({
-            state: 'idle',
+            state: "idle",
             attributes: {
                 backgroundColor: this.sortByDateColorRef,
                 backgroundOpacity: 1,
-                fontColor: new Color(0x000000)
-            }
+                fontColor: new Color(0x000000),
+            },
         });
 
         this.sortByName.set({ backgroundColor: this.sortByNameColorRef });
@@ -1247,7 +1561,8 @@ export class FileBrowserPanel {
         if (this.viewGeneratorFinished === false) {
             this.loadingAnimatedObj.visible = true;
             this.loadingAnimatedObjBackground.visible = true;
-            this.loadingAnimatedObj.rotation.z = (this.loadingAnimatedObj.rotation.z - 0.2);
+            this.loadingAnimatedObj.rotation.z =
+                this.loadingAnimatedObj.rotation.z - 0.2;
         } else {
             this.loadingAnimatedObj.visible = false;
             this.loadingAnimatedObjBackground.visible = false;

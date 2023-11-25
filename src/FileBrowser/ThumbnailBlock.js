@@ -1,12 +1,11 @@
-import { Block } from '../../node_modules/three-mesh-ui/build/three-mesh-ui.module.js';
+import { Block } from "../../node_modules/three-mesh-ui/build/three-mesh-ui.module.js";
 
-import * as Helpers from '../Helpers.js';
-import { fileBrowserPanel } from '../index.js';
+import * as Helpers from "../Helpers.js";
+import { fileBrowserPanel } from "../index.js";
 
-import * as MAIN from '../index.js';
+import * as MAIN from "../index.js";
 
 export default class ThumbnailBlock extends Block {
-
     fileSRC;
     fileNameButton;
     fileThumbnail;
@@ -38,38 +37,46 @@ export default class ThumbnailBlock extends Block {
 
         if (this.shouldVerifyVideoSRC) {
             this.setupState({
-                state: 'selected',
+                state: "selected",
                 attributes: selectedAttributes,
                 onSet: () => {
                     const response = Helpers.testIfFileExist(this.fileSRC);
                     if (response) {
-                        if (screen_type === "screen") MAIN.scaleScreenMesh((this.frame_width / this.frame_height));
+                        if (screen_type === "screen")
+                            MAIN.scaleScreenMesh(
+                                this.frame_width / this.frame_height
+                            );
                         Helpers.setVideoSrc(this.fileSRC);
                         fileBrowserPanel.hideFileMenuPanel(this.screen_type);
                     } else {
-                        MAIN.showPopupMessage(Helpers.getWordFromLang('video_not_found'));
+                        MAIN.showPopupMessage(
+                            Helpers.getWordFromLang("video_not_found")
+                        );
                     }
-                }
+                },
             });
         } else {
             this.setupState({
-                state: 'selected',
+                state: "selected",
                 attributes: selectedAttributes,
                 onSet: () => {
-                    if (screen_type === "screen") MAIN.scaleScreenMesh((this.frame_width / this.frame_height));
+                    if (screen_type === "screen")
+                        MAIN.scaleScreenMesh(
+                            this.frame_width / this.frame_height
+                        );
                     Helpers.setVideoSrc(this.fileSRC);
                     fileBrowserPanel.hideFileMenuPanel(this.screen_type);
-                }
+                },
             });
         }
 
         this.setupState({
-            state: 'hovered',
-            attributes: hoveredStateAttributes
+            state: "hovered",
+            attributes: hoveredStateAttributes,
         });
         this.setupState({
-            state: 'idle',
-            attributes: idleStateAttributes
+            state: "idle",
+            attributes: idleStateAttributes,
         });
     }
 }

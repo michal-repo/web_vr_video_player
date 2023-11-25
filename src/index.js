@@ -43,7 +43,6 @@ export let clickedButton = undefined;
 export let playMenuPanel;
 export let fileBrowserPanel;
 export let camToSave = {};
-export const objectsToDrag = {};
 
 let popupMessage, popupContainer;
 import FontJSON from "../assets/fonts/Roboto-Regular-msdf.json";
@@ -112,7 +111,7 @@ function init() {
     camera.layers.enable(1);
     camera.position.y = CAMERAPOSITIONY;
     scene.add(camera);
-    ScreenManager.registerPanel("cameras", "camera", "camera");
+    ScreenManager.registerPanel(camera, "cameras", "camera", "camera");
     cameras = { camera: camera };
 
     renderer = new THREE.WebGLRenderer({
@@ -141,16 +140,11 @@ function init() {
     const material = new THREE.MeshBasicMaterial({ map: videoTexture });
 
     // screen mode
-
-    // const geometryScreen = new THREE.SphereGeometry(120, 60, 40, (Math.PI / 16 + Math.PI / 4 + Math.PI), (Math.PI / 4 + Math.PI / 8), (Math.PI / 4 + Math.PI / 8), Math.PI / 4);
-    const geometryScreen = new THREE.PlaneGeometry(60, 60);
-    // invert the geometry on the x-axis so that all of the faces point inward
-    // geometryScreen.scale(- 1, 1, 1);
-
+    const geometryScreen = new THREE.PlaneGeometry(120, 120);
     meshForScreenMode = new THREE.Mesh(geometryScreen, material);
     meshForScreenMode.visible = false;
     scene.add(meshForScreenMode);
-    meshForScreenMode.position.setZ(-75);
+    meshForScreenMode.position.setZ(-240);
     meshForScreenMode.position.setY(CAMERAPOSITIONY);
     meshForScreenMode.scale.x = 1.5;
 
@@ -292,6 +286,7 @@ function init() {
     scene.add(meshRight360);
 
     ScreenManager.registerMeshPanel(
+        meshLeftSBS,
         "meshLeftSBS",
         "meshLeftSBS",
         "3d",
@@ -299,6 +294,7 @@ function init() {
         "left"
     );
     ScreenManager.registerMeshPanel(
+        meshLeftTB,
         "meshLeftTB",
         "meshLeftTB",
         "3d",
@@ -306,6 +302,7 @@ function init() {
         "left"
     );
     ScreenManager.registerMeshPanel(
+        meshRightSBS,
         "meshRightSBS",
         "meshRightSBS",
         "3d",
@@ -313,6 +310,7 @@ function init() {
         "right"
     );
     ScreenManager.registerMeshPanel(
+        meshRightTB,
         "meshRightTB",
         "meshRightTB",
         "3d",
@@ -320,6 +318,7 @@ function init() {
         "right"
     );
     ScreenManager.registerMeshPanel(
+        mesh2dSBS,
         "mesh2dSBS",
         "mesh2dSBS",
         "2d",
@@ -327,6 +326,7 @@ function init() {
         "right"
     );
     ScreenManager.registerMeshPanel(
+        mesh2dTB,
         "mesh2dTB",
         "mesh2dTB",
         "2d",
@@ -334,6 +334,7 @@ function init() {
         "right"
     );
     ScreenManager.registerMeshPanel(
+        meshForScreenMode,
         "meshForScreenMode",
         "meshForScreenMode",
         "screen",
@@ -341,6 +342,7 @@ function init() {
         "both"
     );
     ScreenManager.registerMeshPanel(
+        meshLeft360,
         "meshLeft360",
         "meshLeft360",
         "3d",
@@ -348,6 +350,7 @@ function init() {
         "left"
     );
     ScreenManager.registerMeshPanel(
+        meshRight360,
         "meshRight360",
         "meshRight360",
         "3d",
@@ -355,6 +358,7 @@ function init() {
         "right"
     );
     ScreenManager.registerMeshPanel(
+        mesh2d360,
         "mesh2d360",
         "mesh2d360",
         "2d",
@@ -362,6 +366,7 @@ function init() {
         "right"
     );
     ScreenManager.registerMeshPanel(
+        mesh1802D,
         "mesh1802D",
         "mesh1802D",
         "screen",
@@ -369,6 +374,7 @@ function init() {
         "both"
     );
     ScreenManager.registerMeshPanel(
+        mesh3602D,
         "mesh3602D",
         "mesh3602D",
         "screen",
@@ -376,18 +382,18 @@ function init() {
         "both"
     );
     // register for recenter
-    registerObjectToDrag(meshLeftSBS, "player");
-    registerObjectToDrag(meshLeftTB, "player");
-    registerObjectToDrag(meshRightSBS, "player");
-    registerObjectToDrag(meshRightTB, "player");
-    registerObjectToDrag(mesh2dSBS, "player");
-    registerObjectToDrag(mesh2dTB, "player");
-    registerObjectToDrag(meshForScreenMode, "player");
-    registerObjectToDrag(meshLeft360, "player");
-    registerObjectToDrag(meshRight360, "player");
-    registerObjectToDrag(mesh2d360, "player");
-    registerObjectToDrag(mesh1802D, "player");
-    registerObjectToDrag(mesh3602D, "player");
+    ScreenManager.registerObjectToDrag(meshLeftSBS, "player", "meshes");
+    ScreenManager.registerObjectToDrag(meshLeftTB, "player", "meshes");
+    ScreenManager.registerObjectToDrag(meshRightSBS, "player", "meshes");
+    ScreenManager.registerObjectToDrag(meshRightTB, "player", "meshes");
+    ScreenManager.registerObjectToDrag(mesh2dSBS, "player", "meshes");
+    ScreenManager.registerObjectToDrag(mesh2dTB, "player", "meshes");
+    ScreenManager.registerObjectToDrag(meshForScreenMode, "player", "meshes");
+    ScreenManager.registerObjectToDrag(meshLeft360, "player", "meshes");
+    ScreenManager.registerObjectToDrag(meshRight360, "player", "meshes");
+    ScreenManager.registerObjectToDrag(mesh2d360, "player", "meshes");
+    ScreenManager.registerObjectToDrag(mesh1802D, "player", "meshes");
+    ScreenManager.registerObjectToDrag(mesh3602D, "player", "meshes");
     meshes = {
         meshLeftSBS: meshLeftSBS,
         meshRightSBS: meshRightSBS,
@@ -498,14 +504,6 @@ function init() {
     camToSave.rotation = camera.rotation.clone();
     camToSave.controlCenter = orbitControls.target.clone();
 
-    ScreenManager.savePositions("cameras");
-    ScreenManager.savePositions("meshes");
-    ScreenManager.savePositions("playMenuPanel");
-
-    // register listeners on XR session start
-    // change panels positions in VR
-    // renderer.xr.addEventListener('sessionstart', ScreenManager.vrsessionstart);
-
     renderer.xr.addEventListener("sessionend", ScreenManager.vrsessionend);
 
     //
@@ -523,10 +521,9 @@ function init() {
                     ))
             )
             .then((a) => fileBrowserPanel.showFileMenuPanel())
-            .then((a) => ScreenManager.savePositions("fileBrowserPanel"))
             .catch((error) => {
                 console.error("Error:", error);
-                alert(Helpers.getWordFromLang('parsing_failed'));
+                alert(Helpers.getWordFromLang("parsing_failed"));
             });
     } else if (document.getElementById("stashapp")) {
         let stashappURL = document.getElementById("stashapp").innerText;
@@ -552,13 +549,12 @@ function init() {
             .then((jsonRaw) => processStashAppData(jsonRaw))
             .then((json) => (fileBrowserPanel = new FileBrowserPanel(json)))
             .then((a) => fileBrowserPanel.showFileMenuPanel())
-            .then((a) => ScreenManager.savePositions("fileBrowserPanel"))
             .catch((error) => {
                 console.error("Error:", error);
-                alert(Helpers.getWordFromLang('parsing_failed'));
+                alert(Helpers.getWordFromLang("parsing_failed"));
             });
     } else {
-        showPopupMessage(Helpers.getWordFromLang('no_video_sources'));
+        showPopupMessage(Helpers.getWordFromLang("no_video_sources"));
     }
 
     //
@@ -639,10 +635,6 @@ function setLoop() {
     renderer.setAnimationLoop(loop);
 }
 
-export function getCurrentZoom() {
-    return meshLeftSBS.position.z;
-}
-
 let showPopupTimeoutID;
 
 export function showPopupMessage(message) {
@@ -654,7 +646,7 @@ export function showPopupMessage(message) {
             popupContainer.visible = false;
         }, 4000);
     } else {
-        console.warn(Helpers.getWordFromLang('show_popup_message_error'));
+        console.warn(Helpers.getWordFromLang("show_popup_message_error"));
     }
 }
 
@@ -695,7 +687,9 @@ export function playbackChange(is_active = false, screen_type = null) {
             playMenuPanel.buttonPlay.playbackStarted();
             switch (ScreenManager.VRMode) {
                 case "tb":
-                    playMenuPanel.VRSBSTBModeButtonText.set({ content: Helpers.getWordFromLang('top_bottom') });
+                    playMenuPanel.VRSBSTBModeButtonText.set({
+                        content: Helpers.getWordFromLang("top_bottom"),
+                    });
                     break;
                 case "360":
                     playMenuPanel.VRSBSTBModeButtonText.set({ content: "360" });
@@ -716,7 +710,9 @@ export function playbackChange(is_active = false, screen_type = null) {
                     break;
                 default:
                 case "sbs":
-                    playMenuPanel.VRSBSTBModeButtonText.set({ content: Helpers.getWordFromLang('side_by_side') });
+                    playMenuPanel.VRSBSTBModeButtonText.set({
+                        content: Helpers.getWordFromLang("side_by_side"),
+                    });
                     break;
             }
 
@@ -930,13 +926,6 @@ function raycast() {
 
         return closestIntersection;
     }, null);
-}
-
-export function registerObjectToDrag(obj, view) {
-    if (!(view in objectsToDrag)) {
-        objectsToDrag[view] = [];
-    }
-    objectsToDrag[view].push(obj);
 }
 
 export function scaleScreenMesh(x_scale) {

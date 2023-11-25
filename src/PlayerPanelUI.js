@@ -326,6 +326,7 @@ export class PlayerPanel {
         this.playMenuContainer.setupState({ state: "idle" });
 
         ScreenManager.registerPanel(
+            this.playMenuContainer,
             "playMenuPanel",
             "playMenuContainer",
             "playMenuContainer"
@@ -376,9 +377,10 @@ export class PlayerPanel {
         );
 
         const moveButton = new Block(this.buttonOptions);
+        const moveResetButton = new Block(this.buttonOptions);
         const moveButtonContainer = new Block(
             this.moveButtonContainerAttributes
-        ).add(moveButton);
+        ).add(moveResetButton, moveButton);
 
         /////////////////////////////////////////////////////////////////////////////////
 
@@ -579,6 +581,24 @@ export class PlayerPanel {
             },
         });
 
+        moveResetButton.setupState({
+            state: "selected",
+            attributes: this.selectedAttributes,
+            onSet: () => {
+                ScreenManager.resetDrag("player");
+            },
+        });
+
+        moveResetButton.setupState({
+            state: "hovered",
+            attributes: this.hoveredStateAttributes,
+        });
+
+        moveResetButton.setupState({
+            state: "idle",
+            attributes: this.idleStateAttributes,
+        });
+
         // Progress Bar
 
         this.progressBar = new Block(this.progressBarAttributes);
@@ -629,6 +649,7 @@ export class PlayerPanel {
             moveButtonContainer
         );
         this.playMenuObjsToTest.push(
+            moveResetButton,
             moveButton,
             buttonExitToMain,
             buttonRew,
@@ -652,6 +673,7 @@ export class PlayerPanel {
         this.settingsMenuContainer.setupState({ state: "hovered" });
         this.settingsMenuContainer.setupState({ state: "idle" });
         ScreenManager.registerPanel(
+            this.settingsMenuContainer,
             "playMenuPanel",
             "settingsMenuContainer",
             "settingsMenuContainer"
@@ -687,7 +709,7 @@ export class PlayerPanel {
         VR2DModeButton.add(this.VR2DModeButtonText);
 
         this.VRSBSTBModeButtonText = new Text({
-            content: Helpers.getWordFromLang('side_by_side'),
+            content: Helpers.getWordFromLang("side_by_side"),
             fontSize: 0.07,
         });
         VRSBSTBModeButton.add(this.VRSBSTBModeButtonText);
@@ -713,6 +735,9 @@ export class PlayerPanel {
 
         this.loader.load(ResetIcon, (texture) => {
             zoomResetButton.add(
+                new InlineBlock(this.textureAttributes(texture))
+            );
+            moveResetButton.add(
                 new InlineBlock(this.textureAttributes(texture))
             );
         });
@@ -855,10 +880,14 @@ export class PlayerPanel {
             onSet: () => {
                 if (ScreenManager.VRMode === "sbs") {
                     ScreenManager.switchModeVRScreen("tb");
-                    this.VRSBSTBModeButtonText.set({ content: Helpers.getWordFromLang('top_bottom') });
+                    this.VRSBSTBModeButtonText.set({
+                        content: Helpers.getWordFromLang("top_bottom"),
+                    });
                 } else if (ScreenManager.VRMode === "tb") {
                     ScreenManager.switchModeVRScreen("360");
-                    this.VRSBSTBModeButtonText.set({ content: Helpers.getWordFromLang('top_bottom_360') });
+                    this.VRSBSTBModeButtonText.set({
+                        content: Helpers.getWordFromLang("top_bottom_360"),
+                    });
                 } else if (ScreenManager.VRMode === "360") {
                     ScreenManager.switchModeVRScreen("sphere180");
                     this.VRSBSTBModeButtonText.set({ content: "2D 180" });
@@ -867,7 +896,9 @@ export class PlayerPanel {
                     this.VRSBSTBModeButtonText.set({ content: "2D 360" });
                 } else if (ScreenManager.VRMode === "sphere360") {
                     ScreenManager.switchModeVRScreen("sbs");
-                    this.VRSBSTBModeButtonText.set({ content: Helpers.getWordFromLang('side_by_side') });
+                    this.VRSBSTBModeButtonText.set({
+                        content: Helpers.getWordFromLang("side_by_side"),
+                    });
                 }
             },
         });
@@ -877,21 +908,21 @@ export class PlayerPanel {
         // Labels
         const zoomLabel = new Block(this.bigButtonOptions).add(
             new Text({
-                content: Helpers.getWordFromLang('zoom_video'),
+                content: Helpers.getWordFromLang("zoom_video"),
                 fontSize: 0.05,
             })
         );
 
         const tiltLabel = new Block(this.bigButtonOptions).add(
             new Text({
-                content: Helpers.getWordFromLang('tilt_video'),
+                content: Helpers.getWordFromLang("tilt_video"),
                 fontSize: 0.05,
             })
         );
 
         const modeLabel = new Block(this.bigButtonOptions).add(
             new Text({
-                content: Helpers.getWordFromLang('switch_mode'),
+                content: Helpers.getWordFromLang("switch_mode"),
                 fontSize: 0.05,
             })
         );
@@ -981,19 +1012,44 @@ export class PlayerPanel {
             },
         });
         ScreenManager.registerPanel(
+            this.draggingBox,
             "playMenuPanel",
             "draggingBox",
             "draggingBox"
         );
         this.playMenuObjsToTest.push(this.draggingBox);
 
-        MAIN.registerObjectToDrag(this.draggingBox, "player");
-        MAIN.registerObjectToDrag(this.playMenuContainer, "player");
-        MAIN.registerObjectToDrag(this.settingsMenuContainer, "player");
+        ScreenManager.registerObjectToDrag(
+            this.draggingBox,
+            "player",
+            "playMenuPanel"
+        );
+        ScreenManager.registerObjectToDrag(
+            this.playMenuContainer,
+            "player",
+            "playMenuPanel"
+        );
+        ScreenManager.registerObjectToDrag(
+            this.settingsMenuContainer,
+            "player",
+            "playMenuPanel"
+        );
 
-        MAIN.registerObjectToDrag(this.draggingBox, "playerControls");
-        MAIN.registerObjectToDrag(this.playMenuContainer, "playerControls");
-        MAIN.registerObjectToDrag(this.settingsMenuContainer, "playerControls");
+        ScreenManager.registerObjectToDrag(
+            this.draggingBox,
+            "playerControls",
+            "playMenuPanel"
+        );
+        ScreenManager.registerObjectToDrag(
+            this.playMenuContainer,
+            "playerControls",
+            "playMenuPanel"
+        );
+        ScreenManager.registerObjectToDrag(
+            this.settingsMenuContainer,
+            "playerControls",
+            "playMenuPanel"
+        );
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1030,7 +1086,9 @@ export class PlayerPanel {
         this.hidePlayMenuPanel();
         ScreenManager.force2DMode(false);
         this.VR2DModeButtonText.set({ content: "3D" });
-        this.VRSBSTBModeButtonText.set({ content: Helpers.getWordFromLang('side_by_side') });
+        this.VRSBSTBModeButtonText.set({
+            content: Helpers.getWordFromLang("side_by_side"),
+        });
         ScreenManager.resetPosition("playMenuPanel");
         ScreenManager.resetPosition("meshes");
         MAIN.fileBrowserPanel.showFileMenuPanel();
@@ -1065,7 +1123,9 @@ export class PlayerPanel {
                     result += playbackHelper.toISOString().substring(11, 19);
                     this.playbackLabelContainer.set({ content: result });
                 } else {
-                    this.playbackLabelContainer.set({ content: Helpers.getWordFromLang('not_available') });
+                    this.playbackLabelContainer.set({
+                        content: Helpers.getWordFromLang("not_available"),
+                    });
                 }
             }
 

@@ -1,7 +1,7 @@
 export default class FolderEntry {
-    name
-    list
-    
+    name;
+    list;
+
     constructor(name) {
         this.name = name;
         this.list = [];

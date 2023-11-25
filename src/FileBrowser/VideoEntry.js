@@ -1,14 +1,23 @@
 export default class VideoEntry {
-    name
-    src
-    thumbnail
-    screen_type
-    frame_height
-    frame_width
-    date
-    epoch
+    name;
+    src;
+    thumbnail;
+    screen_type;
+    frame_height;
+    frame_width;
+    date;
+    epoch;
 
-    constructor(name, src, thumbnail, screen_type, frame_height, frame_width, date, epoch) {
+    constructor(
+        name,
+        src,
+        thumbnail,
+        screen_type,
+        frame_height,
+        frame_width,
+        date,
+        epoch
+    ) {
         this.name = name;
         this.src = src;
         this.thumbnail = thumbnail;
