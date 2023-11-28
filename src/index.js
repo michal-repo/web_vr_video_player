@@ -541,7 +541,7 @@ function init() {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    query: "{ allScenes {title file_mod_time files {width height} paths { screenshot stream } studio { id name } tags { id name } } }",
+                    query: "{ allScenes {id title file_mod_time files {width height} paths { screenshot stream } studio { id name } tags { id name } } }",
                 }),
             }
         )
@@ -566,67 +566,42 @@ function processStashAppData(json) {
     let preparedJson = { videos: [] };
     let folders = [];
     json.data.allScenes.forEach((scene) => {
-        if (
-            scene.tags.filter((obj) => {
-                if (
-                    obj.name === "VR" ||
-                    obj.name === "SBS" ||
-                    obj.name === "TB" ||
-                    obj.name === "SCREEN"
-                ) {
-                    return true;
-                } else {
-                    return false;
-                }
-            })
-        ) {
-            let screen_type = "sbs";
-            scene.tags.forEach((tag) => {
-                switch (tag.name) {
-                    case "SBS":
-                        screen_type = "sbs";
-                        break;
-                    case "TB":
-                        screen_type = "tb";
-                        break;
-                    case "SCREEN":
-                        screen_type = "screen";
-                        break;
-                }
-            });
-            let epoch = Date.parse(scene.file_mod_time);
-            if (preparedJson.videos[folders[scene.studio.name] - 1]) {
-                preparedJson.videos[folders[scene.studio.name] - 1].list.push(
-                    new VideoEntry(
-                        scene.title,
-                        scene.paths.stream,
-                        scene.paths.screenshot,
-                        screen_type,
-                        scene.files[0].height,
-                        scene.files[0].width,
-                        scene.file_mod_time,
-                        epoch
-                    )
-                );
-            } else {
-                folders.push(scene.studio.name);
-                folders[scene.studio.name] = preparedJson.videos.push(
-                    new FolderEntry(scene.studio.name)
-                );
-                preparedJson.videos[folders[scene.studio.name] - 1].list.push(
-                    new VideoEntry(
-                        scene.title,
-                        scene.paths.stream,
-                        scene.paths.screenshot,
-                        screen_type,
-                        scene.files[0].height,
-                        scene.files[0].width,
-                        scene.file_mod_time,
-                        epoch
-                    )
-                );
+        let screen_type = "screen";
+        scene.tags.forEach((tag) => {
+            switch (tag.name) {
+                case "SBS":
+                    screen_type = "sbs";
+                    break;
+                case "TB":
+                    screen_type = "tb";
+                    break;
+                case "SCREEN":
+                    screen_type = "screen";
+                    break;
             }
+        });
+        let epoch = Date.parse(scene.file_mod_time);
+        if (scene.studio === null) {
+            scene.studio = { name: "MAIN" };
         }
+        if (!(preparedJson.videos[folders[scene.studio.name] - 1])) {
+            folders.push(scene.studio.name);
+            folders[scene.studio.name] = preparedJson.videos.push(
+                new FolderEntry(scene.studio.name)
+            );
+        }
+        preparedJson.videos[folders[scene.studio.name] - 1].list.push(
+            new VideoEntry(
+                scene.title != "" ? scene.title : scene.id,
+                scene.paths.stream,
+                scene.paths.screenshot,
+                screen_type,
+                scene.files[0].height,
+                scene.files[0].width,
+                scene.file_mod_time,
+                epoch
+            )
+        );
     });
     return preparedJson;
 }
