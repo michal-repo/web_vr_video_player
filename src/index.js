@@ -9,11 +9,10 @@ import VRControl from "../node_modules/three-mesh-ui/examples/utils/VRControl.js
 
 import { PlayerPanel } from "./PlayerPanelUI.js";
 import { FileBrowserPanel } from "./FileBrowser/FileBrowserPanelUI.js";
-import VideoEntry from "./FileBrowser/VideoEntry.js";
-import FolderEntry from "./FileBrowser/FolderEntry.js";
 import * as ScreenManager from "./ScreenManager/ScreenManager.js";
 import * as UI from "./UI.js";
 import * as Helpers from "./Helpers.js";
+import SourcesSelectorPanel from "./sourceSelector.js";
 
 export let scene,
     camera,
@@ -42,13 +41,12 @@ export let scene,
 export let clickedButton = undefined;
 export let playMenuPanel;
 export let fileBrowserPanel;
+export let sourcesSelectorPanel;
 export let camToSave = {};
 
 let popupMessage, popupContainer;
 import FontJSON from "../assets/fonts/Roboto-Regular-msdf.json";
 import FontImage from "../assets/fonts/Roboto-Regular.png";
-
-const verifyVideoSRC = true;
 
 export let hiddenSphere;
 const CAMERAPOSITIONY = 1.6;
@@ -507,103 +505,14 @@ function init() {
     renderer.xr.addEventListener("sessionend", ScreenManager.vrsessionend);
 
     //
+    // FILES
 
-    if (document.getElementById("json_file")) {
-        let json_file = document.getElementById("json_file").innerText;
-
-        fetch(json_file)
-            .then((response) => response.json())
-            .then(
-                (json) =>
-                    (fileBrowserPanel = new FileBrowserPanel(
-                        json,
-                        verifyVideoSRC
-                    ))
-            )
-            .then((a) => fileBrowserPanel.showFileMenuPanel())
-            .catch((error) => {
-                console.error("Error:", error);
-                alert(Helpers.getWordFromLang("parsing_failed"));
-            });
-    } else if (document.getElementById("stashapp")) {
-        let stashappURL = document.getElementById("stashapp").innerText;
-
-        fetch(
-            stashappURL +
-                (stashappURL.substring(stashappURL.length - 1) == "/"
-                    ? ""
-                    : "/") +
-                "graphql",
-            {
-                method: "POST",
-                cache: "no-cache",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    query: "{ allScenes {id title file_mod_time files {width height} paths { screenshot stream } studio { id name } tags { id name } } }",
-                }),
-            }
-        )
-            .then((response) => response.json())
-            .then((jsonRaw) => processStashAppData(jsonRaw))
-            .then((json) => (fileBrowserPanel = new FileBrowserPanel(json)))
-            .then((a) => fileBrowserPanel.showFileMenuPanel())
-            .catch((error) => {
-                console.error("Error:", error);
-                alert(Helpers.getWordFromLang("parsing_failed"));
-            });
-    } else {
-        showPopupMessage(Helpers.getWordFromLang("no_video_sources"));
-    }
+    fileBrowserPanel = new FileBrowserPanel({}, true);
+    sourcesSelectorPanel = new SourcesSelectorPanel(Extensions.registered);
 
     //
 
     setTimeout(setLoop, 500);
-}
-
-function processStashAppData(json) {
-    let preparedJson = { videos: [] };
-    let folders = [];
-    json.data.allScenes.forEach((scene) => {
-        let screen_type = "screen";
-        scene.tags.forEach((tag) => {
-            switch (tag.name) {
-                case "SBS":
-                    screen_type = "sbs";
-                    break;
-                case "TB":
-                    screen_type = "tb";
-                    break;
-                case "SCREEN":
-                    screen_type = "screen";
-                    break;
-            }
-        });
-        let epoch = Date.parse(scene.file_mod_time);
-        if (scene.studio === null) {
-            scene.studio = { name: "MAIN" };
-        }
-        if (!(preparedJson.videos[folders[scene.studio.name] - 1])) {
-            folders.push(scene.studio.name);
-            folders[scene.studio.name] = preparedJson.videos.push(
-                new FolderEntry(scene.studio.name)
-            );
-        }
-        preparedJson.videos[folders[scene.studio.name] - 1].list.push(
-            new VideoEntry(
-                scene.title != "" ? scene.title : scene.id,
-                scene.paths.stream,
-                scene.paths.screenshot,
-                screen_type,
-                scene.files[0].height,
-                scene.files[0].width,
-                scene.file_mod_time,
-                epoch
-            )
-        );
-    });
-    return preparedJson;
 }
 
 function setLoop() {
@@ -915,4 +824,10 @@ if (WebGL.isWebGLAvailable()) {
 } else {
     const warning = WebGL.getWebGLErrorMessage();
     document.body.appendChild(warning);
+}
+
+export let Extensions = { registered: [] };
+
+export default function registerExtension(name) {
+    Extensions.registered.push(name);
 }

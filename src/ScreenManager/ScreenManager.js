@@ -54,15 +54,18 @@ export function resetPosition(ui) {
 
 export function zoom(in_or_out, step = 10) {
     const oldZoom = currentZoom;
+    let distance = 0;
     switch (in_or_out) {
         case "in":
             if (currentZoom < 180) {
                 currentZoom += step;
+                distance = -step;
             }
             break;
         case "out":
             if (currentZoom > 0) {
                 currentZoom -= step;
+                distance = step;
             }
             break;
         case "reset":
@@ -73,14 +76,22 @@ export function zoom(in_or_out, step = 10) {
     }
     if (oldZoom !== currentZoom) {
         for (let mesh in MAIN.meshes) {
-            const temp = panels.meshes.panels
-                .find((element) => element.ui_name === mesh)
-                .position.clone();
-            if (currentZoom > 0) {
-                temp.z += currentZoom;
+            if (in_or_out === "reset"){
+                const temp = panels.meshes.panels
+                    .find((element) => element.ui_name === mesh)
+                    .position.clone();
+                if (currentZoom > 0) {
+                    temp.z += currentZoom;
+                }
+                temp.applyEuler(MAIN.meshes[mesh].rotation);
+                MAIN.meshes[mesh].position.copy(temp);
+            } else {
+                const temp = panels.meshes.panels.find(
+                    (element) => element.ui_name === mesh
+                ).position.clone();
+                temp.normalize();
+                MAIN.meshes[mesh].translateOnAxis(temp, distance);
             }
-            temp.applyEuler(MAIN.meshes[mesh].rotation);
-            MAIN.meshes[mesh].position.copy(temp);
         }
     }
 }

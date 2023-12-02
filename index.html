@@ -1,57 +1,83 @@
 <!DOCTYPE html>
 <html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
+        />
+        <link rel="icon" href="favicon.ico" type="image/x-icon" />
+        <title>VR player</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+            }
 
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-  <link rel="icon" href="favicon.ico" type="image/x-icon" />
-  <title>VR player</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-    }
+            body {
+                overflow: hidden;
+            }
 
-    body {
-      overflow: hidden;
-    }
+            footer {
+                position: absolute;
+                bottom: 0px;
+                right: 0px;
+                justify-content: center;
+                padding: 5px;
+                font-size: 12px;
+                background-color: #d4d4d4;
+                color: rgb(0, 0, 0);
+            }
+        </style>
 
-    footer {
-      position: absolute;
-      bottom: 0px;
-      right: 0px;
-      justify-content: center;
-      padding: 5px;
-      font-size: 12px;
-      background-color: #d4d4d4;
-      color: rgb(0, 0, 0);
-    }
-  </style>
+        <script defer src="dist/index.js"></script>
+        <script defer src="dist/jsonLoader.js"></script>
+    </head>
 
-  <script defer="defer" type="module" src="dist/index.js"></script>
-</head>
-
-<body>
-  <video id="video" crossOrigin="anonymous" playsinline style="display:none">
-    <source id="video_src" src="" type="video/mp4">
-  </video>
-  <span id="json_file" hidden>files.json</span>
-  <!-- StashApp must be configured with SSL -->
-  <!-- <span id="stashapp" hidden>https://192.168.1.100:9999/</span> -->
-
-
-
-  <footer>
-    <p>
-      Icons made by
-      &nbsp;<a target="_blank" href="https://www.flaticon.com/authors/nawicon">nawicon</a>,
-      &nbsp;<a target="_blank" href="https://www.flaticon.com/authors/alfanz">alfanz</a>,
-      &nbsp;<a target="_blank" href="https://www.flaticon.com/authors/ayub-irawan">ayub-irawan</a>,
-      &nbsp;<a target="_blank" href="https://www.flaticon.com/authors/us-and-up">us-and-up</a>,
-      &nbsp;<a target="_blank" href="https://www.flaticon.com/authors/freepik">freepik</a>,
-      &nbsp;from&nbsp;<a target="_blank" href="http://www.flaticon.com/">www.flaticon.com</a>
-    </p>
-  </footer>
-</body>
-
+    <body>
+        <video
+            id="video"
+            crossorigin="anonymous"
+            playsinline
+            style="display: none"
+        >
+            <source id="video_src" src="" type="video/mp4" />
+        </video>
+        <footer>
+            <p>
+                Icons made by &nbsp;<a
+                    target="_blank"
+                    href="https://www.flaticon.com/authors/nawicon"
+                    >nawicon</a
+                >, &nbsp;<a
+                    target="_blank"
+                    href="https://www.flaticon.com/authors/alfanz"
+                    >alfanz</a
+                >, &nbsp;<a
+                    target="_blank"
+                    href="https://www.flaticon.com/authors/ayub-irawan"
+                    >ayub-irawan</a
+                >, &nbsp;<a
+                    target="_blank"
+                    href="https://www.flaticon.com/authors/us-and-up"
+                    >us-and-up</a
+                >, &nbsp;<a
+                    target="_blank"
+                    href="https://www.flaticon.com/authors/freepik"
+                    >freepik</a
+                >, &nbsp;from&nbsp;<a
+                    target="_blank"
+                    href="http://www.flaticon.com/"
+                    >www.flaticon.com</a
+                >
+            </p>
+        </footer>
+    </body>
+    <script defer type="module">
+        try {
+            new JsonLoader("files.json");
+        } catch (error) {
+            console.warn(error);
+        }
+    </script>
 </html>

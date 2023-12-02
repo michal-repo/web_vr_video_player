@@ -37,7 +37,6 @@ import * as ScreenManager from "../ScreenManager/ScreenManager.js";
 import LeftIcon from "../../assets/icons/left-arrow.png";
 import RightIcon from "../../assets/icons/right-arrow.png";
 import VideoIcon from "../../assets/icons/video.png";
-import FolderIcon from "../../assets/icons/folder.png";
 
 export class FileBrowserPanel {
     fileBrowserContainer;
@@ -277,18 +276,7 @@ export class FileBrowserPanel {
 
     constructor(files, shouldVerifyVideoSRC = false) {
         this.defaultVideoThumbnail = this.loader.load(VideoIcon);
-        this.shouldVerifyVideoSRC = shouldVerifyVideoSRC;
-
-        if (files.videos) {
-            this.VIDEOS = files.videos;
-            this.FILES = this.VIDEOS[0].list;
-            this.FOLDER = 0;
-            this.ACTIVEFOLDER = 0;
-            this.TOTAL_PAGES =
-                Math.ceil(
-                    this.FILES.length / (this.FILES_PER_ROW * this.FILES_ROWS)
-                ) - 1;
-        }
+        this.rebuildFiles(files, shouldVerifyVideoSRC);
 
         const circle = new CircleGeometry(2, 32);
         const loadingAnimatedObjBackgroundMaterial = new MeshBasicMaterial({
@@ -393,19 +381,13 @@ export class FileBrowserPanel {
 
         this.thumbsContainer = new Block(this.thumbsContainerAttributes);
 
+        this.foldersContainer = new Block(this.foldersContainerAttributes);
         if (this.VIDEOS.length > 0) {
-            this.foldersContainer = new Block(this.foldersContainerAttributes);
-
             this.generateFoldersButtons();
-
-            MAIN.scene.add(this.foldersContainer);
-            this.foldersContainer.position.set(
-                -3.8,
-                1.4,
-                this.SIDEPANELZDISTANCE
-            );
-            this.foldersContainer.rotation.y = 0.5;
         }
+        MAIN.scene.add(this.foldersContainer);
+        this.foldersContainer.position.set(-3.8, 1.4, this.SIDEPANELZDISTANCE);
+        this.foldersContainer.rotation.y = 0.5;
 
         //////////////////////////////////////////////////////////////////////
         // Search
@@ -1566,6 +1548,21 @@ export class FileBrowserPanel {
         } else {
             this.loadingAnimatedObj.visible = false;
             this.loadingAnimatedObjBackground.visible = false;
+        }
+    }
+
+    rebuildFiles(files, shouldVerifyVideoSRC) {
+        this.shouldVerifyVideoSRC = shouldVerifyVideoSRC;
+
+        if (files.videos) {
+            this.VIDEOS = files.videos;
+            this.FILES = this.VIDEOS[0].list;
+            this.FOLDER = 0;
+            this.ACTIVEFOLDER = 0;
+            this.TOTAL_PAGES =
+                Math.ceil(
+                    this.FILES.length / (this.FILES_PER_ROW * this.FILES_ROWS)
+                ) - 1;
         }
     }
 }

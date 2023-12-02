@@ -91,13 +91,9 @@ Supported tags:
 
 `_2D_360` - fisheye 360, not VR (one lens)
 
-### Stashapp
+### Extensions
 
-For stashapp comment json span in index and uncomment stashapp span, then provide url to app (it must be configured with SSL, browser will blocking mixed content if you use http)
-
-Tag your videos with one of these tags: `SBS`, `VR` (screen type is SBS), `TB`, `360`, `SCREEN`
-
-Videos are organized by Studios.
+[Extensions](https://github.com/michal-repo/web_vr_video_player_extensions)
 
 ## Generating your own JSON file with video sources
 Player is using locally stored JSON file with video sources. It's configured in `index.html`, where you can provide your JSON file name:
