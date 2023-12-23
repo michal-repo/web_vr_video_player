@@ -38,6 +38,7 @@ export function vrsessionend() {
     resetPosition("cameras");
     resetPosition("playMenuPanel");
     resetPosition("fileBrowserPanel");
+    resetPosition("sourcesSelectorPanel");
     resetPosition("meshes");
 }
 

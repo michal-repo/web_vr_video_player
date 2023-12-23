@@ -5,12 +5,14 @@ export default class PanelsList {
     playMenuPanel;
     meshes;
     fileBrowserPanel;
+    sourcesSelectorPanel;
 
     constructor() {
         this.cameras = new Panels();
         this.playMenuPanel = new Panels();
         this.meshes = new Panels();
         this.fileBrowserPanel = new Panels();
+        this.sourcesSelectorPanel = new Panels();
     }
 
     addPanel(ref, panel, ui_name, save_as_name) {

@@ -62,6 +62,7 @@ export class FileBrowserPanel {
     sortContainer;
     sortActiveColor = new Color(0xf9dc77);
     sortInactiveColor = new Color(0xc5d564);
+    sourcesBtn;
     sortByName;
     sortByNameColorRef = this.sortActiveColor;
     sortByDate;
@@ -620,6 +621,54 @@ export class FileBrowserPanel {
 
         ////////////
 
+        this.sourcesBtn = new Block({
+            justifyContent: "center",
+            contentDirection: "row",
+            padding: 0.02,
+            margin: 0.02,
+            borderRadius: 0.08,
+            backgroundOpacity: 1,
+            backgroundColor: new Color(0xc5d564),
+            width: 0.5,
+            height: 0.2,
+            hiddenOverflow: true,
+            fontColor: new Color(0x000000),
+        });
+        this.sourcesBtn.add(
+            new Text({
+                fontFamily: FontJSON,
+                fontTexture: FontImage,
+                fontSize: 0.12,
+                content: Helpers.getWordFromLang("sources"),
+            })
+        );
+
+        this.sourcesBtn.setupState({
+            state: "selected",
+            onSet: () => {
+                MAIN.sourcesSelectorPanel.showSourcesSelectorPanel();
+            },
+        });
+
+        this.sourcesBtn.setupState({
+            state: "hovered",
+            attributes: {
+                backgroundColor: new Color(0xdcf63f),
+                backgroundOpacity: 1,
+                fontColor: new Color(0x000000),
+            },
+        });
+
+        this.sourcesBtn.setupState({
+            state: "idle",
+            attributes: {
+                backgroundColor: new Color(0xc5d564),
+                backgroundOpacity: 1,
+                fontColor: new Color(0x000000),
+            },
+        });
+
+        ///////////////
         this.sortByName = new Block({
             justifyContent: "center",
             contentDirection: "row",
@@ -730,7 +779,7 @@ export class FileBrowserPanel {
             padding: 0.02,
             borderRadius: 0.08,
             backgroundOpacity: 1,
-            width: 2,
+            width: 2.7,
             height: 0.3,
             hiddenOverflow: true,
             fontColor: new Color(0x000000),
@@ -754,11 +803,12 @@ export class FileBrowserPanel {
                 content: Helpers.getWordFromLang("sorting") + ":",
             })
         );
+        this.sortContainer.add(this.sourcesBtn);
         this.sortContainer.add(label);
         this.sortContainer.add(this.sortByName);
         this.sortContainer.add(this.sortByDate);
         this.sortContainer.add(this.sortDirectionBlock);
-        this.sortContainer.position.set(1.98, 3.2, this.CENTERPANELZDISTANCE);
+        this.sortContainer.position.set(1.52, 3.2, this.CENTERPANELZDISTANCE);
         MAIN.scene.add(this.sortContainer);
 
         //////////////////////////////////////////////////////////////////////
@@ -827,6 +877,7 @@ export class FileBrowserPanel {
         this.defaultObjsToTest.push(this.sortByDate);
         this.defaultObjsToTest.push(this.sortByName);
         this.defaultObjsToTest.push(this.sortDirectionBlock);
+        this.defaultObjsToTest.push(this.sourcesBtn);
 
         // Finally add defaultObjsToTest to main array used for testing.
         this.resetFileBrowserObjectsToTest();
@@ -1559,6 +1610,10 @@ export class FileBrowserPanel {
             this.FILES = this.VIDEOS[0].list;
             this.FOLDER = 0;
             this.ACTIVEFOLDER = 0;
+            this.folderIndex = 1;
+            this.folderPageIndex = 0;
+            this.currentFolderPageIndex = 0;
+            this.CURRENT_PAGE = 0;
             this.TOTAL_PAGES =
                 Math.ceil(
                     this.FILES.length / (this.FILES_PER_ROW * this.FILES_ROWS)

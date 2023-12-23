@@ -19,6 +19,9 @@
         "date": "Date",
         "sorting": "Sorting",
         "previous_page": "Previous Page",
-        "next_page": "Next Page"
+        "next_page": "Next Page",
+        "refresh": "Refresh",
+        "close": "Close",
+        "sources": "Sources"
     }
 }

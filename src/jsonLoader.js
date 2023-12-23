@@ -1,19 +1,22 @@
 export default class JsonLoader {
     data;
     verifyVideoSRC;
+    name;
 
-    constructor(json_file, verifyVideoSRC = true) {
+    constructor(json_file, verifyVideoSRC = true, name = "Local Files") {
         if (typeof json_file === "string") {
             this.verifyVideoSRC = verifyVideoSRC;
+            this.name = name;
             fetch(json_file)
                 .then((response) => response.json())
                 .then((json) => {
                     window.registerExtension({
                         type: "json_file",
-                        name: "Local Files",
-                        verifyVideoSRC: true,
+                        name: this.name,
+                        verifyVideoSRC: this.verifyVideoSRC,
                         data: json,
                     });
+                    this.data = json;
                     return true;
                 })
                 .catch((error) => {
@@ -28,7 +31,7 @@ export default class JsonLoader {
 
         return {
             type: "json_file",
-            name: "Local Files",
+            name: this.name,
             verifyVideoSRC: this.verifyVideoSRC,
             data: this.data,
         };

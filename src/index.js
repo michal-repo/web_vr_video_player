@@ -513,10 +513,15 @@ function init() {
     //
 
     setTimeout(setLoop, 500);
+    setTimeout(selectFirst, 3000);
 }
 
 function setLoop() {
     renderer.setAnimationLoop(loop);
+}
+
+function selectFirst() {
+    sourcesSelectorPanel.selectFirstSourceIfOnlyOneAvailable();
 }
 
 let showPopupTimeoutID;
@@ -605,6 +610,7 @@ export function playbackChange(is_active = false, screen_type = null) {
         case false:
             playbackIsActive = false;
             hideMeshes();
+            ScreenManager.zoom("reset");
             break;
     }
 }
