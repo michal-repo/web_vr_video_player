@@ -98,7 +98,11 @@ Supported tags:
 ## Generating your own JSON file with video sources
 Player is using locally stored JSON file with video sources. It's configured in `index.html`, where you can provide your JSON file name:
 ```
-<span id="json_file" hidden>files.json</span>
+try {
+    new JsonLoader("files.json");
+} catch (error) {
+    console.warn(error);
+}
 ```
 ### Structure for JSON file
 
