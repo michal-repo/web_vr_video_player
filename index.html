@@ -1,84 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta
-            name="viewport"
-            content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
-        />
-        <link rel="icon" href="favicon.ico" type="image/x-icon" />
-        <title>VR player</title>
-        <style>
-            * {
-                margin: 0;
-                padding: 0;
-            }
 
-            body {
-                overflow: hidden;
-            }
-
-            footer {
-                position: absolute;
-                bottom: 0px;
-                right: 0px;
-                justify-content: center;
-                padding: 5px;
-                font-size: 12px;
-                background-color: #d4d4d4;
-                color: rgb(0, 0, 0);
-            }
-        </style>
-
-        <script defer src="dist/index.js"></script>
-        <script defer src="dist/jsonLoader.js"></script>
-    </head>
-
-    <body>
-        <div id="three_scene"></div>
-        <video
-            id="video"
-            crossorigin="anonymous"
-            playsinline
-            style="display: none"
-        >
-            <source id="video_src" src="" type="video/mp4" />
-        </video>
-        <footer>
-            <p>
-                Icons made by &nbsp;<a
-                    target="_blank"
-                    href="https://www.flaticon.com/authors/nawicon"
-                    >nawicon</a
-                >, &nbsp;<a
-                    target="_blank"
-                    href="https://www.flaticon.com/authors/alfanz"
-                    >alfanz</a
-                >, &nbsp;<a
-                    target="_blank"
-                    href="https://www.flaticon.com/authors/ayub-irawan"
-                    >ayub-irawan</a
-                >, &nbsp;<a
-                    target="_blank"
-                    href="https://www.flaticon.com/authors/us-and-up"
-                    >us-and-up</a
-                >, &nbsp;<a
-                    target="_blank"
-                    href="https://www.flaticon.com/authors/freepik"
-                    >freepik</a
-                >, &nbsp;from&nbsp;<a
-                    target="_blank"
-                    href="http://www.flaticon.com/"
-                    >www.flaticon.com</a
-                >
-            </p>
-        </footer>
-    </body>
-    <script defer type="module">
-        try {
-            new JsonLoader("files.json");
-        } catch (error) {
-            console.warn(error);
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
+    <title>VR player</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
         }
-    </script>
+
+        body {
+            overflow: hidden;
+        }
+
+        .loader {
+            position: absolute;
+            right: 0px;
+            bottom: 20%;
+            padding: 5px;
+            font-size: 15px;
+            background-color: #d4d4d4;
+            color: rgb(0, 0, 0);
+            width: 20%;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .loader pre {
+            color: rgb(20, 63, 129);
+        }
+
+        .loader input {
+            margin-top: 5px;
+            width: 100%;
+        }
+
+        .btn {
+            background-color: #19abff;
+            border: none;
+            color: white;
+            padding: 5px;
+            width: 100%;
+            margin-top: 5px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+        }
+
+        .loader .close {
+            width: 35px;
+            position: absolute;
+            top: -34px;
+            right: 0;
+        }
+
+        .open {
+            position: absolute;
+            width: 135px;
+            right: 0;
+            bottom: 25px;
+            font-family: Arial, Helvetica, sans-serif;
+            visibility: hidden;
+        }
+
+        footer {
+            position: absolute;
+            bottom: 0px;
+            right: 0px;
+            justify-content: center;
+            padding: 5px;
+            font-size: 12px;
+            height: 15px;
+            max-height: 15px !important;
+            background-color: #d4d4d4;
+            color: rgb(0, 0, 0);
+        }
+    </style>
+
+    <script defer src="dist/index.js"></script>
+    <script defer src="dist/jsonLoader.js"></script>
+</head>
+
+<body>
+    <div id="three_scene"></div>
+    <video id="video" crossorigin="anonymous" playsinline style="display: none">
+        <source id="video_src" src="" type="video/mp4" />
+    </video>
+    <div class="loader" id="loader">
+        <button class="close btn" onclick="document.getElementById('loader').style.visibility = 'hidden';document.getElementById('open_loader').style.visibility = 'visible';">X</button>
+        <p>
+            To load your file, your web server needs to return CORS headers.<br />
+            Install apache2 mod:
+        <pre>sudo a2enmod headers</pre>
+        <br />
+        Add CORS header to your videos directory (and place where json is
+        located if it's different):
+        <pre>&lt;Directory /var/www/html/videos&gt;<br>Header set Access-Control-Allow-Origin "*"<br>&lt;/Directory&gt;</pre>
+        <input placeholder="JSON url" id="json_url" />
+        <input placeholder="Name" id="json_name" />
+        <button onclick="loadFromURL()">Load</button>
+        </p>
+    </div>
+    <button class="open btn" id="open_loader" onclick="document.getElementById('loader').style.visibility = 'visible';document.getElementById('open_loader').style.visibility = 'hidden';">Loader</button>
+    <footer>
+        <p>
+            Icons made by &nbsp;<a target="_blank" href="https://www.flaticon.com/authors/nawicon">nawicon</a>, &nbsp;<a
+                target="_blank" href="https://www.flaticon.com/authors/alfanz">alfanz</a>, &nbsp;<a target="_blank"
+                href="https://www.flaticon.com/authors/ayub-irawan">ayub-irawan</a>, &nbsp;<a target="_blank"
+                href="https://www.flaticon.com/authors/us-and-up">us-and-up</a>, &nbsp;<a target="_blank"
+                href="https://www.flaticon.com/authors/freepik">freepik</a>, &nbsp;from&nbsp;<a target="_blank"
+                href="http://www.flaticon.com/">www.flaticon.com</a>
+        </p>
+    </footer>
+</body>
+<script>
+    async function loadFromURL() {
+        try {
+            const JL = new JsonLoader(
+                document.getElementById("json_url").value,
+                true,
+                document.getElementById("json_name").value
+            );
+            await JL.load();
+            if (JL.status == "error") {
+                throw new Error(JL.error);
+            } else {
+                document.getElementById("json_url").value = "";
+                document.getElementById("json_name").value = "";
+                alert("Loaded, you can refresh sources.");
+            }
+        } catch (error) {
+            alert(error);
+        }
+    }
+</script>
+<script defer type="module">
+    try {
+        new JsonLoader("files.json").load();
+    } catch (error) {
+        console.warn(error);
+    }
+</script>
+
 </html>
