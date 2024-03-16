@@ -1,0 +1,207 @@
+{
+    "videos": [
+        {
+            "name": "Music",
+            "list": [
+                {
+                    "name": "Example",
+                    "src": "../videos/Music/Example.mp4",
+                    "thumbnail": "",
+                    "screen_type": "sbs",
+                    "date": "2023-01-10 15:05:50",
+                    "epoch": "1673359550.854825"
+                },
+                {
+                    "name": "Example",
+                    "src": "../videos/Music/Example.mp4",
+                    "thumbnail": "",
+                    "screen_type": "sbs",
+                    "date": "2023-01-10 15:05:50",
+                    "epoch": "1673359550.854825"
+                },
+                {
+                    "name": "Example",
+                    "src": "../videos/Music/Example.mp4",
+                    "thumbnail": "",
+                    "screen_type": "sbs",
+                    "date": "2023-01-10 15:05:50",
+                    "epoch": "1673359550.854825"
+                },
+                {
+                    "name": "Example",
+                    "src": "../videos/Music/Example.mp4",
+                    "thumbnail": "",
+                    "screen_type": "sbs",
+                    "date": "2023-01-10 15:05:50",
+                    "epoch": "1673359550.854825"
+                },
+                {
+                    "name": "Example",
+                    "src": "../videos/Music/Example.mp4",
+                    "thumbnail": "",
+                    "screen_type": "sbs",
+                    "date": "2023-01-10 15:05:50",
+                    "epoch": "1673359550.854825"
+                },
+                {
+                    "name": "Example",
+                    "src": "../videos/Music/Example.mp4",
+                    "thumbnail": "",
+                    "screen_type": "sbs",
+                    "date": "2023-01-10 15:05:50",
+                    "epoch": "1673359550.854825"
+                },
+                {
+                    "name": "Example",
+                    "src": "../videos/Music/Example.mp4",
+                    "thumbnail": "",
+                    "screen_type": "sbs",
+                    "date": "2023-01-10 15:05:50",
+                    "epoch": "1673359550.854825"
+                },
+                {
+                    "name": "Example",
+                    "src": "../videos/Music/Example.mp4",
+                    "thumbnail": "",
+                    "screen_type": "sbs",
+                    "date": "2023-01-10 15:05:50",
+                    "epoch": "1673359550.854825"
+                },
+                {
+                    "name": "Example",
+                    "src": "../videos/Music/Example.mp4",
+                    "thumbnail": "",
+                    "screen_type": "sbs",
+                    "date": "2023-01-10 15:05:50",
+                    "epoch": "1673359550.854825"
+                },
+                {
+                    "name": "Example",
+                    "src": "../videos/Music/Example.mp4",
+                    "thumbnail": "",
+                    "screen_type": "sbs",
+                    "date": "2023-01-10 15:05:50",
+                    "epoch": "1673359550.854825"
+                },
+                {
+                    "name": "Example",
+                    "src": "../videos/Music/Example.mp4",
+                    "thumbnail": "",
+                    "screen_type": "sbs",
+                    "date": "2023-01-10 15:05:50",
+                    "epoch": "1673359550.854825"
+                },
+                {
+                    "name": "Example",
+                    "src": "../videos/Music/Example.mp4",
+                    "thumbnail": "",
+                    "screen_type": "sbs",
+                    "date": "2023-01-10 15:05:50",
+                    "epoch": "1673359550.854825"
+                },
+                {
+                    "name": "Example",
+                    "src": "../videos/Music/Example.mp4",
+                    "thumbnail": "",
+                    "screen_type": "sbs",
+                    "date": "2023-01-10 15:05:50",
+                    "epoch": "1673359550.854825"
+                },
+                {
+                    "name": "Example",
+                    "src": "../videos/Music/Example.mp4",
+                    "thumbnail": "",
+                    "screen_type": "sbs",
+                    "date": "2023-01-10 15:05:50",
+                    "epoch": "1673359550.854825"
+                },
+                {
+                    "name": "Example",
+                    "src": "../videos/Music/Example.mp4",
+                    "thumbnail": "",
+                    "screen_type": "sbs",
+                    "date": "2023-01-10 15:05:50",
+                    "epoch": "1673359550.854825"
+                },
+                {
+                    "name": "Example",
+                    "src": "../videos/Music/Example.mp4",
+                    "thumbnail": "",
+                    "screen_type": "sbs",
+                    "date": "2023-01-10 15:05:50",
+                    "epoch": "1673359550.854825"
+                },
+                {
+                    "name": "Example",
+                    "src": "../videos/Music/Example.mp4",
+                    "thumbnail": "",
+                    "screen_type": "sbs",
+                    "date": "2023-01-10 15:05:50",
+                    "epoch": "1673359550.854825"
+                },
+                {
+                    "name": "Example",
+                    "src": "../videos/Music/Example.mp4",
+                    "thumbnail": "",
+                    "screen_type": "sbs",
+                    "date": "2023-01-10 15:05:50",
+                    "epoch": "1673359550.854825"
+                },
+                {
+                    "name": "Example",
+                    "src": "../videos/Music/Example.mp4",
+                    "thumbnail": "",
+                    "screen_type": "sbs",
+                    "date": "2023-01-10 15:05:50",
+                    "epoch": "1673359550.854825"
+                },
+                {
+                    "name": "Example",
+                    "src": "../videos/Music/Example.mp4",
+                    "thumbnail": "",
+                    "screen_type": "sbs",
+                    "date": "2023-01-10 15:05:50",
+                    "epoch": "1673359550.854825"
+                }
+            ]
+        },
+        {
+            "name": "Nature",
+            "list": [
+                {
+                    "name": "Example",
+                    "src": "../videos/Nature/Example.mp4",
+                    "thumbnail": "",
+                    "screen_type": "sbs",
+                    "date": "2023-01-10 15:05:50",
+                    "epoch": "1673359550.854825"
+                }
+            ]
+        },
+        {
+            "name": "Movies",
+            "list": [
+                {
+                    "name": "Example",
+                    "src": "../videos/Movies/Example.mp4",
+                    "thumbnail": "",
+                    "screen_type": "screen",
+                    "frame_height": "720",
+                    "frame_width": "1280",
+                    "date": "2023-01-10 15:05:50",
+                    "epoch": "1673359550.854825"
+                },
+                {
+                    "name": "Example",
+                    "src": "../videos/Movies/Example.mp4",
+                    "thumbnail": "",
+                    "screen_type": "screen",
+                    "frame_height": "480",
+                    "frame_width": "640",
+                    "date": "2023-01-10 15:05:50",
+                    "epoch": "1673359550.854825"
+                }
+            ]
+        }
+    ]
+}
