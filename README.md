@@ -46,6 +46,9 @@ Thumbstick:
 Thumbstick: 
 - left/right for switching pages
 
+## Demo
+[on Github Pages](https://michal-repo.github.io/web_vr_video_player/)
+
 ## Requirements
 
 - Linux server with installed and configured web server including https (WebXR requires https)
