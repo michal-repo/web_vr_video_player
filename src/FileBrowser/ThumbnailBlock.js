@@ -46,6 +46,10 @@ export default class ThumbnailBlock extends Block {
                             MAIN.scaleScreenMesh(
                                 this.frame_width / this.frame_height
                             );
+                        if (screen_type === "tb_screen")
+                            MAIN.scaleTBScreenMesh(
+                                this.frame_width / this.frame_height
+                            );
                         Helpers.setVideoSrc(this.fileSRC);
                         fileBrowserPanel.hideFileMenuPanel(this.screen_type);
                     } else {
@@ -62,6 +66,10 @@ export default class ThumbnailBlock extends Block {
                 onSet: () => {
                     if (screen_type === "screen")
                         MAIN.scaleScreenMesh(
+                            this.frame_width / this.frame_height
+                        );
+                    if (screen_type === "tb_screen")
+                        MAIN.scaleTBScreenMesh(
                             this.frame_width / this.frame_height
                         );
                     Helpers.setVideoSrc(this.fileSRC);

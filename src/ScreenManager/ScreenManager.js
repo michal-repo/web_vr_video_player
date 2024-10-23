@@ -77,7 +77,7 @@ export function zoom(in_or_out, step = 10) {
     }
     if (oldZoom !== currentZoom) {
         for (let mesh in MAIN.meshes) {
-            if (in_or_out === "reset"){
+            if (in_or_out === "reset") {
                 const temp = panels.meshes.panels
                     .find((element) => element.ui_name === mesh)
                     .position.clone();
@@ -97,16 +97,16 @@ export function zoom(in_or_out, step = 10) {
     }
 }
 
-export function tilt(up_or_down) {
+export function tilt(up_or_down, value = 0.01) {
     switch (up_or_down) {
         case "up":
             for (let mesh in MAIN.meshes) {
-                MAIN.meshes[mesh].rotation.x -= 0.01;
+                MAIN.meshes[mesh].rotation.x -= value;
             }
             break;
         case "down":
             for (let mesh in MAIN.meshes) {
-                MAIN.meshes[mesh].rotation.x += 0.01;
+                MAIN.meshes[mesh].rotation.x += value;
             }
             break;
         case "reset":
@@ -155,6 +155,10 @@ export function switchModeVRScreen(vr_or_screen) {
             break;
         case "screen":
             isVRModeUsed = false;
+            break;
+        case "tb_screen":
+            VRMode = "tb_screen";
+            isVRModeUsed = true;
             break;
     }
 }

@@ -98,6 +98,8 @@ for (root, dirs, files) in os.walk(config['videos']['videos_relative_path']+"/"+
 
             if "_TB" in title[-3:]:
                 screen_type = "tb"
+            elif "_TB_SCREEN" in title[-10:]:
+                screen_type = "tb_screen"
             elif "_SCREEN" in title[-7:]:
                 screen_type = "screen"
             elif "_2D_180" in title[-7:]:
@@ -109,7 +111,7 @@ for (root, dirs, files) in os.walk(config['videos']['videos_relative_path']+"/"+
             else:
                 screen_type = "sbs"
 
-            if screen_type == "screen":
+            if screen_type == "screen" or screen_type == "tb_screen":
                 out_files[subDir]["list"].append(
                     {"name": title,
                      "src": urllib.parse.quote(fullfile),

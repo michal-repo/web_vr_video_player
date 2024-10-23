@@ -28,8 +28,8 @@ export default class SourcesSelectorPanel {
         padding: 0.02,
         borderRadius: 0,
         backgroundOpacity: 1,
-        backgroundColor: new Color(0x292929),
-        width: 3,
+        backgroundColor: new Color(0x494949),
+        width: 1.3,
         height: 2,
     };
     sourcesSelectorContainer = new Block(
@@ -85,7 +85,7 @@ export default class SourcesSelectorPanel {
 
     constructor(sources = []) {
         this.sources = sources;
-        this.sourcesSelectorContainer.position.set(0, 1.3, -4.5);
+        this.sourcesSelectorContainer.position.set(0, 1.3, -5);
         scene.add(this.sourcesSelectorContainer);
         registerPanel(
             this.sourcesSelectorContainer,

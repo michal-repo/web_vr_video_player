@@ -14,6 +14,9 @@ import * as UI from "./UI.js";
 import * as Helpers from "./Helpers.js";
 import SourcesSelectorPanel from "./sourceSelector.js";
 
+import FontJSON from "../assets/fonts/Roboto-Regular-msdf.json";
+import FontImage from "../assets/fonts/Roboto-Regular.png";
+
 export let scene,
     camera,
     cameras,
@@ -27,28 +30,29 @@ export let scene,
     videoTexture,
     meshLeftSBS,
     meshLeftTB,
+    meshLeftTBScreen,
     meshRightSBS,
     meshRightTB,
+    meshRightTBScreen,
     mesh2dSBS,
     mesh2dTB,
+    mesh2dTBScreen,
     meshForScreenMode,
     meshes,
     meshLeft360,
     meshRight360,
     mesh2d360,
     mesh1802D,
-    mesh3602D;
+    mesh3602D,
+    playMenuPanel,
+    fileBrowserPanel,
+    sourcesSelectorPanel,
+    hiddenSphere;
 export let clickedButton = undefined;
-export let playMenuPanel;
-export let fileBrowserPanel;
-export let sourcesSelectorPanel;
 export let camToSave = {};
 
 let popupMessage, popupContainer;
-import FontJSON from "../assets/fonts/Roboto-Regular-msdf.json";
-import FontImage from "../assets/fonts/Roboto-Regular.png";
 
-export let hiddenSphere;
 const CAMERAPOSITIONY = 1.6;
 
 // compute mouse position in normalized device coordinates
@@ -121,7 +125,7 @@ function init() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.xr.enabled = true;
     document.body.appendChild(VRButton.createButton(renderer));
-    document.body.appendChild(renderer.domElement);
+    document.getElementById("three_scene").appendChild(renderer.domElement);
 
     // Orbit controls for no-vr
 
@@ -160,12 +164,14 @@ function init() {
         120,
         60,
         40,
-        Math.PI / 2 + Math.PI / 4,
-        Math.PI + Math.PI / 2
+        (Math.PI / 4) * 3,
+        (Math.PI / 2) * 3
     );
     geometryLeftTB.scale(-1, 1, 1);
     const geometryRightSBS = geometryLeftSBS.clone();
     const geometryRightTB = geometryLeftTB.clone();
+    const geometryLeftTBScreen = new THREE.PlaneGeometry(120, 120);
+    const geometryRightTBScreen = geometryLeftTBScreen.clone();
     const geometryLeft360 = new THREE.SphereGeometry(240, 120, 80, Math.PI / 2);
     geometryLeft360.scale(-1, 1, 1);
     const geometryRight360 = geometryLeft360.clone();
@@ -244,6 +250,28 @@ function init() {
     mesh2d360.visible = false;
     scene.add(mesh2d360);
 
+
+    // TBScreen
+    const uvsLeftTBScreen = geometryLeftTBScreen.attributes.uv.array;
+    for (let i = 1; i < uvsLeftTBScreen.length; i += 2) {
+        uvsLeftTBScreen[i] *= 0.5;
+        uvsLeftTBScreen[i] += 0.5;
+    }
+
+    meshLeftTBScreen = new THREE.Mesh(geometryLeftTBScreen, material);
+    meshLeftTBScreen.layers.set(1); // display in left eye only
+    meshLeftTBScreen.visible = false;
+    meshLeftTBScreen.position.setZ(-240);
+    meshLeftTBScreen.position.setY(CAMERAPOSITIONY);
+    scene.add(meshLeftTBScreen);
+
+    // mesh for 2d mode
+
+    mesh2dTBScreen = meshLeftTBScreen.clone();
+    mesh2dTBScreen.layers.set(2);
+    mesh2dTBScreen.visible = false;
+    scene.add(mesh2dTBScreen);
+
     //// right eye
     // SBS
     const uvsRightSBS = geometryRightSBS.attributes.uv.array;
@@ -283,6 +311,21 @@ function init() {
     meshRight360.position.setZ(-120);
     scene.add(meshRight360);
 
+
+    // TBScreen
+    const uvsRightTBScreen = geometryRightTBScreen.attributes.uv.array;
+    for (let i = 1; i < uvsRightTBScreen.length; i += 2) {
+        uvsRightTBScreen[i] *= 0.5;
+    }
+
+    meshRightTBScreen = new THREE.Mesh(geometryRightTBScreen, material);
+    meshRightTBScreen.layers.set(2); // display in left eye only
+    meshRightTBScreen.visible = false;
+    meshRightTBScreen.position.setZ(-240);
+    meshRightTBScreen.position.setY(CAMERAPOSITIONY);
+    scene.add(meshRightTBScreen);
+
+
     ScreenManager.registerMeshPanel(
         meshLeftSBS,
         "meshLeftSBS",
@@ -297,6 +340,14 @@ function init() {
         "meshLeftTB",
         "3d",
         "tb",
+        "left"
+    );
+    ScreenManager.registerMeshPanel(
+        meshLeftTBScreen,
+        "meshLeftTBScreen",
+        "meshLeftTBScreen",
+        "3d",
+        "tb_screen",
         "left"
     );
     ScreenManager.registerMeshPanel(
@@ -316,6 +367,14 @@ function init() {
         "right"
     );
     ScreenManager.registerMeshPanel(
+        meshRightTBScreen,
+        "meshRightTBScreen",
+        "meshRightTBScreen",
+        "3d",
+        "tb_screen",
+        "right"
+    );
+    ScreenManager.registerMeshPanel(
         mesh2dSBS,
         "mesh2dSBS",
         "mesh2dSBS",
@@ -329,6 +388,14 @@ function init() {
         "mesh2dTB",
         "2d",
         "tb",
+        "right"
+    );
+    ScreenManager.registerMeshPanel(
+        mesh2dTBScreen,
+        "mesh2dTBScreen",
+        "mesh2dTBScreen",
+        "2d",
+        "tb_screen",
         "right"
     );
     ScreenManager.registerMeshPanel(
@@ -392,6 +459,9 @@ function init() {
     ScreenManager.registerObjectToDrag(mesh2d360, "player", "meshes");
     ScreenManager.registerObjectToDrag(mesh1802D, "player", "meshes");
     ScreenManager.registerObjectToDrag(mesh3602D, "player", "meshes");
+    ScreenManager.registerObjectToDrag(meshLeftTBScreen, "player", "meshes");
+    ScreenManager.registerObjectToDrag(meshRightTBScreen, "player", "meshes");
+    ScreenManager.registerObjectToDrag(mesh2dTBScreen, "player", "meshes");
     meshes = {
         meshLeftSBS: meshLeftSBS,
         meshRightSBS: meshRightSBS,
@@ -405,6 +475,9 @@ function init() {
         mesh2d360: mesh2d360,
         mesh1802D: mesh1802D,
         mesh3602D: mesh3602D,
+        meshLeftTBScreen: meshLeftTBScreen,
+        meshRightTBScreen: meshRightTBScreen,
+        mesh2dTBScreen: mesh2dTBScreen,
     };
 
     //////////
@@ -630,6 +703,26 @@ function gamepadControlsUpdate() {
                     if (typeof gamepad !== "undefined" && gamepad !== null) {
                         if (gamepad.mapping === "xr-standard") {
                             if (
+                                gamepad.buttons[1].pressed &&
+                                gamepad.axes[3] < -0.35 &&
+                                (gamepadAxisActive === false ||
+                                    gamepadAxisActive === "up")
+                            ) {
+                                if (playbackIsActive) {
+                                    ScreenManager.tilt("up", 0.005);
+                                }
+                                gamepadAxisActive = "up";
+                            } else if (
+                                gamepad.buttons[1].pressed &&
+                                gamepad.axes[3] > 0.35 &&
+                                (gamepadAxisActive === false ||
+                                    gamepadAxisActive === "down")
+                            ) {
+                                if (playbackIsActive) {
+                                    ScreenManager.tilt("down", 0.005);
+                                }
+                                gamepadAxisActive = "down";
+                            } else if (
                                 gamepad.axes[2] > 0.35 &&
                                 gamepadAxisActive === false
                             ) {
@@ -683,9 +776,30 @@ function gamepadControlsUpdate() {
 }
 
 let buttonABXYpressed = false;
+let buttonABXYexitVR = false;
+let buttonABXYexitVRstart = null;
 
 function gamepadButtonsCheck(buttons) {
-    if (buttons[4].pressed && playbackIsActive && buttonABXYpressed === false) {
+    if (
+        buttons[1].pressed &&
+        buttons[5].pressed &&
+        !playbackIsActive &&
+        (buttonABXYpressed === false || buttonABXYexitVR)
+    ) {
+        if (buttonABXYexitVRstart === null) {
+            buttonABXYexitVRstart = Date.now();
+            showPopupMessage("Hold Grip + B for 3 seconds to exit.");
+        } else if (Date.now() - buttonABXYexitVRstart > 3000) {
+            let session = renderer.xr.getSession();
+            session.end();
+        }
+        buttonABXYexitVR = true;
+        buttonABXYpressed = true;
+    } else if (
+        buttons[4].pressed &&
+        playbackIsActive &&
+        buttonABXYpressed === false
+    ) {
         playMenuPanel.playPause();
         buttonABXYpressed = true;
     } else if (
@@ -697,6 +811,8 @@ function gamepadButtonsCheck(buttons) {
         buttonABXYpressed = true;
     } else if (!buttons[4].pressed && !buttons[5].pressed) {
         buttonABXYpressed = false;
+        buttonABXYexitVR = false;
+        buttonABXYexitVRstart = null;
     }
 }
 
@@ -820,6 +936,11 @@ function raycast() {
 
 export function scaleScreenMesh(x_scale) {
     meshForScreenMode.scale.x = x_scale;
+}
+export function scaleTBScreenMesh(x_scale) {
+    mesh2dTBScreen.scale.x = x_scale;
+    meshLeftTBScreen.scale.x = x_scale;
+    meshRightTBScreen.scale.x = x_scale;
 }
 
 if (WebGL.isWebGLAvailable()) {

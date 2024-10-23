@@ -69,7 +69,7 @@ export class FileBrowserPanel {
     sortByDateColorRef = this.sortInactiveColor;
     activeSorting = "name";
     sortDirectionBlock;
-    sortDirection = "ASC";
+    sortDirection;
 
     buttonLeft;
     buttonRight;
@@ -834,11 +834,11 @@ export class FileBrowserPanel {
             justifyContent: "center",
             contentDirection: "row",
             padding: 0.02,
-            borderRadius: 0.06,
+            borderRadius: 0.12,
             backgroundOpacity: 1,
             backgroundColor: new Color(0x5c5c5c),
-            width: this.PANELMAXWIDTH / 3,
-            height: 0.1,
+            width: this.PANELMAXWIDTH / 2,
+            height: 0.2,
         });
 
         MAIN.scene.add(this.draggingBox);
@@ -1614,6 +1614,16 @@ export class FileBrowserPanel {
             this.folderPageIndex = 0;
             this.currentFolderPageIndex = 0;
             this.CURRENT_PAGE = 0;
+            this.sortByName.setState('selected');
+            this.sortByName.setState('idle');
+            this.sortDirection.set({
+                content: Helpers.getWordFromLang("ascending"),
+            });
+            this.sortDirection.sortDirection = "asc";
+            this.sortFiles(
+                this.activeSorting,
+                this.sortDirection.sortDirection
+            );
             this.TOTAL_PAGES =
                 Math.ceil(
                     this.FILES.length / (this.FILES_PER_ROW * this.FILES_ROWS)
